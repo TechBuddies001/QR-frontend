@@ -1,0 +1,340 @@
+
+import React from 'react';
+import Script from 'next/script';
+
+export default function Page() {
+  return (
+    <>
+      <div dangerouslySetInnerHTML={{ __html: `<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        body { font-family: 'Space Grotesk', sans-serif; }
+        .sidebar-fixed { width: 280px; position: fixed; height: 100vh; }
+        .main-content { margin-left: 280px; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .active-nav { background-color: rgba(79, 70, 229, 0.1); color: #4F46E5; }
+    </style>
+` }} />
+      <Script src="https://cdn.tailwindcss.com/?plugins=forms,container-queries" strategy="beforeInteractive" />
+<Script id="inline-script-0" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: `
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4F46E5",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121121",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    ` }} />
+
+      <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-w-[1280px]" style={{minHeight: '100vh', width: '100%'}} dangerouslySetInnerHTML={{ __html: `
+<!-- Sidebar Navigation -->
+<aside class="sidebar-fixed border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark p-6 flex flex-col gap-8">
+<div class="flex items-center gap-3 px-2">
+<div class="size-10 rounded-lg bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">shield_person</span>
+</div>
+<div>
+<h1 class="text-lg font-bold leading-tight">Tarkshya Admin</h1>
+<p class="text-xs text-slate-500">Management Portal</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg active-nav" href="/admin/plans">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">payments</span>
+<span class="font-medium">Plans &amp; Packs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-medium">Users</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-medium">Inventory</span>
+</a>
+<div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-medium">Settings</span>
+</a>
+</div>
+</nav>
+<div class="mt-auto p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+<p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">System Status</p>
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-emerald-500"></div>
+<span class="text-sm font-medium">All systems operational</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="main-content min-h-screen p-8">
+<header class="mb-10">
+<h2 class="text-3xl font-bold tracking-tight mb-2">Plans &amp; Packs</h2>
+<p class="text-slate-500 dark:text-slate-400">Manage subscription tiers, pricing strategies, and physical sticker asset inventory.</p>
+</header>
+<!-- Section 1: Plan Comparison Table -->
+<section class="mb-12">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-xl font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">compare_arrows</span>
+                    Plan Comparison
+                </h3>
+<button class="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+                    Edit Features
+                </button>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50">
+<th class="p-5 text-sm font-semibold text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 w-1/3">Feature</th>
+<th class="p-5 text-sm font-semibold text-slate-900 dark:text-slate-100 border-b border-slate-200 dark:border-slate-800">Basic Plan</th>
+<th class="p-5 text-sm font-semibold text-primary border-b border-slate-200 dark:border-slate-800">Premium Plan</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr>
+<td class="p-5 text-sm font-medium">Monthly API Requests</td>
+<td class="p-5 text-sm text-slate-600 dark:text-slate-400">10,000 requests</td>
+<td class="p-5 text-sm font-semibold text-slate-900 dark:text-slate-100">Unlimited</td>
+</tr>
+<tr>
+<td class="p-5 text-sm font-medium">Device Monitoring</td>
+<td class="p-5 text-sm text-slate-600 dark:text-slate-400">Up to 5 devices</td>
+<td class="p-5 text-sm font-semibold text-slate-900 dark:text-slate-100">Unlimited devices</td>
+</tr>
+<tr>
+<td class="p-5 text-sm font-medium">Data Retention</td>
+<td class="p-5 text-sm text-slate-600 dark:text-slate-400">30 days</td>
+<td class="p-5 text-sm font-semibold text-slate-900 dark:text-slate-100">2 Years</td>
+</tr>
+<tr>
+<td class="p-5 text-sm font-medium">Advanced Analytics</td>
+<td class="p-5 text-sm text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-slate-300">cancel</span>
+</td>
+<td class="p-5 text-sm font-semibold text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined text-emerald-500">check_circle</span>
+</td>
+</tr>
+<tr>
+<td class="p-5 text-sm font-medium">Priority Support</td>
+<td class="p-5 text-sm text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-slate-300">cancel</span>
+</td>
+<td class="p-5 text-sm font-semibold text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined text-emerald-500">check_circle</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Section 2: Premium Pricing Table -->
+<section class="mb-12">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-xl font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">sell</span>
+                    Premium Pricing Tiers
+                </h3>
+<div class="flex gap-2">
+<button class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+                        Update Currency
+                    </button>
+</div>
+</div>
+<div class="grid grid-cols-4 gap-6">
+<!-- Monthly -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold px-2.5 py-1 rounded uppercase tracking-wider">Monthly</span>
+<span class="material-symbols-outlined text-slate-400">more_vert</span>
+</div>
+<div class="mb-6">
+<span class="text-3xl font-bold">\$29</span>
+<span class="text-slate-500">/mo</span>
+</div>
+<ul class="space-y-3 mb-6">
+<li class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-xs">check</span> Full features
+                        </li>
+<li class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-xs">check</span> Cancel anytime
+                        </li>
+</ul>
+<button class="w-full py-2 border border-primary text-primary font-semibold rounded-lg hover:bg-primary/5 transition-colors">Configure</button>
+</div>
+<!-- Quarterly -->
+<div class="bg-primary/5 p-6 rounded-xl border-2 border-primary shadow-lg relative">
+<div class="absolute -top-3 right-4 bg-primary text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-tighter">Best Seller</div>
+<div class="flex justify-between items-start mb-4">
+<span class="bg-primary/20 text-primary text-xs font-bold px-2.5 py-1 rounded uppercase tracking-wider">Quarterly</span>
+<span class="material-symbols-outlined text-primary/60">more_vert</span>
+</div>
+<div class="mb-6">
+<span class="text-3xl font-bold">\$75</span>
+<span class="text-slate-500">/3mo</span>
+<p class="text-xs text-emerald-600 font-medium mt-1">Save 15%</p>
+</div>
+<ul class="space-y-3 mb-6">
+<li class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined text-xs">check</span> Priority assets
+                        </li>
+<li class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined text-xs">check</span> Seasonal packs
+                        </li>
+</ul>
+<button class="w-full py-2 bg-primary text-white font-semibold rounded-lg hover:shadow-md transition-all">Configure</button>
+</div>
+<!-- Annual -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold px-2.5 py-1 rounded uppercase tracking-wider">Annual</span>
+<span class="material-symbols-outlined text-slate-400">more_vert</span>
+</div>
+<div class="mb-6">
+<span class="text-3xl font-bold">\$240</span>
+<span class="text-slate-500">/yr</span>
+<p class="text-xs text-emerald-600 font-medium mt-1">Save 30%</p>
+</div>
+<ul class="space-y-3 mb-6">
+<li class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-xs">check</span> Extended warranty
+                        </li>
+<li class="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-xs">check</span> Free global shipping
+                        </li>
+</ul>
+<button class="w-full py-2 border border-primary text-primary font-semibold rounded-lg hover:bg-primary/5 transition-colors">Configure</button>
+</div>
+<!-- Custom -->
+<div class="bg-slate-900 text-white p-6 rounded-xl border border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="bg-slate-800 text-slate-400 text-xs font-bold px-2.5 py-1 rounded uppercase tracking-wider">Enterprise</span>
+<span class="material-symbols-outlined text-slate-600">more_vert</span>
+</div>
+<div class="mb-6">
+<span class="text-2xl font-bold">Custom</span>
+<p class="text-xs text-slate-400 mt-1">Tailored for teams</p>
+</div>
+<ul class="space-y-3 mb-6">
+<li class="flex items-center gap-2 text-sm text-slate-400">
+<span class="material-symbols-outlined text-xs text-primary">check</span> Bulk discounts
+                        </li>
+<li class="flex items-center gap-2 text-sm text-slate-400">
+<span class="material-symbols-outlined text-xs text-primary">check</span> Dedicated manager
+                        </li>
+</ul>
+<button class="w-full py-2 bg-slate-800 text-white font-semibold rounded-lg hover:bg-slate-700 transition-colors">Contact Sales</button>
+</div>
+</div>
+</section>
+<!-- Section 3: Sticker Packs Grid -->
+<section>
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-xl font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">layers</span>
+                    Sticker Pack Inventory
+                </h3>
+<button class="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+<span class="material-symbols-outlined text-sm">add</span> Add New Pack
+                </button>
+</div>
+<div class="grid grid-cols-5 gap-4">
+<!-- Vehicle Pack -->
+<div class="group bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 transition-all hover:shadow-lg">
+<div class="h-32 bg-indigo-500 relative flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary to-indigo-900 opacity-80"></div>
+<span class="material-symbols-outlined text-5xl text-white/50 relative z-10" style="font-variation-settings: 'FILL' 1">directions_car</span>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-sm mb-1">Vehicle Pack</h4>
+<p class="text-xs text-slate-500 mb-3">Reflective durable vinyl</p>
+<div class="flex justify-between items-center">
+<span class="text-xs font-semibold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">1,240 In Stock</span>
+<span class="text-sm font-bold">\$12.99</span>
+</div>
+</div>
+</div>
+<!-- Pet Pack -->
+<div class="group bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 transition-all hover:shadow-lg">
+<div class="h-32 bg-orange-500 relative flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-orange-400 to-red-600 opacity-80"></div>
+<span class="material-symbols-outlined text-5xl text-white/50 relative z-10" style="font-variation-settings: 'FILL' 1">pets</span>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-sm mb-1">Pet Safe Pack</h4>
+<p class="text-xs text-slate-500 mb-3">Collar-friendly tags</p>
+<div class="flex justify-between items-center">
+<span class="text-xs font-semibold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">850 In Stock</span>
+<span class="text-sm font-bold">\$8.50</span>
+</div>
+</div>
+</div>
+<!-- Student Pack -->
+<div class="group bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 transition-all hover:shadow-lg">
+<div class="h-32 bg-cyan-500 relative flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-cyan-400 to-blue-700 opacity-80"></div>
+<span class="material-symbols-outlined text-5xl text-white/50 relative z-10" style="font-variation-settings: 'FILL' 1">school</span>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-sm mb-1">Student Pack</h4>
+<p class="text-xs text-slate-500 mb-3">Laptop &amp; books kit</p>
+<div class="flex justify-between items-center">
+<span class="text-xs font-semibold px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full">230 Low Stock</span>
+<span class="text-sm font-bold">\$15.00</span>
+</div>
+</div>
+</div>
+<!-- Combo Pack -->
+<div class="group bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 transition-all hover:shadow-lg">
+<div class="h-32 bg-fuchsia-500 relative flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-fuchsia-400 to-purple-800 opacity-80"></div>
+<span class="material-symbols-outlined text-5xl text-white/50 relative z-10" style="font-variation-settings: 'FILL' 1">auto_awesome_motion</span>
+</div>
+<div class="p-4">
+<h4 class="font-bold text-sm mb-1">Combo Pack</h4>
+<p class="text-xs text-slate-500 mb-3">Mixed utility set</p>
+<div class="flex justify-between items-center">
+<span class="text-xs font-semibold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">500 In Stock</span>
+<span class="text-sm font-bold">\$24.99</span>
+</div>
+</div>
+</div>
+<!-- Future/Coming Soon -->
+<div class="group bg-slate-50 dark:bg-slate-800/30 rounded-xl overflow-hidden border-2 border-dashed border-slate-200 dark:border-slate-800 transition-all">
+<div class="h-32 flex flex-col items-center justify-center gap-2">
+<span class="material-symbols-outlined text-3xl text-slate-300 dark:text-slate-600">lock</span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Locked Slot</span>
+</div>
+<div class="p-4 flex flex-col items-center text-center">
+<h4 class="font-bold text-sm mb-1 text-slate-400">Holiday Pack</h4>
+<p class="text-[10px] text-slate-400 mb-3">Available Dec 2024</p>
+<button class="text-xs font-bold text-slate-400 cursor-not-allowed">Enable Now</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+` }} />
+    </>
+  );
+}

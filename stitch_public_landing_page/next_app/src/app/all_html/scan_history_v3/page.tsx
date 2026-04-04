@@ -1,0 +1,372 @@
+
+import React from 'react';
+import Script from 'next/script';
+
+export default function Page() {
+  return (
+    <>
+      <div dangerouslySetInnerHTML={{ __html: `<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        body {
+            font-family: 'Public Sans', sans-serif;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+` }} />
+      <Script src="https://cdn.tailwindcss.com/?plugins=forms,container-queries" strategy="beforeInteractive" />
+<Script id="inline-script-0" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: `
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    ` }} />
+
+      <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display" style={{minHeight: '100vh', width: '100%'}} dangerouslySetInnerHTML={{ __html: `
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-slate-900 dark:bg-black flex flex-col border-r border-slate-200 dark:border-slate-800">
+            <div class="p-6 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white">
+                    <span class="material-symbols-outlined">qr_code_scanner</span>
+                </div>
+                <div>
+                    <h1 class="text-white text-base font-bold leading-none">Tarkshya</h1>
+                    <p class="text-slate-400 text-xs mt-1">Enterprise Admin</p>
+                </div>
+            </div>
+            <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto max-h-[calc(100vh-250px)]">
+                <a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" href="/admin_dashboard_v3">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    <span class="text-sm font-medium">Dashboard</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" href="/generate_qr_v3">
+                    <span class="material-symbols-outlined">qr_code_2</span>
+                    <span class="text-sm font-medium">Generate QR</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" href="/tag_management_v3">
+                    <span class="material-symbols-outlined">label</span>
+                    <span class="text-sm font-medium">Tags</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" href="/plans_packs_v3">
+                    <span class="material-symbols-outlined">package</span>
+                    <span class="text-sm font-medium">Plans &amp; Packs</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" href="/subscriptions_v3">
+                    <span class="material-symbols-outlined">subscriptions</span>
+                    <span class="text-sm font-medium">Subscriptions</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" href="/sponsor_management_v3">
+                    <span class="material-symbols-outlined">loyalty</span>
+                    <span class="text-sm font-medium">Sponsors</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" href="/call_logs_v3">
+                    <span class="material-symbols-outlined">call</span>
+                    <span class="text-sm font-medium">Call Logs</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" href="/sms_logs_v3">
+                    <span class="material-symbols-outlined">sms</span>
+                    <span class="text-sm font-medium">SMS Logs</span>
+                </a>
+                <a class="flex items-center gap-3 px-3 py-2 text-white bg-primary rounded-lg" href="/scan_history_v3">
+                    <span class="material-symbols-outlined">history</span>
+                    <span class="text-sm font-medium">Scan History</span>
+                </a>
+                <div class="pt-4 mt-4 border-t border-slate-800">
+                    <a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" href="/settings_v3">
+                        <span class="material-symbols-outlined">settings</span>
+                        <span class="text-sm font-medium">Settings</span>
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" href="/../project_hub">
+                        <span class="material-symbols-outlined">home</span>
+                        <span class="text-sm font-medium">Project Hub</span>
+                    </a>
+                    <a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors" href="/../index">
+                        <span class="material-symbols-outlined">logout</span>
+                        <span class="text-sm font-medium">Logout</span>
+                    </a>
+                </div>
+            </nav>
+            <div class="p-4 mt-auto border-t border-slate-800">
+                <div class="flex items-center gap-3 px-2 py-2">
+                    <div class="w-8 h-8 rounded-full bg-slate-700 overflow-hidden">
+                        <img alt="Profile" data-alt="User profile avatar circle" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZMWyGblI5UgOFTLqyapvo1sx55eacq9Ds5_ZMC-yVJTil1sTXHmOjCtn6XvVu1pU6Y1Jeb9EoWo3nAspv4i3GqdgpyTad8JuFPJLqG8owANLpL7t8ywItMtj9mHiSy7_NhO40H2pPnuajAmXEJKZ0aF4-2uL-G8qPY9GrnILmYrT6LNrYLGSBRHJTVjxR5x0YpqS-a1wi4Sk0zniXSvenkmbPURghFlxVhLlrAIDP4sAiIHc1uQFzgE7I0EeQOKGfnilLBVzOFqM">
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-white text-xs font-semibold">Alex Rivera</p>
+                        <p class="text-slate-500 text-[10px]">alex@tarkshya.com</p>
+                    </div>
+                    <span class="material-symbols-outlined text-slate-500 text-sm">logout</span>
+                </div>
+            </div>
+        </aside>
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto">
+            <header class="h-16 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 bg-white dark:bg-background-dark/50 backdrop-blur-md sticky top-0 z-10">
+                <div>
+                    <h2 class="text-xl font-bold tracking-tight">Scan History</h2>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+                        <input class="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm w-64 focus:ring-2 focus:ring-primary/50" placeholder="Search logs..." type="text">
+                    </div>
+                    <button class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+                        <span class="material-symbols-outlined text-sm">download</span>
+                        Export PDF
+                    </button>
+                </div>
+            </header>
+            <div class="p-8 space-y-8">
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Scans</p>
+                                <h3 class="text-3xl font-bold mt-1">12,842</h3>
+                            </div>
+                            <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                                <span class="material-symbols-outlined">analytics</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center gap-2">
+                            <span class="text-emerald-500 text-xs font-bold flex items-center">
+                                <span class="material-symbols-outlined text-xs">trending_up</span> +12.5%
+                            </span>
+                            <span class="text-slate-400 text-xs">from last month</span>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Active Devices</p>
+                                <h3 class="text-3xl font-bold mt-1">156</h3>
+                            </div>
+                            <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                                <span class="material-symbols-outlined">smartphone</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center gap-2">
+                            <span class="text-emerald-500 text-xs font-bold flex items-center">
+                                <span class="material-symbols-outlined text-xs">trending_up</span> +5.2%
+                            </span>
+                            <span class="text-slate-400 text-xs">from last month</span>
+                        </div>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Unique IPs</p>
+                                <h3 class="text-3xl font-bold mt-1">892</h3>
+                            </div>
+                            <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                                <span class="material-symbols-outlined">public</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center gap-2">
+                            <span class="text-rose-500 text-xs font-bold flex items-center">
+                                <span class="material-symbols-outlined text-xs">trending_down</span> -2.1%
+                            </span>
+                            <span class="text-slate-400 text-xs">from last month</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Activity Chart -->
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h4 class="font-bold text-lg">Scan Activity</h4>
+                            <p class="text-slate-500 text-sm">Traffic over the last 7 days</p>
+                        </div>
+                        <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+                            <button class="px-3 py-1 text-xs font-semibold bg-white dark:bg-slate-700 rounded-md shadow-sm">Last
+                                7 Days</button>
+                            <button class="px-3 py-1 text-xs font-semibold text-slate-500">Last 30 Days</button>
+                        </div>
+                    </div>
+                    <div class="h-64 flex items-end justify-between gap-4 px-2">
+                        <!-- Chart Bar -->
+                        <div class="flex-1 flex flex-col items-center gap-3">
+                            <div class="w-full bg-primary/20 rounded-t-lg relative group transition-all" style="height: 45%;">
+                                <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-2 py-1 rounded text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    1,240 scans</div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-primary rounded-t-lg h-2 transition-all">
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-slate-400">MON</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-3">
+                            <div class="w-full bg-primary/20 rounded-t-lg relative group transition-all" style="height: 65%;">
+                                <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-2 py-1 rounded text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    1,820 scans</div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-primary rounded-t-lg h-2 transition-all">
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-slate-400">TUE</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-3">
+                            <div class="w-full bg-primary/20 rounded-t-lg relative group transition-all" style="height: 35%;">
+                                <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-2 py-1 rounded text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    980 scans</div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-primary rounded-t-lg h-2 transition-all">
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-slate-400">WED</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-3">
+                            <div class="w-full bg-primary/20 rounded-t-lg relative group transition-all" style="height: 85%;">
+                                <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-2 py-1 rounded text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    2,450 scans</div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-primary rounded-t-lg h-2 transition-all">
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-slate-400">THU</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-3">
+                            <div class="w-full bg-primary/20 rounded-t-lg relative group transition-all" style="height: 100%;">
+                                <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-2 py-1 rounded text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    3,120 scans</div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-primary rounded-t-lg h-2 transition-all">
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-primary">FRI</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-3">
+                            <div class="w-full bg-primary/20 rounded-t-lg relative group transition-all" style="height: 40%;">
+                                <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-2 py-1 rounded text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    1,150 scans</div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-primary rounded-t-lg h-2 transition-all">
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-slate-400">SAT</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-3">
+                            <div class="w-full bg-primary/20 rounded-t-lg relative group transition-all" style="height: 55%;">
+                                <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-2 py-1 rounded text-[10px] opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                    1,640 scans</div>
+                                <div class="absolute bottom-0 left-0 right-0 bg-primary rounded-t-lg h-2 transition-all">
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold text-slate-400">SUN</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Table Section -->
+                <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <h4 class="font-bold text-lg">Detailed Scan Logs</h4>
+                        <div class="flex gap-2">
+                            <button class="p-2 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
+                                <span class="material-symbols-outlined text-sm">filter_list</span>
+                            </button>
+                            <button class="p-2 border border-slate-200 dark:border-slate-800 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800">
+                                <span class="material-symbols-outlined text-sm">refresh</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                                    <th class="px-6 py-4">Tag ID</th>
+                                    <th class="px-6 py-4">Owner</th>
+                                    <th class="px-6 py-4">Language</th>
+                                    <th class="px-6 py-4">Action Taken</th>
+                                    <th class="px-6 py-4">Device</th>
+                                    <th class="px-6 py-4">IP Address</th>
+                                    <th class="px-6 py-4 text-right">Time</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-sm">
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                    <td class="px-6 py-4 font-mono font-medium text-primary">#TK-8921-A</td>
+                                    <td class="px-6 py-4">Global Logistics Inc.</td>
+                                    <td class="px-6 py-4">English</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-bold uppercase">Authorized</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-500">iPhone 14 Pro</td>
+                                    <td class="px-6 py-4 text-slate-500">192.168.1.45</td>
+                                    <td class="px-6 py-4 text-right text-slate-400">2 mins ago</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                    <td class="px-6 py-4 font-mono font-medium text-primary">#TK-4432-B</td>
+                                    <td class="px-6 py-4">Summit Tech Corp</td>
+                                    <td class="px-6 py-4">Spanish</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-[10px] font-bold uppercase">Redirected</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-500">Samsung S23</td>
+                                    <td class="px-6 py-4 text-slate-500">14.192.88.21</td>
+                                    <td class="px-6 py-4 text-right text-slate-400">14 mins ago</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                    <td class="px-6 py-4 font-mono font-medium text-primary">#TK-1029-X</td>
+                                    <td class="px-6 py-4">Vortex Solutions</td>
+                                    <td class="px-6 py-4">French</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-full text-[10px] font-bold uppercase">Blocked</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-500">Pixel 7a</td>
+                                    <td class="px-6 py-4 text-slate-500">103.44.12.9</td>
+                                    <td class="px-6 py-4 text-right text-slate-400">45 mins ago</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                    <td class="px-6 py-4 font-mono font-medium text-primary">#TK-7721-C</td>
+                                    <td class="px-6 py-4">Prime Retailers</td>
+                                    <td class="px-6 py-4">German</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-bold uppercase">Authorized</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-500">iPad Air 5</td>
+                                    <td class="px-6 py-4 text-slate-500">172.16.254.1</td>
+                                    <td class="px-6 py-4 text-right text-slate-400">1 hour ago</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                    <td class="px-6 py-4 font-mono font-medium text-primary">#TK-8921-A</td>
+                                    <td class="px-6 py-4">Global Logistics Inc.</td>
+                                    <td class="px-6 py-4">English</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-bold uppercase">Authorized</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-slate-500">Chrome / Windows</td>
+                                    <td class="px-6 py-4 text-slate-500">192.168.1.45</td>
+                                    <td class="px-6 py-4 text-right text-slate-400">2 hours ago</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <p class="text-xs text-slate-500 font-medium">Showing 1-5 of 12,842 results</p>
+                        <div class="flex gap-2">
+                            <button class="px-3 py-1 text-xs border border-slate-200 dark:border-slate-800 rounded hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50">Previous</button>
+                            <button class="px-3 py-1 text-xs bg-primary text-white rounded transition-colors">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+` }} />
+    </>
+  );
+}

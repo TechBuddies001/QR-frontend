@@ -1,0 +1,197 @@
+
+import React from 'react';
+import Script from 'next/script';
+
+export default function Page() {
+  return (
+    <>
+      <div dangerouslySetInnerHTML={{ __html: `<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+    </style>
+` }} />
+      <Script src="https://cdn.tailwindcss.com/?plugins=forms,container-queries" strategy="beforeInteractive" />
+<Script id="inline-script-0" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: `
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4F46E5",
+                        "amber-accent": "#D97706",
+                        "background-light": "#F1F5F9",
+                        "background-dark": "#121121",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    ` }} />
+
+      <div className="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center py-10 px-4" style={{minHeight: '100vh', width: '100%'}} dangerouslySetInnerHTML={{ __html: `
+<!-- Main Container Card (520px wide) -->
+<div class="w-full max-w-[520px] bg-white dark:bg-slate-900 shadow-xl rounded-xl overflow-hidden flex flex-col">
+<!-- Header / Nav -->
+<header class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-2">
+<div class="text-primary">
+<span class="material-symbols-outlined text-3xl">qr_code_2</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold tracking-tight">Tarkshya</h2>
+</div>
+<div class="flex items-center gap-4">
+<a class="text-slate-500 dark:text-slate-400 text-xs font-medium hover:text-primary" href="#">How it Works</a>
+<span class="material-symbols-outlined text-slate-400 text-xl cursor-pointer">info</span>
+</div>
+</header>
+<!-- Language Toggle -->
+<div class="px-6 py-4">
+<div class="flex h-10 w-full items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 p-1">
+<label class="flex cursor-pointer h-full grow items-center justify-center rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm text-slate-600 dark:text-slate-300 has-[:checked]:text-primary text-xs font-bold transition-all">
+<span>HI</span>
+<input class="hidden" name="lang" type="radio" value="HI">
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm text-slate-600 dark:text-slate-300 has-[:checked]:text-primary text-xs font-bold transition-all">
+<span>EN</span>
+<input checked="" class="hidden" name="lang" type="radio" value="EN">
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm text-slate-600 dark:text-slate-300 has-[:checked]:text-primary text-xs font-bold transition-all">
+<span>KN</span>
+<input class="hidden" name="lang" type="radio" value="KN">
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm text-slate-600 dark:text-slate-300 has-[:checked]:text-primary text-xs font-bold transition-all">
+<span>TE</span>
+<input class="hidden" name="lang" type="radio" value="TE">
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm text-slate-600 dark:text-slate-300 has-[:checked]:text-primary text-xs font-bold transition-all">
+<span>MR</span>
+<input class="hidden" name="lang" type="radio" value="MR">
+</label>
+</div>
+</div>
+<!-- Vehicle Tag Hero Section -->
+<div class="px-6">
+<div class="relative h-32 w-full rounded-xl overflow-hidden bg-gradient-to-r from-primary to-indigo-800 flex items-end p-6" data-alt="Indigo and purple abstract geometric gradient background">
+<div class="flex flex-col">
+<span class="text-indigo-200 text-xs font-medium uppercase tracking-widest">Digital Asset</span>
+<h1 class="text-white text-2xl font-bold">Vehicle Tag</h1>
+</div>
+<div class="absolute top-4 right-4 opacity-20">
+<span class="material-symbols-outlined text-6xl text-white">directions_car</span>
+</div>
+</div>
+</div>
+<!-- Sponsored Offer (Amber Accents) -->
+<div class="px-6 py-6">
+<div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl p-4 flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-accent">stars</span>
+<p class="text-amber-900 dark:text-amber-200 text-sm font-bold uppercase tracking-tight">Sponsored Offer</p>
+</div>
+<div class="flex justify-between items-center gap-4">
+<p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">Upgrade to premium amber accents for your vehicle dashboard today.</p>
+<button class="shrink-0 bg-amber-accent hover:bg-amber-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors">
+                        Claim Now
+                    </button>
+</div>
+</div>
+</div>
+<!-- Owner Info Section -->
+<div class="px-6 pb-6">
+<div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden border-2 border-primary/20" data-alt="Placeholder portrait of a professional vehicle owner">
+<img alt="Owner Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtrNHs5AR9t12aOLYXwynv875ObicQGDEytvie3fv3dQrrt-JAa4H4Sl8vGFCEDQbj8Hjl_a8htSFXP9bZK9ckoQkKBTf7k8sBJrbuEFtpVI8PW93x0suATBqCg_UmlYFiKh9EqVTc1vHKTD_jmcjvi_UJa9H6XtoISNAu_KFgZZwKQbD7-dFKJlRRGybxe6nwrY7SDKZHY26xtYN3g6P5lrwznPl9UxCGOCDctTEeGkzT_0X29P20MYm_oGNK-OS_yXG9lXBcjmw">
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<p class="text-slate-900 dark:text-slate-100 font-bold text-lg leading-none">Rajesh Kumar</p>
+<span class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Premium</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-green-500">verified</span>
+                            Verified Owner
+                        </p>
+</div>
+</div>
+<!-- Vehicle Quick Details -->
+<div class="mt-4 grid grid-cols-2 gap-3 border-t border-slate-200 dark:border-slate-700 pt-4">
+<div class="flex flex-col">
+<span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Reg Number</span>
+<span class="text-slate-700 dark:text-slate-300 font-mono font-bold">KA 01 MJ 4492</span>
+</div>
+<div class="flex flex-col">
+<span class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">Vehicle Model</span>
+<span class="text-slate-700 dark:text-slate-300 font-bold">Toyota Innova</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="px-6 pb-6 flex flex-col gap-3">
+<button class="w-full bg-primary hover:bg-indigo-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined">call</span>
+                Call Vehicle Owner
+            </button>
+<button class="w-full bg-slate-900 dark:bg-slate-100 dark:text-slate-900 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined">emergency_home</span>
+                Emergency Contact
+            </button>
+</div>
+<!-- How it Works & Privacy -->
+<div class="px-6 py-8 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800 mt-auto">
+<h3 class="text-slate-900 dark:text-slate-100 font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">help_center</span>
+                How it Works
+            </h3>
+<ul class="space-y-3">
+<li class="flex gap-3">
+<div class="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+<span class="text-[10px] font-bold">1</span>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-xs">Scan the QR code tag placed on the vehicle dashboard or windshield.</p>
+</li>
+<li class="flex gap-3">
+<div class="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+<span class="text-[10px] font-bold">2</span>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-xs">Verify the owner's information and vehicle registration details.</p>
+</li>
+<li class="flex gap-3">
+<div class="w-5 h-5 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+<span class="text-[10px] font-bold">3</span>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-xs">Use one-tap buttons to notify the owner or contact emergency services.</p>
+</li>
+</ul>
+<div class="mt-8 pt-4 border-t border-slate-200 dark:border-slate-700">
+<p class="text-slate-400 dark:text-slate-500 text-[10px] leading-relaxed italic">
+                    Privacy Note: Your location may be shared with the vehicle owner for safety purposes when you initiate a call. Tarkshya Solution ensures data encryption for all interactions.
+                </p>
+</div>
+</div>
+<!-- Footer -->
+<footer class="px-6 py-4 flex justify-between items-center text-slate-400 text-[10px] font-medium uppercase tracking-widest">
+<span>© 2024 Tarkshya Solution</span>
+<div class="flex gap-3">
+<a class="hover:text-primary" href="#">Privacy</a>
+<a class="hover:text-primary" href="#">Terms</a>
+</div>
+</footer>
+</div>
+` }} />
+    </>
+  );
+}

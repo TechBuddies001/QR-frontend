@@ -1,0 +1,336 @@
+
+import React from 'react';
+import Script from 'next/script';
+
+export default function Page() {
+  return (
+    <>
+      <div dangerouslySetInnerHTML={{ __html: `<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        body { font-family: 'Space Grotesk', sans-serif; }
+        .sidebar-fixed { width: 220px; }
+        .main-calc { width: calc(100% - 220px); }
+    </style>
+` }} />
+      <Script src="https://cdn.tailwindcss.com/?plugins=forms,container-queries" strategy="beforeInteractive" />
+<Script id="inline-script-0" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: `
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4F46E5",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121121",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    ` }} />
+
+      <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased" style={{minHeight: '100vh', width: '100%'}} dangerouslySetInnerHTML={{ __html: `
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="sidebar-fixed h-full bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
+<div class="p-6 flex items-center gap-3">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-xl">shield</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Tarkshya</h1>
+</div>
+<nav class="flex-1 px-4 py-2 space-y-1 overflow-y-auto">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary font-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">sell</span>
+<span class="text-sm">Tags</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">handshake</span>
+<span class="text-sm">Sponsors</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">credit_card</span>
+<span class="text-sm">Plans</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">qr_code_2</span>
+<span class="text-sm">QR Codes</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm">Users</span>
+</a>
+<div class="pt-4 pb-2 px-3 text-xs font-bold text-slate-400 uppercase tracking-wider">System</div>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">help</span>
+<span class="text-sm">Support</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/50">
+<div class="size-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Admin user profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7gkZEtG5hvZcYMl2eBU6Va03s3tENtuGYdxoyurX6IfgM7MCnUCgrRWEVLf7g7ulMmPfiXfKENIwhGdHJf-5q4W9rvek6IPp2wcvtXEYiIuzvKBeMFXnS5CWdFWiJkjkKBiZoA5GPgIr4-Ph7dmt27eayOSu0DFjHa3QUKbG0Jf-AKlGTSCVmkk1N1qJznSxTtCPSM4JkY3yfi9q7vGVEoaQ0e9mHjh9-QYQA12PymIBBdN5trv2GdHE-sJsYY2uytP0c2u7Y4RI">
+</div>
+<div class="min-w-0">
+<p class="text-sm font-semibold truncate text-slate-900 dark:text-white">Alex Rivera</p>
+<p class="text-xs text-slate-500 dark:text-slate-400 truncate">System Admin</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="main-calc flex flex-col h-full">
+<!-- Top Bar -->
+<header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-8 shrink-0">
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm w-64 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Search anything..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="size-10 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 relative">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+</button>
+<button class="size-10 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">translate</span>
+</button>
+<div class="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-1"></div>
+<div class="flex flex-col items-end">
+<p class="text-xs font-medium text-slate-500">Tarkshya Solution</p>
+<p class="text-sm font-bold text-primary">v2.4.0-pro</p>
+</div>
+</div>
+</header>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-8 bg-[#F8F9FC] dark:bg-background-dark/50">
+<!-- Alert Banner -->
+<div class="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 dark:text-red-400">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<div>
+<h4 class="font-bold text-red-900 dark:text-red-200">Critical: Expiring Subscriptions</h4>
+<p class="text-sm text-red-700 dark:text-red-300">15 premium subscriptions are expiring within the next 7 days. Action required.</p>
+</div>
+</div>
+<button class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-lg transition-colors">
+                        Review Now
+                    </button>
+</div>
+<!-- Stat Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">tag</span>
+</div>
+<span class="text-xs font-bold text-green-500 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded">+12%</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Tags</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">1,284</h3>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="size-10 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
+<span class="material-symbols-outlined">workspace_premium</span>
+</div>
+<span class="text-xs font-bold text-green-500 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded">+5%</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Premium</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">850</h3>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="size-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
+<span class="material-symbols-outlined">database</span>
+</div>
+<span class="text-xs font-bold text-red-500 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded">-2%</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Basic</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">312</h3>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="size-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500">
+<span class="material-symbols-outlined">event_busy</span>
+</div>
+<span class="text-xs font-bold text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded">+18%</span>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Expiring</p>
+<h3 class="text-2xl font-bold text-slate-900 dark:text-white mt-1">122</h3>
+</div>
+</div>
+<!-- Quick Actions -->
+<div class="mb-8">
+<h2 class="text-lg font-bold mb-4 text-slate-900 dark:text-white">Quick Actions</h2>
+<div class="flex flex-wrap gap-4">
+<button class="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">
+<span class="material-symbols-outlined">qr_code_2</span>
+                            Generate QR
+                        </button>
+<button class="flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined">download</span>
+                            Export Data
+                        </button>
+<button class="flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined">person_add</span>
+                            Add Sponsor
+                        </button>
+<button class="flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-bold rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined">settings_suggest</span>
+                            Manage Plans
+                        </button>
+</div>
+</div>
+<!-- Tables & Charts Row -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Recent Calls Table -->
+<div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Recent Service Requests</h3>
+<button class="text-primary text-sm font-bold hover:underline">View All</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50">
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">User</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tag ID</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Location</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs">JS</div>
+<span class="text-sm font-medium">John Smith</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-mono text-slate-500">TK-9821-XP</td>
+<td class="px-6 py-4 text-sm">Mumbai, IN</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 uppercase">Resolved</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">2 mins ago</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs">AL</div>
+<span class="text-sm font-medium">Anna Lee</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-mono text-slate-500">TK-4432-BQ</td>
+<td class="px-6 py-4 text-sm">Pune, IN</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 uppercase">Pending</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">14 mins ago</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 flex items-center justify-center font-bold text-xs">RK</div>
+<span class="text-sm font-medium">Raj Kumar</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-mono text-slate-500">TK-1209-LL</td>
+<td class="px-6 py-4 text-sm">Delhi, IN</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-primary/10 text-primary uppercase">Active</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">1 hour ago</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center font-bold text-xs">MP</div>
+<span class="text-sm font-medium">Maria P.</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm font-mono text-slate-500">TK-5561-AA</td>
+<td class="px-6 py-4 text-sm">Bangalore, IN</td>
+<td class="px-6 py-4">
+<span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 uppercase">Resolved</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">3 hours ago</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Tag Distribution Donut Chart -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
+<h3 class="text-lg font-bold mb-6 text-slate-900 dark:text-white">Tag Distribution</h3>
+<div class="flex-1 flex flex-col items-center justify-center">
+<div class="relative size-48">
+<!-- Visual representation of donut chart using CSS gradients and pseudo-elements -->
+<div class="absolute inset-0 rounded-full border-[16px] border-slate-100 dark:border-slate-800"></div>
+<div class="absolute inset-0 rounded-full border-[16px] border-primary border-t-transparent border-l-transparent transform -rotate-45"></div>
+<div class="absolute inset-0 rounded-full border-[16px] border-amber-500 border-b-transparent border-r-transparent border-l-transparent transform rotate-120"></div>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-3xl font-bold">1,284</span>
+<span class="text-xs text-slate-500 uppercase font-bold tracking-widest">Total</span>
+</div>
+</div>
+<div class="mt-8 w-full space-y-3">
+<div class="flex items-center justify-between text-sm">
+<div class="flex items-center gap-2">
+<span class="size-3 rounded-full bg-primary"></span>
+<span class="text-slate-600 dark:text-slate-400">Premium Tags</span>
+</div>
+<span class="font-bold">66%</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<div class="flex items-center gap-2">
+<span class="size-3 rounded-full bg-amber-500"></span>
+<span class="text-slate-600 dark:text-slate-400">Basic Tags</span>
+</div>
+<span class="font-bold">24%</span>
+</div>
+<div class="flex items-center justify-between text-sm">
+<div class="flex items-center gap-2">
+<span class="size-3 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+<span class="text-slate-600 dark:text-slate-400">Other</span>
+</div>
+<span class="font-bold">10%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Stats or Meta Info -->
+<div class="mt-8 flex flex-wrap gap-4 items-center justify-between text-slate-400 text-xs">
+<p>© 2024 Tarkshya Solution Admin Panel. All rights reserved.</p>
+<div class="flex gap-4">
+<a class="hover:text-primary" href="#">System Status</a>
+<a class="hover:text-primary" href="#">API Documentation</a>
+<a class="hover:text-primary" href="#">Privacy Policy</a>
+</div>
+</div>
+</div>
+</main>
+</div>
+` }} />
+    </>
+  );
+}

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tarkshya Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5048e5",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121121",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Space Grotesk', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="flex min-h-screen">
+<!-- Sidebar -->
+<aside class="w-[220px] bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col fixed h-full z-50">
+<div class="p-6">
+<div class="flex items-center gap-2 mb-8">
+<span class="text-2xl">🛡</span>
+<h1 class="text-xl font-bold tracking-tight text-primary">Tarkshya</h1>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary text-white" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">sell</span>
+<span class="text-sm font-medium">Tags</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">credit_card</span>
+<span class="text-sm font-medium">Plans</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">stars</span>
+<span class="text-sm font-medium">Sponsors</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm">person</span>
+</div>
+<div class="overflow-hidden">
+<p class="text-xs font-bold truncate">Admin User</p>
+<p class="text-[10px] text-slate-500">Super Admin</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 ml-[220px]">
+<!-- Top Bar -->
+<header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 px-8 flex items-center justify-between">
+<h2 class="text-lg font-bold">Dashboard</h2>
+<div class="flex items-center gap-4">
+<div class="relative">
+<input class="pl-10 pr-4 py-1.5 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:ring-primary focus:border-primary" placeholder="Search data..." type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+</div>
+<button class="size-9 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<div class="size-9 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden border-2 border-white dark:border-slate-800">
+<img class="w-full h-full object-cover" data-alt="Admin user profile headshot photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAM4Ghf0UF28P1TAeKWo11RAFunbwn5BmVanyAorIchnFODajHuNu2AuM-z1AuZ55SNwqiv6EvIWbD4HdqFHKkCJz1rUh2rfXrpTPydWGomVu8kivpo3SQK0nBL_QWwi9lKhR2b2uuLbqYNCBYYCGzW-KjlzlDQ_Woj5_rxn4Xis4dkqpPhi1UbqMZSkiBXtTsYQ7GJ89LzUEEHTYh3faE1Aif2yHBPGNnFraNJk0pTv1wkvLHre-ybqeIjVKVex8SaArzkiKIP8nk"/>
+</div>
+</div>
+</header>
+<div class="p-8 space-y-8">
+<!-- Stats Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+<p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Total Tags</p>
+<h3 class="text-3xl font-bold mt-1 text-slate-900 dark:text-slate-100">1,234</h3>
+<div class="mt-4 flex items-center gap-1 text-emerald-500 text-xs font-bold">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+<span>12% from last month</span>
+</div>
+</div>
+<div class="p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+<p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Premium</p>
+<h3 class="text-3xl font-bold mt-1 text-slate-900 dark:text-slate-100">856</h3>
+<div class="mt-4 flex items-center gap-1 text-primary text-xs font-bold">
+<span class="material-symbols-outlined text-[14px]">workspace_premium</span>
+<span>69% Market Share</span>
+</div>
+</div>
+<div class="p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+<p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Basic</p>
+<h3 class="text-3xl font-bold mt-1 text-slate-900 dark:text-slate-100">378</h3>
+<div class="mt-4 flex items-center gap-1 text-slate-400 text-xs font-bold">
+<span class="material-symbols-outlined text-[14px]">info</span>
+<span>Standard users</span>
+</div>
+</div>
+<div class="p-6 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+<p class="text-sm text-slate-500 dark:text-slate-400 font-medium text-rose-500">Expiring</p>
+<h3 class="text-3xl font-bold mt-1 text-rose-500">42</h3>
+<div class="mt-4 flex items-center gap-1 text-rose-500 text-xs font-bold">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+<span>Requires action</span>
+</div>
+</div>
+</div>
+<!-- Alert Banner -->
+<div class="bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/50 p-4 rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-rose-100 dark:bg-rose-800 flex items-center justify-center text-rose-600 dark:text-rose-200">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<p class="text-rose-900 dark:text-rose-200 font-medium">⚠️ 42 subscriptions expiring within the next 7 days</p>
+</div>
+<button class="px-4 py-1.5 bg-rose-600 text-white rounded-lg text-sm font-bold hover:bg-rose-700 transition-colors">Review All</button>
+</div>
+<!-- Quick Actions -->
+<div class="flex flex-wrap gap-4">
+<button class="flex items-center gap-2 bg-primary text-white px-6 py-2.5 rounded-lg font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]">qr_code_2</span>
+                        Generate QR
+                    </button>
+<button class="flex items-center gap-2 border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-6 py-2.5 rounded-lg font-bold hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
+<span class="material-symbols-outlined text-[20px]">bar_chart</span>
+                        Export
+                    </button>
+<button class="flex items-center gap-2 bg-amber-500 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-amber-600 shadow-lg shadow-amber-500/20 transition-all">
+<span class="material-symbols-outlined text-[20px]">volunteer_activism</span>
+                        Add Sponsor
+                    </button>
+<button class="flex items-center gap-2 bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-600/20 transition-all">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+                        Manage Plans
+                    </button>
+</div>
+<!-- Main Grid Section -->
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+<!-- Recent Calls Table -->
+<div class="lg:col-span-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<h4 class="font-bold text-lg">Recent Calls</h4>
+<button class="text-primary text-sm font-bold hover:underline">View History</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-bold">
+<tr>
+<th class="px-6 py-4">Tag ID</th>
+<th class="px-6 py-4">Type</th>
+<th class="px-6 py-4">Plan</th>
+<th class="px-6 py-4">Duration</th>
+<th class="px-6 py-4">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 font-medium">#TAG-9021</td>
+<td class="px-6 py-4 text-sm">Emergency</td>
+<td class="px-6 py-4"><span class="px-2 py-1 rounded bg-primary/10 text-primary text-[10px] font-bold">PREMIUM</span></td>
+<td class="px-6 py-4 text-sm">04m 12s</td>
+<td class="px-6 py-4"><span class="flex items-center gap-1.5 text-emerald-500 text-xs font-bold"><span class="size-2 rounded-full bg-emerald-500"></span>Completed</span></td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 font-medium">#TAG-8834</td>
+<td class="px-6 py-4 text-sm">Concierge</td>
+<td class="px-6 py-4"><span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold">BASIC</span></td>
+<td class="px-6 py-4 text-sm">02m 45s</td>
+<td class="px-6 py-4"><span class="flex items-center gap-1.5 text-amber-500 text-xs font-bold"><span class="size-2 rounded-full bg-amber-500"></span>Pending</span></td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 font-medium">#TAG-7712</td>
+<td class="px-6 py-4 text-sm">Support</td>
+<td class="px-6 py-4"><span class="px-2 py-1 rounded bg-primary/10 text-primary text-[10px] font-bold">PREMIUM</span></td>
+<td class="px-6 py-4 text-sm">12m 08s</td>
+<td class="px-6 py-4"><span class="flex items-center gap-1.5 text-rose-500 text-xs font-bold"><span class="size-2 rounded-full bg-rose-500"></span>Dropped</span></td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4 font-medium">#TAG-6543</td>
+<td class="px-6 py-4 text-sm">Information</td>
+<td class="px-6 py-4"><span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold">BASIC</span></td>
+<td class="px-6 py-4 text-sm">01m 30s</td>
+<td class="px-6 py-4"><span class="flex items-center gap-1.5 text-emerald-500 text-xs font-bold"><span class="size-2 rounded-full bg-emerald-500"></span>Completed</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Tag Types Donut Chart -->
+<div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 flex flex-col">
+<h4 class="font-bold text-lg mb-6">Tag Distribution</h4>
+<div class="flex-1 flex flex-col items-center justify-center">
+<div class="relative size-48 flex items-center justify-center">
+<svg class="size-full -rotate-90" viewbox="0 0 36 36">
+<circle class="stroke-slate-100 dark:stroke-slate-800" cx="18" cy="18" fill="none" r="16" stroke-width="4"></circle>
+<circle class="stroke-primary" cx="18" cy="18" fill="none" r="16" stroke-dasharray="65, 100" stroke-width="4"></circle>
+<circle class="stroke-emerald-500" cx="18" cy="18" fill="none" r="16" stroke-dasharray="25, 100" stroke-dashoffset="-65" stroke-width="4"></circle>
+<circle class="stroke-amber-500" cx="18" cy="18" fill="none" r="16" stroke-dasharray="10, 100" stroke-dashoffset="-90" stroke-width="4"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-3xl font-bold">1,234</span>
+<span class="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Total Tags</span>
+</div>
+</div>
+<div class="mt-8 w-full grid grid-cols-2 gap-4">
+<div class="flex items-center gap-2">
+<span class="size-3 rounded-full bg-primary"></span>
+<span class="text-xs font-medium">Premium (65%)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="size-3 rounded-full bg-emerald-500"></span>
+<span class="text-xs font-medium">Basic (25%)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="size-3 rounded-full bg-amber-500"></span>
+<span class="text-xs font-medium">Trial (10%)</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="size-3 rounded-full bg-slate-200 dark:bg-slate-700"></span>
+<span class="text-xs font-medium">Inactive (0%)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Full-width Line Chart -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm p-6">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h4 class="font-bold text-lg">Calls Over Time</h4>
+<p class="text-xs text-slate-500">Total volume tracking for the current month</p>
+</div>
+<select class="bg-slate-50 dark:bg-slate-800 border-none text-xs font-bold rounded-lg px-3 py-1.5 focus:ring-primary">
+<option>Last 30 Days</option>
+<option>Last 7 Days</option>
+<option>Last 12 Months</option>
+</select>
+</div>
+<div class="h-64 w-full relative">
+<!-- Simplified Visualization of a Line Chart using CSS Gradients/Borders -->
+<div class="absolute inset-0 flex items-end justify-between px-2 opacity-50">
+<div class="w-full h-[1px] bg-slate-100 dark:bg-slate-800 absolute bottom-0"></div>
+<div class="w-full h-[1px] bg-slate-100 dark:bg-slate-800 absolute bottom-1/4"></div>
+<div class="w-full h-[1px] bg-slate-100 dark:bg-slate-800 absolute bottom-2/4"></div>
+<div class="w-full h-[1px] bg-slate-100 dark:bg-slate-800 absolute bottom-3/4"></div>
+</div>
+<div class="relative h-full w-full flex items-end">
+<svg class="w-full h-4/5" preserveaspectratio="none" viewbox="0 0 100 100">
+<defs>
+<lineargradient id="chartGradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#5048e5" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#5048e5" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path d="M0 80 Q 10 70, 20 75 T 40 50 T 60 60 T 80 30 T 100 20 V 100 H 0 Z" fill="url(#chartGradient)"></path>
+<path d="M0 80 Q 10 70, 20 75 T 40 50 T 60 60 T 80 30 T 100 20" fill="none" stroke="#5048e5" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+</svg>
+</div>
+</div>
+<div class="flex justify-between mt-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+<span>May 01</span>
+<span>May 07</span>
+<span>May 14</span>
+<span>May 21</span>
+<span>May 28</span>
+<span>Jun 01</span>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="p-8 text-center text-xs text-slate-500 border-t border-slate-200 dark:border-slate-800">
+<p>© 2024 Tarkshya Solution Admin Dashboard. Built with Precision.</p>
+</footer>
+</main>
+</div>
+</body></html>

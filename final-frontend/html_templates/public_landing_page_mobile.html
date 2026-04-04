@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tarkshya Solution - Vehicle Verification</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4f46e5",
+                        "amber-accent": "#d97706",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121121",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden max-w-md mx-auto shadow-2xl">
+<!-- Header Section -->
+<header class="flex items-center bg-white dark:bg-slate-900 p-4 border-b border-slate-200 dark:border-slate-800 justify-between sticky top-0 z-50">
+<div class="text-primary flex size-10 shrink-0 items-center justify-center bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined">sell</span>
+</div>
+<h1 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">Tarkshya Solution</h1>
+<div class="flex items-center justify-end">
+<span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold px-2 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">Active</span>
+</div>
+</header>
+<!-- Language Selector -->
+<div class="flex gap-2 p-4 overflow-x-auto no-scrollbar bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+<button class="flex h-9 shrink-0 items-center justify-center rounded-lg bg-primary text-white px-4 text-sm font-semibold">EN</button>
+<button class="flex h-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-4 text-sm font-medium">HI</button>
+<button class="flex h-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-4 text-sm font-medium">KN</button>
+<button class="flex h-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-4 text-sm font-medium">TE</button>
+<button class="flex h-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-4 text-sm font-medium">MR</button>
+</div>
+<!-- Sponsor/Hero Banner -->
+<div class="p-4">
+<div class="w-full bg-slate-200 dark:bg-slate-800 bg-center bg-cover flex flex-col justify-end overflow-hidden rounded-xl aspect-[21/9] relative" data-alt="Modern dark luxury car driving through city at night" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCDHhgYUDdmxt3dpy9fI7u5mQDpg5IgLTB34dOuIgW9XwfgmkQEcUWu2xd-Q3T-WmW6vUGPhpYROv7FBQ5kuNkskZ63-lQU4GvJmeD6AEPGt19bFoKPG2PXaNglBLyUpSVj_Z-QZYO58C5jF4L1rXTdcEKCNgq6ujp5NcmctXMGxhnW0-AzYVOWUmR7fQ2VJFbVkGjIkwIq9E0S86uPAAxZgct9MLN7Th3W1JXpWmOOdu6jiELZ7iJqOW7AX05ygLvDiNF9zLS62lY");'>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<p class="relative p-4 text-white text-sm font-medium">Secure your journey with Tarkshya Solutions</p>
+</div>
+</div>
+<!-- Owner Info Card -->
+<div class="px-4 pb-4">
+<div class="flex flex-col rounded-xl overflow-hidden shadow-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+<div class="w-full h-48 bg-center bg-cover" data-alt="Professional portrait of a male vehicle owner" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBE-yIPc-mdKAo3sdpTskTxJ7QGWxkcrr637pCc3amlXintmHWkngCAAmRT4J6NWk9XBbDHgNdeMc1Y2JKF_JyIK6M5upHbCPwqs0pEf3lQpeJ5NwAtxntjMvaCWIoWFvLjb3FXpv5HtyTuoJcsPqmIx4_ho1pfq-8JbTxoWB0Sv-IFA87lu8P8ovb_m_oPUo5u1OvBYmOKnCoheFx5jKt2jbbob5aaZ2ZSPntYzSTVXltSOKUF_gvlsPn5GYI_aAzZfDyemD9iM8M");'></div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold">Rajesh Kumar</h2>
+<span class="flex items-center gap-1 text-primary text-xs font-bold uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm">verified</span> Verified
+                        </span>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-lg">directions_car</span>
+<p class="text-sm">Toyota Fortuner (KA 01 MG 1234)</p>
+</div>
+<div class="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+<span class="material-symbols-outlined text-lg">event_available</span>
+<p class="text-sm">Validity: 24 Dec 2025</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Amber Message Box -->
+<div class="px-4 pb-4">
+<div class="flex gap-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 p-4 rounded-xl">
+<span class="material-symbols-outlined text-amber-accent">info</span>
+<p class="text-amber-800 dark:text-amber-200 text-sm leading-relaxed">
+                    Please use the emergency contact button only in case of real emergencies or accidents. Improper use may lead to account suspension.
+                </p>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="px-4 pb-6 space-y-3">
+<button class="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white h-12 rounded-xl font-bold transition-colors">
+<span class="material-symbols-outlined">call</span>
+                Call Owner
+            </button>
+<button class="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white h-12 rounded-xl font-bold transition-colors">
+<span class="material-symbols-outlined">emergency_share</span>
+                Emergency Contact
+            </button>
+<div class="pt-2">
+<button class="w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">location_on</span>
+<span class="text-sm font-semibold text-slate-700 dark:text-slate-300">Share Current Location</span>
+</div>
+<span class="material-symbols-outlined text-slate-400">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- How It Works Section -->
+<div class="bg-slate-50 dark:bg-slate-900/50 px-4 py-8 border-t border-slate-200 dark:border-slate-800">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold mb-6">How It Works</h3>
+<div class="space-y-6">
+<!-- Step 1 -->
+<div class="flex gap-4">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">1</div>
+<div class="flex flex-col gap-1">
+<p class="text-slate-900 dark:text-slate-100 font-bold">Scan the Tag</p>
+<p class="text-slate-600 dark:text-slate-400 text-sm">Scan the QR code or tap the NFC tag on the vehicle dashboard.</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex gap-4">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">2</div>
+<div class="flex flex-col gap-1">
+<p class="text-slate-900 dark:text-slate-100 font-bold">Verify Identity</p>
+<p class="text-slate-600 dark:text-slate-400 text-sm">See real-time owner information and vehicle validity status.</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex gap-4">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-bold">3</div>
+<div class="flex flex-col gap-1">
+<p class="text-slate-900 dark:text-slate-100 font-bold">Instant Communication</p>
+<p class="text-slate-600 dark:text-slate-400 text-sm">Connect directly via secure calling or emergency alerts.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Spacer -->
+<div class="h-20"></div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-6 py-2 pb-6 z-50">
+<div class="flex justify-between items-center">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-1">home</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">History</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Profile</span>
+</a>
+</div>
+</nav>
+</div>
+</body></html>

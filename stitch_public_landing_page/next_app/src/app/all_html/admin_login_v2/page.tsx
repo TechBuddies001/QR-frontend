@@ -1,0 +1,108 @@
+
+import React from 'react';
+import Script from 'next/script';
+
+export default function Page() {
+  return (
+    <>
+      <div dangerouslySetInnerHTML={{ __html: `<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+    </style>
+` }} />
+      <Script src="https://cdn.tailwindcss.com/?plugins=forms,container-queries" strategy="beforeInteractive" />
+<Script id="inline-script-0" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: `
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4F46E5",
+                        "background-light": "#F1F5F9",
+                        "background-dark": "#0f172a",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    ` }} />
+
+      <div className="bg-background-light dark:bg-background-dark min-h-screen flex flex-col" style={{minHeight: '100vh', width: '100%'}} dangerouslySetInnerHTML={{ __html: `
+<div class="flex-1 flex items-center justify-center p-6">
+<div class="w-full max-w-[420px] bg-white dark:bg-slate-900 shadow-xl rounded-xl border border-slate-200 dark:border-slate-800 p-8">
+<!-- Header Section -->
+<div class="flex flex-col items-center mb-8">
+<div class="w-16 h-16 bg-primary/10 dark:bg-primary/20 rounded-full flex items-center justify-center mb-4">
+<span class="text-3xl">🛡️</span>
+</div>
+<h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">Admin Panel</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Access Tarkshya Solution Dashboard</p>
+</div>
+<!-- Login Form -->
+<form class="space-y-5">
+<div>
+<label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">mail</span>
+<input class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900 dark:text-slate-100 transition-all" placeholder="admin@tarkshya.com" type="email">
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-1.5">
+<label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Password</label>
+<a class="text-sm font-medium text-primary hover:underline" href="#">Forgot Password?</a>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">lock</span>
+<input class="w-full pl-10 pr-12 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900 dark:text-slate-100 transition-all" placeholder="••••••••" type="password">
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" type="button">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+</div>
+</div>
+<div class="flex items-center">
+<input class="w-4 h-4 text-primary border-slate-300 rounded focus:ring-primary" id="remember" type="checkbox">
+<label class="ml-2 text-sm text-slate-600 dark:text-slate-400 cursor-pointer" for="remember">Remember me for 30 days</label>
+</div>
+<!-- 2FA Section -->
+<div class="pt-4 border-t border-slate-100 dark:border-slate-800">
+<label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 text-center">Two-Factor Authentication</label>
+<div class="flex justify-between gap-2">
+<input class="w-12 h-12 text-center text-lg font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900 dark:text-slate-100" maxlength="1" type="text">
+<input class="w-12 h-12 text-center text-lg font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900 dark:text-slate-100" maxlength="1" type="text">
+<input class="w-12 h-12 text-center text-lg font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900 dark:text-slate-100" maxlength="1" type="text">
+<input class="w-12 h-12 text-center text-lg font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900 dark:text-slate-100" maxlength="1" type="text">
+<input class="w-12 h-12 text-center text-lg font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900 dark:text-slate-100" maxlength="1" type="text">
+<input class="w-12 h-12 text-center text-lg font-bold bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-slate-900 dark:text-slate-100" maxlength="1" type="text">
+</div>
+<p class="text-[11px] text-slate-400 mt-2 text-center">Enter the 6-digit code from your authenticator app</p>
+</div>
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3.5 rounded-lg shadow-lg shadow-primary/30 transition-all uppercase tracking-wider text-sm" type="submit">
+                    Login to Dashboard
+                </button>
+</form>
+</div>
+</div>
+<!-- Footer Area -->
+<footer class="p-8 text-center">
+<div class="flex items-center justify-center gap-2 text-slate-400 dark:text-slate-600">
+<span class="material-symbols-outlined text-sm">copyright</span>
+<span class="text-xs font-medium uppercase tracking-widest">Tarkshya Solution 2024</span>
+</div>
+</footer>
+` }} />
+    </>
+  );
+}

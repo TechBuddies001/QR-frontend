@@ -1,0 +1,362 @@
+
+import React from 'react';
+import Script from 'next/script';
+
+export default function Page() {
+  return (
+    <>
+      <div dangerouslySetInnerHTML={{ __html: `<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+    </style>
+` }} />
+      <Script src="https://cdn.tailwindcss.com/?plugins=forms,container-queries" strategy="beforeInteractive" />
+<Script id="inline-script-0" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: `
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4F46E5",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121121",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    ` }} />
+
+      <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen" style={{minHeight: '100vh', width: '100%'}} dangerouslySetInnerHTML={{ __html: `
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
+<div class="p-6 flex items-center gap-3">
+<div class="size-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">bolt</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-slate-900 dark:text-white font-bold leading-none tracking-tight">Tarkshya Solution</h1>
+<p class="text-slate-500 text-xs font-medium">Admin Panel</p>
+</div>
+</div>
+<nav class="flex-1 px-4 py-4 flex flex-col gap-1.5 overflow-y-auto">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span>
+<span class="text-sm font-medium">Users</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-primary text-white shadow-md shadow-primary/20" href="/admin/sms-logs">
+<span class="material-symbols-outlined text-[20px]">chat_bubble</span>
+<span class="text-sm font-medium">📱 SMS Logs</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">bar_chart</span>
+<span class="text-sm font-medium">Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors mt-auto" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span>
+<span class="text-sm font-medium">Support</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-3 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+<div class="size-8 rounded-full bg-slate-200" data-alt="User avatar placeholder profile picture" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBPUKHYgA1GwaZUdgkB-cEKfNwY-fn3WFWtresnj5nd9nZ4fpZg-h9q8Cah0xOLjA7ibpIKnhvEJVAeG1Hwmxm0-IB9rzuAvyATUuDRNu7Hd8ycLQncmBX5NDV2gkNdFDiNwsTwJamWL0Gau-XED85Sx6j-xIkgWh2iHifaCBIK4ibfSHF2i1QCfdD2VWt_2r_9Pe5mDZxGQ2M9U4Wk3TXc2C41zh7qQqjgbNXc4NwGkhHdtWt8RxKGuo6iZmYOPvHfe36GTWv4B_c')"></div>
+<div class="flex-1 min-w-0">
+<p class="text-xs font-bold text-slate-900 dark:text-white truncate">John Admin</p>
+<p class="text-[10px] text-slate-500 truncate">john@tarkshya.io</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- Header -->
+<header class="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-8 z-10">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">SMS Logs</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary w-64" placeholder="Global search..." type="text">
+</div>
+<button class="size-9 rounded-lg flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 size-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+</button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8">
+<!-- Page Title & Actions -->
+<div class="flex flex-wrap items-end justify-between gap-6 mb-8">
+<div class="space-y-1">
+<h3 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">System Message Logs</h3>
+<p class="text-slate-500">Monitor and audit all SMS communications sent to clients.</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+                            Export CSV
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white shadow-lg shadow-primary/20 text-sm font-semibold hover:brightness-110 transition-all">
+<span class="material-symbols-outlined text-[20px]">refresh</span>
+                            Refresh Logs
+                        </button>
+</div>
+</div>
+<!-- Filters -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 mb-6 shadow-sm">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Search</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+<input class="w-full pl-9 pr-4 py-2 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-primary focus:border-primary text-sm" placeholder="Tag ID or Recipient" type="text">
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Status</label>
+<select class="w-full pl-4 pr-10 py-2 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-primary focus:border-primary text-sm appearance-none">
+<option>All Status</option>
+<option>Sent</option>
+<option>Delivered</option>
+<option>Failed</option>
+</select>
+</div>
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Message Type</label>
+<select class="w-full pl-4 pr-10 py-2 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-primary focus:border-primary text-sm appearance-none">
+<option>All Types</option>
+<option>scan_alert</option>
+<option>sub_reminder</option>
+<option>otp_verification</option>
+</select>
+</div>
+<div class="space-y-1.5">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Date Range</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">calendar_today</span>
+<input class="w-full pl-9 pr-4 py-2 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-primary focus:border-primary text-sm cursor-pointer" readonly="" type="text" value="Last 7 days">
+</div>
+</div>
+</div>
+</div>
+<!-- Table -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-slate-100 dark:border-slate-800">
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Tag ID</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Recipient</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Type</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Content</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Sent At</th>
+<th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 text-sm font-medium text-primary">#TAG-8821</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-slate-900 dark:text-white">+1 (555) 012-3456</span>
+<span class="text-[11px] text-slate-500">Acme Corp</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase">scan_alert</span>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm text-slate-600 dark:text-slate-400 max-w-xs truncate">Alert: Your asset #Q4-99 was scanned in Chicago warehouse.</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+<span class="material-symbols-outlined text-lg">check_circle</span>
+<span class="text-xs font-bold">Delivered</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">2 mins ago</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined">visibility</span></button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 text-sm font-medium text-primary">#TAG-1052</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-slate-900 dark:text-white">+44 20 7946 0958</span>
+<span class="text-[11px] text-slate-500">Global Logistics</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded-md bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase">sub_reminder</span>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm text-slate-600 dark:text-slate-400 max-w-xs truncate">Reminder: Your premium sub expires in 3 days. Renew now.</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-blue-500">
+<span class="material-symbols-outlined text-lg">send</span>
+<span class="text-xs font-bold">Sent</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">14 mins ago</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined">visibility</span></button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 text-sm font-medium text-primary">#TAG-4412</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-slate-900 dark:text-white">+91 98765 43210</span>
+<span class="text-[11px] text-slate-500">Individual User</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded-md bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 text-[10px] font-bold uppercase">otp_verification</span>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm text-slate-600 dark:text-slate-400 max-w-xs truncate">Your verification code is 49201. Valid for 5 minutes.</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-rose-500">
+<span class="material-symbols-outlined text-lg">error</span>
+<span class="text-xs font-bold">Failed</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">1 hour ago</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined">visibility</span></button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 text-sm font-medium text-primary">#TAG-7712</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-slate-900 dark:text-white">+1 (202) 555-0143</span>
+<span class="text-[11px] text-slate-500">Prime Systems</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase">scan_alert</span>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm text-slate-600 dark:text-slate-400 max-w-xs truncate">Item #S-22 scanned outside authorized zone.</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+<span class="material-symbols-outlined text-lg">check_circle</span>
+<span class="text-xs font-bold">Delivered</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">3 hours ago</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined">visibility</span></button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4 text-sm font-medium text-primary">#TAG-0012</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-semibold text-slate-900 dark:text-white">+1 (202) 555-0988</span>
+<span class="text-[11px] text-slate-500">Retail Group</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold uppercase">system_update</span>
+</td>
+<td class="px-6 py-4">
+<p class="text-sm text-slate-600 dark:text-slate-400 max-w-xs truncate">Maintenance update scheduled for Sunday 2 AM UTC.</p>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+<span class="material-symbols-outlined text-lg">check_circle</span>
+<span class="text-xs font-bold">Delivered</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">5 hours ago</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined">visibility</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-6 py-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20">
+<p class="text-xs text-slate-500">Showing <span class="font-bold text-slate-900 dark:text-white">1</span> to <span class="font-bold text-slate-900 dark:text-white">10</span> of <span class="font-bold text-slate-900 dark:text-white">1,240</span> results</p>
+<div class="flex items-center gap-2">
+<button class="size-8 rounded border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 cursor-not-allowed">
+<span class="material-symbols-outlined text-lg">chevron_left</span>
+</button>
+<button class="size-8 rounded bg-primary text-white flex items-center justify-center text-xs font-bold">1</button>
+<button class="size-8 rounded border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800">2</button>
+<button class="size-8 rounded border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800">3</button>
+<span class="text-slate-400 px-1">...</span>
+<button class="size-8 rounded border border-slate-200 dark:border-slate-700 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800">124</button>
+<button class="size-8 rounded border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Footer Summary Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+<div class="size-12 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 flex items-center justify-center">
+<span class="material-symbols-outlined">send</span>
+</div>
+<div>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">99.2%</p>
+<p class="text-xs text-slate-500 font-medium uppercase tracking-tighter">Delivery Rate</p>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+<div class="size-12 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center">
+<span class="material-symbols-outlined">forum</span>
+</div>
+<div>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">12,480</p>
+<p class="text-xs text-slate-500 font-medium uppercase tracking-tighter">Total Monthly SMS</p>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+<div class="size-12 rounded-lg bg-rose-50 dark:bg-rose-900/20 text-rose-600 flex items-center justify-center">
+<span class="material-symbols-outlined">error_outline</span>
+</div>
+<div>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">14</p>
+<p class="text-xs text-slate-500 font-medium uppercase tracking-tighter">Failed (24h)</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+` }} />
+    </>
+  );
+}

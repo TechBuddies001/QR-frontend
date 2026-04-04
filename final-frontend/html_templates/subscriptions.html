@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tarkshya Solution - Subscriptions Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4F46E5",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121121",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-w-[1280px]">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 flex-shrink-0 border-r border-primary/10 bg-white dark:bg-slate-900 flex flex-col">
+<div class="p-6 flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">shield_person</span>
+</div>
+<div>
+<h1 class="text-sm font-bold tracking-tight">Tarkshya Solution</h1>
+<p class="text-xs text-slate-500">Admin Portal</p>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">group</span>
+<span class="text-sm font-medium">Users</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-primary/10 text-primary rounded-lg transition-colors" href="/admin/subscriptions">
+<span class="material-symbols-outlined text-[22px] font-fill">sync</span>
+<span class="text-sm font-bold">Subscriptions</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">bar_chart</span>
+<span class="text-sm font-medium">Analytics</span>
+</a>
+<div class="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</div>
+</nav>
+<div class="p-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-800 rounded-xl">
+<img alt="Admin Avatar" class="w-8 h-8 rounded-full bg-primary/20" data-alt="User profile avatar icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsJjP-BUlACLKJQOvSvYITsfzJT4n3eWjI59m4U7NKSKUeBMQvRbR93rG3rs8CIyvRwFwye5u-jtCMh4XCQVSVCflPKNVe8CukBd-VldXpWpWZtLt71gjd-R1zvUvhF5VpyhQoi0y_TtjWeH8Yyo_IXuEjS-ObZFB6BlCr4TEUf-zL-JtThi3ju1VRqEZpkFyh_kxmvpsP3ZT9URH0J2d65nzGCd7VL8iVI8mudLxnTC-IN2YI5oQvrC3wMg7xVPKkXyKX9hix2Zs"/>
+<div class="flex-1 min-w-0">
+<p class="text-xs font-bold truncate">Alex Rivera</p>
+<p class="text-[10px] text-slate-500 truncate">System Admin</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto flex flex-col">
+<!-- Header -->
+<header class="h-16 flex-shrink-0 border-b border-primary/10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-8 sticky top-0 z-10">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">sync_alt</span>
+<h2 class="text-lg font-bold">Subscriptions Management</h2>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="pl-9 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-sm w-64 focus:ring-2 focus:ring-primary/20" placeholder="Search invoices, users..." type="text"/>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary/10 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-sm">add</span>
+                        New Subscription
+                    </button>
+</div>
+</header>
+<div class="p-8 space-y-8">
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/10 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-primary bg-primary/10 p-2 rounded-lg">check_circle</span>
+<span class="text-xs font-bold text-green-500 bg-green-500/10 px-2 py-1 rounded">+12.5%</span>
+</div>
+<p class="text-slate-500 text-sm font-medium">Active Subscriptions</p>
+<h3 class="text-3xl font-bold mt-1">1,284</h3>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/10 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-orange-500 bg-orange-500/10 p-2 rounded-lg">pending_actions</span>
+<span class="text-xs font-bold text-orange-500 bg-orange-500/10 px-2 py-1 rounded">Action Required</span>
+</div>
+<p class="text-slate-500 text-sm font-medium">Expiring Soon (7d)</p>
+<h3 class="text-3xl font-bold mt-1">42</h3>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/10 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-red-500 bg-red-500/10 p-2 rounded-lg">cancel</span>
+<span class="text-xs font-bold text-red-500 bg-red-500/10 px-2 py-1 rounded">-3.2%</span>
+</div>
+<p class="text-slate-500 text-sm font-medium">Expired (Last 30d)</p>
+<h3 class="text-3xl font-bold mt-1">156</h3>
+</div>
+</div>
+<!-- Main Table Section -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-primary/10 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-primary/5 flex justify-between items-center">
+<h4 class="font-bold text-lg">Recent Renewal Cycles</h4>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 text-xs font-bold border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 transition-colors">Export CSV</button>
+<button class="px-3 py-1.5 text-xs font-bold border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 transition-colors">Filters</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-slate-50 dark:bg-slate-800/50 text-xs uppercase font-bold text-slate-500 tracking-wider">
+<tr>
+<th class="px-6 py-4">Customer</th>
+<th class="px-6 py-4">Plan</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4">Renewal Date</th>
+<th class="px-6 py-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase">AC</div>
+<span class="text-sm font-semibold">Acme Corp</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-bold bg-primary/5 text-primary px-3 py-1 rounded-full uppercase tracking-tighter border border-primary/10">Enterprise</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+<span class="text-sm">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">Dec 01, 2024</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary font-bold text-sm hover:underline">Renew Now</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-xs uppercase">GT</div>
+<span class="text-sm font-semibold">Global Tech</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-bold bg-slate-100 text-slate-600 px-3 py-1 rounded-full uppercase tracking-tighter">Pro</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-orange-500"></span>
+<span class="text-sm">Expiring</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">Nov 15, 2024</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary font-bold text-sm hover:underline">Send Invoice</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-xs uppercase">BS</div>
+<span class="text-sm font-semibold">Beta Systems</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-bold bg-slate-100 text-slate-600 px-3 py-1 rounded-full uppercase tracking-tighter">Basic</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500"></span>
+<span class="text-sm">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-slate-500">Jan 20, 2025</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary font-bold text-sm hover:underline">Update</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Bottom Cards Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-12">
+<!-- Assign Free Trial Form -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-primary/10 shadow-sm p-6">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary">card_giftcard</span>
+<h4 class="font-bold text-lg">Assign Free Trial</h4>
+</div>
+<form class="space-y-4">
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-xs font-bold text-slate-500 uppercase">Customer Email</label>
+<input class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary" placeholder="client@company.com" type="email"/>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-bold text-slate-500 uppercase">Trial Tier</label>
+<select class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary">
+<option>Pro (Limited Access)</option>
+<option>Enterprise (Full Suite)</option>
+</select>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-bold text-slate-500 uppercase">Duration (Days)</label>
+<div class="flex items-center gap-4">
+<input class="flex-1 accent-primary" max="60" min="7" type="range" value="14"/>
+<span class="text-sm font-bold w-12 text-center bg-primary/10 text-primary py-1 rounded">14d</span>
+</div>
+</div>
+<div class="flex items-center gap-2 py-2">
+<input class="rounded border-slate-300 text-primary focus:ring-primary" id="notify" type="checkbox"/>
+<label class="text-sm text-slate-600 dark:text-slate-400" for="notify">Notify customer via email immediately</label>
+</div>
+<button class="w-full py-3 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all transform active:scale-[0.98] shadow-lg shadow-primary/20" type="submit">
+                                Grant Trial Access
+                            </button>
+</form>
+</div>
+<!-- Auto-Downgrade Flow Timeline -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-primary/10 shadow-sm p-6">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">auto_mode</span>
+<h4 class="font-bold text-lg">Auto-Downgrade Flow</h4>
+</div>
+<span class="text-[10px] font-bold bg-green-100 text-green-600 px-2 py-0.5 rounded uppercase tracking-wider">Active Policy</span>
+</div>
+<div class="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-primary before:via-slate-200 before:to-transparent">
+<!-- Step 1 -->
+<div class="relative flex items-center justify-between group">
+<div class="flex items-center w-full">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow shadow-primary/30 z-10 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-sm">notifications_active</span>
+</div>
+<div class="ml-4">
+<h5 class="text-sm font-bold">First Grace Period Notification</h5>
+<p class="text-xs text-slate-500">Triggered 3 days after payment failure.</p>
+</div>
+</div>
+<span class="text-[10px] font-bold text-slate-400 whitespace-nowrap">T + 3d</span>
+</div>
+<!-- Step 2 -->
+<div class="relative flex items-center justify-between group">
+<div class="flex items-center w-full">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow shadow-primary/30 z-10 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-sm">mail</span>
+</div>
+<div class="ml-4">
+<h5 class="text-sm font-bold">Final Warning &amp; Offer</h5>
+<p class="text-xs text-slate-500">Discount offer to prevent downgrade.</p>
+</div>
+</div>
+<span class="text-[10px] font-bold text-slate-400 whitespace-nowrap">T + 10d</span>
+</div>
+<!-- Step 3 -->
+<div class="relative flex items-center justify-between group">
+<div class="flex items-center w-full">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-400 border border-slate-200 z-10 transition-transform group-hover:scale-110">
+<span class="material-symbols-outlined text-sm">move_down</span>
+</div>
+<div class="ml-4">
+<h5 class="text-sm font-bold text-slate-800 dark:text-slate-200">Tier Downgrade Execution</h5>
+<p class="text-xs text-slate-500">Accounts moved to 'Free' or 'Basic' tier.</p>
+</div>
+</div>
+<span class="text-[10px] font-bold text-slate-400 whitespace-nowrap">T + 15d</span>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+<button class="text-xs font-bold text-primary flex items-center gap-1 hover:gap-2 transition-all">
+                                Edit Automation Flow
+                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

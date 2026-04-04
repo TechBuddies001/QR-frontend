@@ -1,0 +1,136 @@
+// Prisma schema for Smart QR Identity & Call Masking System
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tags      Tag[]
+}
+
+model Tag {
+  id               String    @id @default(uuid())
+  tagCode          String    @unique  // e.g. KA01AB1234
+  qrUrl            String?             // Full public URL
+  qrImagePath      String?             // Path to generated QR image
+
+  // Owner info
+  ownerName        String
+  ownerPhoto       String?             // Path to uploaded photo
+  ownerPhone       String              // Hidden from public
+  emergencyContact String?
+  customMessage    String?
+  address          String?
+
+  // Tag metadata
+  assetType        String   @default("vehicle")  // vehicle | pet | person | other
+  planType         String   @default("basic")    // basic | premium | standard
+  isActive         Boolean  @default(true)
+  isLost           Boolean  @default(false)
+  expiresAt        DateTime?
+
+  // Relations
+  adminId          String
+  admin            Admin    @relation(fields: [adminId], references: [id])
+
+  scanLogs         ScanLog[]
+  callLogs         CallLog[]
+  smsLogs          SmsLog[]
+  sponsorId        String?
+  sponsor          Sponsor? @relation(fields: [sponsorId], references: [id])
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ScanLog {
+  id          String   @id @default(uuid())
+  tagId       String
+  tag         Tag      @relation(fields: [tagId], references: [id])
+  scannerIp   String?
+  scannerLat  Float?
+  scannerLng  Float?
+  scannerCity String?
+  userAgent   String?
+  smsSent     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model CallLog {
+  id            String   @id @default(uuid())
+  tagId         String
+  tag           Tag      @relation(fields: [tagId], references: [id])
+  scannerPhone  String?  // Temporary – masked
+  callSid       String?  // Exotel/Twilio call ID
+  status        String   @default("initiated") // initiated | connected | failed | missed
+  duration      Int?     // seconds
+  provider      String   @default("exotel")
+  createdAt     DateTime @default(now())
+}
+
+model SmsLog {
+  id          String   @id @default(uuid())
+  tagId       String
+  tag         Tag      @relation(fields: [tagId], references: [id])
+  recipient   String   // masked number
+  message     String
+  status      String   @default("sent") // sent | failed
+  provider    String   @default("exotel")
+  createdAt   DateTime @default(now())
+}
+
+model Plan {
+  id            String   @id @default(uuid())
+  name          String   @unique  // basic | standard | premium
+  displayName   String
+  price         Float
+  validityDays  Int
+  features      String   // JSON string of features array
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+}
+
+model Subscription {
+  id          String   @id @default(uuid())
+  tagId       String?
+  ownerName   String
+  ownerPhone  String
+  planName    String
+  amount      Float
+  status      String   @default("active") // active | expired | cancelled
+  startsAt    DateTime @default(now())
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+}
+
+model Sponsor {
+  id          String   @id @default(uuid())
+  name        String
+  logo        String?
+  website     String?
+  description String?
+  isActive    Boolean  @default(true)
+  tags        Tag[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}

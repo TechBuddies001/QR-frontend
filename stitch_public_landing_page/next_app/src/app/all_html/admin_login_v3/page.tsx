@@ -1,0 +1,111 @@
+
+import React from 'react';
+import Script from 'next/script';
+
+export default function Page() {
+  return (
+    <>
+      <div dangerouslySetInnerHTML={{ __html: `<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+` }} />
+      <Script src="https://cdn.tailwindcss.com/?plugins=forms,container-queries" strategy="beforeInteractive" />
+<Script id="inline-script-0" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: `
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    ` }} />
+
+      <div className="bg-[#F1F5F9] font-display min-h-screen flex items-center justify-center p-4" style={{minHeight: '100vh', width: '100%'}} dangerouslySetInnerHTML={{ __html: `
+<div class="w-full max-w-[420px]">
+<div class="bg-white dark:bg-background-dark rounded-xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-800">
+<!-- Header Section -->
+<div class="p-8 pb-0 flex flex-col items-center text-center">
+<div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary text-4xl">shield</span>
+</div>
+<h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Admin Panel</h1>
+<p class="text-slate-500 dark:text-slate-400 mt-2 text-sm">Secure access to Tarkshya Solution dashboard</p>
+</div>
+<!-- Form Section -->
+<form class="p-8 space-y-5" onsubmit="return false;">
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">mail</span>
+<input class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-400" placeholder="admin@tarkshya.com" type="email">
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">lock</span>
+<input class="w-full pl-10 pr-12 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-slate-900 dark:text-slate-100 placeholder:text-slate-400" placeholder="••••••••" type="password">
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors" type="button">
+<span class="material-symbols-outlined text-xl">visibility</span>
+</button>
+</div>
+</div>
+<!-- Remember & Forgot -->
+<div class="flex items-center justify-between text-sm">
+<label class="flex items-center gap-2 cursor-pointer group">
+<input class="rounded border-slate-300 text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox">
+<span class="text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">Remember me</span>
+</label>
+<a class="text-primary font-semibold hover:underline" href="#">Forgot Password?</a>
+</div>
+<!-- 2FA Input Row -->
+<div class="space-y-3 pt-2">
+<div class="flex items-center justify-between">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Two-Factor Authentication</label>
+<span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">6-Digit Code</span>
+</div>
+<div class="flex justify-between gap-2">
+<input class="w-full h-12 text-center text-xl font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-slate-900 dark:text-slate-100" maxlength="1" type="text">
+<input class="w-full h-12 text-center text-xl font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-slate-900 dark:text-slate-100" maxlength="1" type="text">
+<input class="w-full h-12 text-center text-xl font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-slate-900 dark:text-slate-100" maxlength="1" type="text">
+<input class="w-full h-12 text-center text-xl font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-slate-900 dark:text-slate-100" maxlength="1" type="text">
+<input class="w-full h-12 text-center text-xl font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-slate-900 dark:text-slate-100" maxlength="1" type="text">
+<input class="w-full h-12 text-center text-xl font-bold bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-slate-900 dark:text-slate-100" maxlength="1" type="text">
+</div>
+</div>
+<!-- Login Button -->
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-lg shadow-lg shadow-primary/30 transition-all active:scale-[0.98] mt-4 uppercase tracking-widest text-sm" type="submit">
+                    Login to Dashboard
+                </button>
+</form>
+<!-- Footer -->
+<div class="bg-slate-50 dark:bg-slate-900/50 p-6 text-center border-t border-slate-100 dark:border-slate-800">
+<p class="text-xs text-slate-400 dark:text-slate-500">
+                    © 2024 Tarkshya Solution. All rights reserved. <br>
+                    Authorized Personnel Only.
+                </p>
+</div>
+</div>
+<!-- Help Link -->
+<div class="mt-6 text-center">
+<a class="inline-flex items-center gap-2 text-slate-500 hover:text-primary transition-colors text-sm" href="#">
+<span class="material-symbols-outlined text-lg">support_agent</span>
+                Contact System Administrator
+            </a>
+</div>
+</div>
+` }} />
+    </>
+  );
+}
