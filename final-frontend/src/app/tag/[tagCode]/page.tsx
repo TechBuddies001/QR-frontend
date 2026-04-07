@@ -91,19 +91,28 @@ export default function PublicTagPage() {
     }
   };
 
-  const handleCallRequest = async () => {
-    if (!scannerPhone.match(/^[6-9]\d{9}$/)) {
+  const [exophone, setExophone] = useState("");
+
+  const handleCallRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!/^[6-9]\d{9}$/.test(scannerPhone)) {
       toast.error("Please enter a valid 10-digit mobile number");
       return;
     }
 
     setActionLoading(true);
+    const toastId = toast.loading("Registering secure call...");
     try {
-      await axios.post(`${API_URL}/api/public/tag/${tagCode}/call`, { scannerPhone });
-      toast.success("Call request sent! You will receive a call connecting you to the owner shortly.", { duration: 6000 });
-      setShowCallInput(false);
+      const response = await api.post(`/public/tag/${tagCode}/call`, {
+        scannerPhone
+      });
+      
+      if (response.data.success) {
+        setExophone(response.data.exophone);
+        toast.success("Ready to connect!", { id: toastId });
+      }
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Call initiation failed");
+      toast.error(error.response?.data?.error || "Failed to register call", { id: toastId });
     } finally {
       setActionLoading(false);
     }
@@ -205,51 +214,89 @@ export default function PublicTagPage() {
         {/* Action Grid */}
         <div className="grid grid-cols-1 gap-4">
           
-          {/* Call Logic */}
-          {!showCallInput ? (
-            <button 
-              onClick={() => setShowCallInput(true)}
-              className="w-full bg-primary text-white h-16 rounded-[1.5rem] font-bold flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
-            >
-              <Phone className="size-5 fill-current" />
-              Secure Call to Owner
-            </button>
-          ) : (
-            <div className="bg-slate-50 dark:bg-slate-900 p-5 rounded-[1.5rem] border-2 border-primary space-y-4 animate-in slide-in-from-top duration-300">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-black uppercase text-slate-400">Your Mobile Number</label>
+          {/* Secure Call Section - Powered by Exotel */}
+          <div className="bg-white dark:bg-slate-900/50 p-6 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800 shadow-xl shadow-black/5 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+               <img src="/images/exotel-badge.png" className="w-16 h-16 grayscale" alt="Exotel" />
+            </div>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-3 bg-[#00D4D4]/10 rounded-2xl text-[#00D4D4]">
+                 <Phone className="size-6" />
+              </div>
+              <div>
+                 <h3 className="font-black text-slate-800 dark:text-white uppercase tracking-tight">Need to reach the owner?</h3>
+                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Secured Privacy via Exotel Masking</p>
+              </div>
+            </div>
+
+            {!showCallInput ? (
+              <button 
+                onClick={() => setShowCallInput(true)}
+                className="w-full bg-[#00D4D4] hover:bg-[#00B8B8] text-white h-16 rounded-[1.5rem] font-black flex items-center justify-center gap-3 shadow-xl shadow-[#00D4D4]/20 hover:scale-[1.02] active:scale-95 transition-all text-sm uppercase"
+              >
+                Start Secure Call
+              </button>
+            ) : exophone ? (
+              <div className="space-y-4 animate-in zoom-in-95 duration-300">
+                <a 
+                  href={`tel:${exophone}`}
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-white h-16 rounded-[1.5rem] font-black flex items-center justify-center gap-3 shadow-xl shadow-emerald-500/20 hover:scale-[1.02] active:scale-95 transition-all text-sm uppercase no-underline"
+                >
+                  <Phone className="size-6 fill-current animate-bounce" />
+                  Call Now (Click to Connect)
+                </a>
+                <p className="text-[10px] font-bold text-slate-500 text-center uppercase tracking-widest px-4">
+                  Note: You will be dialing a secure bridge number. 
+                  Privacy will be maintained throughout the conversation.
+                </p>
+                <button 
+                  onClick={() => { setExophone(""); setShowCallInput(false); }}
+                  className="w-full h-12 text-slate-400 font-bold text-xs uppercase"
+                >
+                  Go Back
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleCallRequest} className="space-y-4 animate-in slide-in-from-bottom-2 duration-300">
                 <div className="relative">
+                  <Phone className="absolute left-5 top-1/2 -translate-y-1/2 size-5 text-slate-400" />
                   <input 
                     type="tel"
-                    placeholder="Enter 10-digit mobile"
-                    maxLength={10}
-                    className="w-full h-12 rounded-xl bg-white dark:bg-slate-800 border-none px-4 font-bold text-lg outline-none focus:ring-2 focus:ring-primary shadow-sm"
+                    placeholder="Enter your mobile number"
+                    className="w-full h-16 pl-14 pr-6 bg-slate-50 dark:bg-slate-800 border-none rounded-[1.5rem] font-bold text-lg focus:ring-4 focus:ring-[#00D4D4]/10 transition-all outline-none"
                     value={scannerPhone}
-                    onChange={(e) => setScannerPhone(e.target.value.replace(/\D/g, ''))}
+                    onChange={(e) => setScannerPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   />
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={handleCallRequest}
-                  disabled={actionLoading}
-                  className="flex-1 bg-primary text-white h-12 rounded-xl font-bold flex items-center justify-center gap-2"
-                >
-                  {actionLoading ? <Loader2 className="size-4 animate-spin" /> : <Zap className="size-4 fill-current" />}
-                  Connect Now
-                </button>
-                <button 
-                  onClick={() => setShowCallInput(false)}
-                  className="px-4 bg-slate-200 dark:bg-slate-800 rounded-xl font-bold text-slate-600 dark:text-slate-400"
-                >
-                  Cancel
-                </button>
-              </div>
-              <p className="text-[9px] text-slate-400 leading-tight">
-                Privacy Protected: Your number is masked and only used to connect you to the owner via our secure router.
-              </p>
+                <div className="flex gap-2">
+                  <button 
+                    type="submit"
+                    className="flex-1 bg-[#00D4D4] text-white h-16 rounded-[1.5rem] font-black shadow-lg shadow-[#00D4D4]/20 hover:brightness-110 transition-all text-sm uppercase"
+                  >
+                    {actionLoading ? <Loader2 className="size-5 animate-spin" /> : "Verify & Connect"}
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setShowCallInput(false)}
+                    className="w-16 bg-slate-100 dark:bg-slate-800 text-slate-400 h-16 rounded-[1.5rem] flex items-center justify-center hover:text-slate-600 transition-all"
+                  >
+                    <RotateCcw className="size-5" />
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center gap-4">
+               <img src="/images/exotel-badge.png" className="w-12 h-12 rounded-lg" alt="Secure Call" />
+               <div>
+                  <p className="text-[11px] font-black text-slate-800 dark:text-white leading-tight uppercase">Privacy First Protocol</p>
+                  <p className="text-[9px] font-bold text-slate-400 leading-relaxed uppercase tracking-tighter mt-0.5">
+                    Your number is 100% masked. We use Exotel's enterprise bridge to connect you safely without exposing identity.
+                  </p>
+               </div>
             </div>
-          )}
+          </div>
 
           <button 
             onClick={handleEmergencyAlert}

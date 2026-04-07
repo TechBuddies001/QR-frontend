@@ -52,11 +52,11 @@ export default function Page() {
     ownerPhone: "",
     emergencyContact: "",
     tagCode: "",
-    assetType: "vehicle",
+    assetType: "employee",
     planType: "basic",
     sponsorId: "",
     designTypes: ["standard"] as string[],
-    quantities: { standard: 1, circle: 1 } as Record<string, number>,
+    quantities: { standard: 1, circle: 1, landscape: 1 } as Record<string, number>,
     customMessage: "",
     address: ""
   });
@@ -172,7 +172,7 @@ export default function Page() {
       planType: plans[0]?.name || "basic",
       sponsorId: "",
       designTypes: ["standard"],
-      quantities: { standard: 1, circle: 1 },
+      quantities: { standard: 1, circle: 1, landscape: 1 },
       customMessage: "",
       address: ""
     });
@@ -239,8 +239,17 @@ export default function Page() {
           isFirstPage = false;
 
           const isCircle = design === 'circle';
-          const width = 140;
-          const height = isCircle ? 140 : 180;
+          const isLandscape = design === 'landscape';
+          
+          let width, height;
+          if (isCircle) {
+            width = 140; height = 140;
+          } else if (isLandscape) {
+            width = 180; height = 114; // Credit card aspect
+          } else {
+            width = 140; height = 180;
+          }
+
           const x = (210 - width) / 2;
           const y = (297 - height) / 2 - 20;
           
@@ -248,8 +257,8 @@ export default function Page() {
           
           doc.setFontSize(10);
           doc.setTextColor(150, 150, 150);
-          doc.text(`V-KAWACH Premium QR Tag - ${tagCode} (${design.toUpperCase()})`, 105, isCircle ? 230 : 260, { align: 'center' });
-          doc.text(`Copy ${q + 1} of ${qty} | Generated on ${new Date().toLocaleDateString()}`, 105, isCircle ? 235 : 265, { align: 'center' });
+          doc.text(`V-KAWACH Premium QR Tag - ${tagCode} (${design.toUpperCase()})`, 105, isCircle ? 230 : (isLandscape ? 215 : 260), { align: 'center' });
+          doc.text(`Copy ${q + 1} of ${qty} | Generated on ${new Date().toLocaleDateString()}`, 105, isCircle ? 235 : (isLandscape ? 220 : 265), { align: 'center' });
         }
       }
       
@@ -398,6 +407,8 @@ export default function Page() {
                       value={formData.assetType}
                       onChange={(e) => setFormData({...formData, assetType: e.target.value})}
                     >
+                      <option value="employee">💼 Employee</option>
+                      <option value="student">🎒 Student</option>
                       <option value="vehicle">🚗 Vehicle</option>
                       <option value="pet">🐕 Pet</option>
                       <option value="person">👤 Person</option>
@@ -465,7 +476,7 @@ export default function Page() {
                           const designs = formData.designTypes.includes('circle')
                             ? formData.designTypes.filter(d => d !== 'circle')
                             : [...formData.designTypes, 'circle'];
-                          if (designs.length === 0) designs.push('circle');
+                          if (designs.length === 0) designs.push('standard');
                           setFormData({...formData, designTypes: designs});
                         }}
                         className="cursor-pointer flex items-center gap-3 mb-3"
@@ -487,6 +498,41 @@ export default function Page() {
                             className="bg-transparent text-sm font-black text-primary outline-none w-full"
                             value={formData.quantities.circle}
                             onChange={(e) => setFormData({...formData, quantities: {...formData.quantities, circle: parseInt(e.target.value) || 1}})}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div 
+                      className={`relative p-4 rounded-xl border-2 transition-all group ${formData.designTypes.includes('landscape') ? 'border-primary bg-primary/5' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700'}`}
+                    >
+                      <div 
+                        onClick={() => {
+                          const designs = formData.designTypes.includes('landscape')
+                            ? formData.designTypes.filter(d => d !== 'landscape')
+                            : [...formData.designTypes, 'landscape'];
+                          if (designs.length === 0) designs.push('standard');
+                          setFormData({...formData, designTypes: designs});
+                        }}
+                        className="cursor-pointer flex items-center gap-3 mb-3"
+                      >
+                        <div className={`p-1.5 rounded-lg ${formData.designTypes.includes('landscape') ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
+                           <Zap className="size-4" />
+                        </div>
+                        <span className={`font-bold text-sm ${formData.designTypes.includes('landscape') ? 'text-primary' : 'text-slate-600 dark:text-slate-400'}`}>Landscape (Card)</span>
+                        {formData.designTypes.includes('landscape') && <CheckCircle2 className="size-4 ml-auto text-primary" />}
+                      </div>
+                      <p className="text-[10px] text-slate-400 leading-tight mb-4">Credit card sized tags. Ideal for wallets, ID cards etc.</p>
+                      
+                      {formData.designTypes.includes('landscape') && (
+                        <div className="flex items-center gap-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-primary/20">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase">Qty:</span>
+                          <input 
+                            type="number" 
+                            min="1" 
+                            className="bg-transparent text-sm font-black text-primary outline-none w-full"
+                            value={formData.quantities.landscape}
+                            onChange={(e) => setFormData({...formData, quantities: {...formData.quantities, landscape: parseInt(e.target.value) || 1}})}
                           />
                         </div>
                       )}
@@ -564,9 +610,9 @@ export default function Page() {
                             <Info className="w-3.5 h-3.5 text-primary" />
                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Step 1: Set Output Style & Qty</label>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div 
-                                className={`relative p-3.5 rounded-xl border-2 transition-all cursor-pointer group ${formData.designTypes.includes('standard') ? 'border-primary bg-white dark:bg-slate-800' : 'border-dashed border-slate-200 dark:border-slate-800 hover:border-slate-300'}`}
+                                className={`relative p-4 rounded-xl border-2 transition-all cursor-pointer group ${formData.designTypes.includes('standard') ? 'border-primary bg-white dark:bg-slate-800 shadow-lg shadow-primary/5' : 'border-slate-100 dark:border-slate-800 hover:border-primary/30'}`}
                                 onClick={() => {
                                     const designs = formData.designTypes.includes('standard')
                                         ? formData.designTypes.filter(d => d !== 'standard')
@@ -575,7 +621,7 @@ export default function Page() {
                                     setFormData({...formData, designTypes: designs});
                                 }}
                             >
-                                <div className="flex items-center gap-2 mb-3">
+                                <div className="flex items-center gap-3 mb-3">
                                     <div className={`p-1.5 rounded-lg ${formData.designTypes.includes('standard') ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-900 text-slate-400'}`}>
                                         <QrIcon className="size-4" />
                                     </div>
@@ -583,8 +629,8 @@ export default function Page() {
                                     {formData.designTypes.includes('standard') && <CheckCircle2 className="size-4 ml-auto text-primary" />}
                                 </div>
                                 {formData.designTypes.includes('standard') && (
-                                    <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg border border-slate-100 dark:border-slate-800" onClick={(e) => e.stopPropagation()}>
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Qty:</span>
+                                    <div className="flex items-center gap-2 bg-primary/5 dark:bg-primary/10 p-2 rounded-lg border border-primary/10" onClick={(e) => e.stopPropagation()}>
+                                        <span className="text-[9px] font-black text-primary/60 uppercase">Qty:</span>
                                         <input 
                                             type="number" 
                                             min="1" 
@@ -597,16 +643,16 @@ export default function Page() {
                             </div>
 
                             <div 
-                                className={`relative p-3.5 rounded-xl border-2 transition-all cursor-pointer group ${formData.designTypes.includes('circle') ? 'border-primary bg-white dark:bg-slate-800' : 'border-dashed border-slate-200 dark:border-slate-800 hover:border-slate-300'}`}
+                                className={`relative p-4 rounded-xl border-2 transition-all cursor-pointer group ${formData.designTypes.includes('circle') ? 'border-primary bg-white dark:bg-slate-800 shadow-lg shadow-primary/5' : 'border-slate-100 dark:border-slate-800 hover:border-primary/30'}`}
                                 onClick={() => {
                                     const designs = formData.designTypes.includes('circle')
                                         ? formData.designTypes.filter(d => d !== 'circle')
                                         : [...formData.designTypes, 'circle'];
-                                    if (designs.length === 0) designs.push('circle');
+                                    if (designs.length === 0) designs.push('standard');
                                     setFormData({...formData, designTypes: designs});
                                 }}
                             >
-                                <div className="flex items-center gap-2 mb-3">
+                                <div className="flex items-center gap-3 mb-3">
                                     <div className={`p-1.5 rounded-lg ${formData.designTypes.includes('circle') ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-900 text-slate-400'}`}>
                                         <div className="size-4 rounded-full border-2 border-current" />
                                     </div>
@@ -614,14 +660,45 @@ export default function Page() {
                                     {formData.designTypes.includes('circle') && <CheckCircle2 className="size-4 ml-auto text-primary" />}
                                 </div>
                                 {formData.designTypes.includes('circle') && (
-                                    <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg border border-slate-100 dark:border-slate-800" onClick={(e) => e.stopPropagation()}>
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Qty:</span>
+                                    <div className="flex items-center gap-2 bg-primary/5 dark:bg-primary/10 p-2 rounded-lg border border-primary/10" onClick={(e) => e.stopPropagation()}>
+                                        <span className="text-[9px] font-black text-primary/60 uppercase">Qty:</span>
                                         <input 
                                             type="number" 
                                             min="1" 
                                             className="bg-transparent text-sm font-black text-primary outline-none w-full"
                                             value={formData.quantities.circle}
                                             onChange={(e) => setFormData({...formData, quantities: {...formData.quantities, circle: parseInt(e.target.value) || 1}})}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            <div 
+                                className={`relative p-4 rounded-xl border-2 transition-all cursor-pointer group ${formData.designTypes.includes('landscape') ? 'border-primary bg-white dark:bg-slate-800 shadow-lg shadow-primary/5' : 'border-slate-100 dark:border-slate-800 hover:border-primary/30'}`}
+                                onClick={() => {
+                                    const designs = formData.designTypes.includes('landscape')
+                                        ? formData.designTypes.filter(d => d !== 'landscape')
+                                        : [...formData.designTypes, 'landscape'];
+                                    if (designs.length === 0) designs.push('standard');
+                                    setFormData({...formData, designTypes: designs});
+                                }}
+                            >
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className={`p-1.5 rounded-lg ${formData.designTypes.includes('landscape') ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-900 text-slate-400'}`}>
+                                         <Zap className="size-4" />
+                                    </div>
+                                    <span className={`font-bold text-sm ${formData.designTypes.includes('landscape') ? 'text-primary' : 'text-slate-500'}`}>Landscape</span>
+                                    {formData.designTypes.includes('landscape') && <CheckCircle2 className="size-4 ml-auto text-primary" />}
+                                </div>
+                                {formData.designTypes.includes('landscape') && (
+                                    <div className="flex items-center gap-2 bg-primary/5 dark:bg-primary/10 p-2 rounded-lg border border-primary/10" onClick={(e) => e.stopPropagation()}>
+                                        <span className="text-[9px] font-black text-primary/60 uppercase">Qty:</span>
+                                        <input 
+                                            type="number" 
+                                            min="1" 
+                                            className="bg-transparent text-sm font-black text-primary outline-none w-full"
+                                            value={formData.quantities.landscape}
+                                            onChange={(e) => setFormData({...formData, quantities: {...formData.quantities, landscape: parseInt(e.target.value) || 1}})}
                                         />
                                     </div>
                                 )}
@@ -745,10 +822,10 @@ export default function Page() {
                               <img 
                                 src={qrResult.qrs[dt].base64} 
                                 alt={`${dt} QR`} 
-                                className={`${dt === 'circle' ? 'w-[220px] h-[220px] rounded-full' : 'w-[200px] h-[250px]'} object-contain`}
+                                className={`${dt === 'circle' ? 'w-[220px] h-[220px] rounded-full' : (dt === 'landscape' ? 'w-[280px] h-[180px]' : 'w-[200px] h-[250px]')} object-contain`}
                               />
                             ) : (
-                              <div className={`${dt === 'circle' ? 'w-[220px] h-[220px]' : 'w-[200px] h-[250px]'} bg-slate-50 flex flex-col items-center justify-center text-slate-200`}>
+                              <div className={`${dt === 'circle' ? 'w-[220px] h-[220px]' : (dt === 'landscape' ? 'w-[280px] h-[180px]' : 'w-[200px] h-[250px]')} bg-slate-50 flex flex-col items-center justify-center text-slate-200`}>
                                 <QrIcon className="w-10 h-10 mb-2 animate-pulse" />
                                 <span className="text-[8px] font-black uppercase tracking-widest text-slate-300">Syncing...</span>
                               </div>

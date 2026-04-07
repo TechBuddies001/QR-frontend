@@ -1,311 +1,184 @@
-export default function Page() {
+"use client";
+
+import { useEffect, useState } from "react";
+import api from "@/lib/api";
+import { 
+  Phone, Calendar, Clock, CheckCircle2, 
+  XCircle, AlertCircle, Loader2, Search,
+  Filter, ChevronLeft, ChevronRight, Info
+} from "lucide-react";
+import toast from "react-hot-toast";
+
+interface CallLog {
+  id: string;
+  tag: {
+    tagCode: string;
+    ownerName: string;
+    assetType: string;
+  };
+  scannerPhone: string;
+  status: string;
+  duration: number | null;
+  provider: string;
+  createdAt: string;
+}
+
+export default function CallLogsPage() {
+  const [loading, setLoading] = useState(true);
+  const [calls, setCalls] = useState<CallLog[]>([]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    total: 0
+  });
+
+  const fetchCalls = async (page = 1) => {
+    setLoading(true);
+    try {
+      const response = await api.get(`/calls?page=${page}&limit=20`);
+      setCalls(response.data.calls);
+      setPagination({
+        page: response.data.page,
+        totalPages: response.data.totalPages,
+        total: response.data.total
+      });
+    } catch (error) {
+      toast.error("Failed to fetch call logs");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCalls();
+  }, []);
+
   return (
-    <>
-      <div className="p-8 max-w-7xl mx-auto space-y-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-3xl font-black tracking-tight">Call Logs</h2>
-            <p className="text-slate-500 dark:text-slate-400 mt-1">
-              Detailed overview of all communication activities.
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 gap-2 shadow-sm">
-              <span className="material-symbols-outlined text-slate-400 text-lg">
-                calendar_today
-              </span>
-              <span className="text-sm font-medium">
-                Oct 1, 2023 - Oct 31, 2023
-              </span>
-              <span className="material-symbols-outlined text-slate-400 text-lg cursor-pointer">
-                expand_more
-              </span>
+    <div className="flex flex-col h-screen overflow-hidden bg-slate-50/50 dark:bg-slate-950">
+      {/* Header Bar */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 px-10 py-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm transition-all">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-slate-800 dark:text-white flex items-center gap-3">
+            <div className="p-2 bg-[#00D4D4]/10 rounded-xl text-[#00D4D4]">
+               <Phone className="w-6 h-6" />
             </div>
-            <button className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm flex items-center gap-2">
-              <span className="material-symbols-outlined text-lg">
-                download
-              </span>
-              Export
-            </button>
-          </div>
+            Call Traffic Logs
+          </h1>
+          <p className="text-sm font-medium text-slate-400 mt-1 uppercase tracking-widest">Powered by Exotel Voice Masking</p>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Total Calls
-            </p>
-            <div className="flex items-end justify-between mt-2">
-              <h3 className="text-2xl font-bold">1,284</h3>
-              <span className="text-emerald-500 text-sm font-bold flex items-center">
-                +12%
-              </span>
-            </div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Connected
-            </p>
-            <div className="flex items-end justify-between mt-2">
-              <h3 className="text-2xl font-bold">942</h3>
-              <span className="text-rose-500 text-sm font-bold flex items-center">
-                -5%
-              </span>
-            </div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Failed
-            </p>
-            <div className="flex items-end justify-between mt-2">
-              <h3 className="text-2xl font-bold">156</h3>
-              <span className="text-rose-500 text-sm font-bold flex items-center">
-                -2%
-              </span>
-            </div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Missed
-            </p>
-            <div className="flex items-end justify-between mt-2">
-              <h3 className="text-2xl font-bold">120</h3>
-              <span className="text-emerald-500 text-sm font-bold flex items-center">
-                +8%
-              </span>
-            </div>
-          </div>
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Busy
-            </p>
-            <div className="flex items-end justify-between mt-2">
-              <h3 className="text-2xl font-bold">66</h3>
-              <span className="text-emerald-500 text-sm font-bold flex items-center">
-                +1%
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex flex-wrap gap-3 items-center justify-between">
-            <div className="flex flex-1 min-w-[200px] max-w-md items-center bg-slate-100 dark:bg-slate-900 px-3 py-2 rounded-lg gap-2">
-              <span className="material-symbols-outlined text-slate-400">
-                search
-              </span>
-              <input
-                className="bg-transparent border-none focus:ring-0 text-sm w-full placeholder:text-slate-400"
-                placeholder="Search by Call ID or Tag ID..."
-                type="text"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <button className="flex items-center gap-2 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-900">
-                <span className="material-symbols-outlined text-lg">
-                  filter_list
-                </span>
-                Filter
-              </button>
-              <button className="flex items-center gap-2 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-900">
-                <span className="material-symbols-outlined text-lg">
-                  view_column
-                </span>
-                Columns
-              </button>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto @container">
-            <table className="w-full text-left">
-              <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
-                <tr>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Call ID
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Tag ID
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Plan
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Duration
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    Timestamp
-                  </th>
-                  <th className="px-6 py-4"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-                <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-primary">
-                    #88291
-                  </td>
-                  <td className="px-6 py-4 text-sm">T-902</td>
-                  <td className="px-6 py-4">
-                    <span className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-full text-xs font-semibold">
-                      Enterprise
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium">04:12</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-                      Connected
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
-                    Oct 24, 10:20 AM
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="material-symbols-outlined text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                      more_vert
-                    </button>
-                  </td>
-                </tr>
-                <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-primary">
-                    #88290
-                  </td>
-                  <td className="px-6 py-4 text-sm">T-115</td>
-                  <td className="px-6 py-4">
-                    <span className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-full text-xs font-semibold">
-                      Starter
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium">00:00</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400">
-                      Failed
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
-                    Oct 24, 10:15 AM
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="material-symbols-outlined text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                      more_vert
-                    </button>
-                  </td>
-                </tr>
-                <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-primary">
-                    #88289
-                  </td>
-                  <td className="px-6 py-4 text-sm">T-442</td>
-                  <td className="px-6 py-4">
-                    <span className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-full text-xs font-semibold">
-                      Professional
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium">12:45</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-                      Connected
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
-                    Oct 24, 09:50 AM
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="material-symbols-outlined text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                      more_vert
-                    </button>
-                  </td>
-                </tr>
-                <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-primary">
-                    #88288
-                  </td>
-                  <td className="px-6 py-4 text-sm">T-902</td>
-                  <td className="px-6 py-4">
-                    <span className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-full text-xs font-semibold">
-                      Enterprise
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium">00:00</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
-                      Missed
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
-                    Oct 24, 09:42 AM
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="material-symbols-outlined text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                      more_vert
-                    </button>
-                  </td>
-                </tr>
-                <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-primary">
-                    #88287
-                  </td>
-                  <td className="px-6 py-4 text-sm">T-221</td>
-                  <td className="px-6 py-4">
-                    <span className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-full text-xs font-semibold">
-                      Starter
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm font-medium">02:30</td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-                      Connected
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
-                    Oct 24, 09:30 AM
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button className="material-symbols-outlined text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                      more_vert
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              Showing 1 to 5 of 1,284 entries
-            </p>
-            <div className="flex items-center gap-1">
-              <button
-                className="p-2 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50"
-                disabled={true}
-              >
-                <span className="material-symbols-outlined text-lg leading-none">
-                  chevron_left
-                </span>
-              </button>
-              <button className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold">
-                1
-              </button>
-              <button className="px-4 py-2 border border-transparent rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-900">
-                2
-              </button>
-              <button className="px-4 py-2 border border-transparent rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-900">
-                3
-              </button>
-              <span className="px-2">...</span>
-              <button className="px-4 py-2 border border-transparent rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-900">
-                257
-              </button>
-              <button className="p-2 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900">
-                <span className="material-symbols-outlined text-lg leading-none">
-                  chevron_right
-                </span>
-              </button>
-            </div>
-          </div>
+        
+        <div className="flex items-center gap-3">
+           <div className="flex items-center gap-2 px-4 py-2 bg-[#00D4D4]/5 rounded-xl border border-[#00D4D4]/10">
+              <img src="/images/exotel-badge.png" className="w-8 h-8" alt="Exotel" />
+              <div className="flex flex-col">
+                 <span className="text-[10px] font-black text-[#00D4D4] uppercase leading-none">Bridge Active</span>
+                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Secure Routing Layer</span>
+              </div>
+           </div>
         </div>
       </div>
-    </>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto px-10 py-8 no-scrollbar">
+        <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden relative min-h-[400px]">
+           {loading ? (
+             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                <Loader2 className="w-10 h-10 text-[#00D4D4] animate-spin" />
+                <p className="text-sm font-bold text-slate-400">Fetching call records...</p>
+             </div>
+           ) : (
+             <div className="w-full overflow-x-auto">
+               <table className="w-full text-left border-collapse min-w-[1000px]">
+                 <thead>
+                   <tr className="bg-slate-50 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800 uppercase text-[10px] font-black tracking-widest text-slate-400">
+                     <th className="px-8 py-5">Incident Info</th>
+                     <th className="px-8 py-5">Participants</th>
+                     <th className="px-8 py-5">Status & Duration</th>
+                     <th className="px-8 py-5">Technology</th>
+                     <th className="px-8 py-5 text-right">Actions</th>
+                   </tr>
+                 </thead>
+                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
+                   {calls.map((call) => (
+                     <tr key={call.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all font-medium">
+                       <td className="px-8 py-5">
+                          <div className="flex flex-col gap-1">
+                             <span className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight">{call.tag.tagCode}</span>
+                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                <Calendar className="w-2.5 h-2.5" />
+                                {new Date(call.createdAt).toLocaleDateString()}
+                                <Clock className="w-2.5 h-2.5 ml-1" />
+                                {new Date(call.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                             </span>
+                          </div>
+                       </td>
+                       <td className="px-8 py-5 text-sm">
+                          <div className="flex items-center gap-4">
+                             <div className="flex flex-col">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Owner</span>
+                                <span className="font-bold text-slate-700 dark:text-slate-300">{call.tag.ownerName}</span>
+                             </div>
+                             <div className="w-[1px] h-6 bg-slate-100 dark:bg-slate-800" />
+                             <div className="flex flex-col">
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Scanner</span>
+                                <span className="font-bold text-slate-700 dark:text-slate-300 font-mono">{call.scannerPhone || 'Anonymous'}</span>
+                             </div>
+                          </div>
+                       </td>
+                       <td className="px-8 py-5">
+                         <div className="flex flex-col gap-1.5">
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tight w-fit flex items-center gap-1.5 ${
+                               call.status === 'connected' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' :
+                               call.status === 'failed' ? 'bg-red-50 text-red-600 border border-red-100' :
+                               'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                            }`}>
+                               {call.status === 'connected' ? <CheckCircle2 className="w-3 h-3" /> : (call.status === 'failed' ? <XCircle className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />)}
+                               {call.status}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">
+                               {call.duration ? `${Math.floor(call.duration / 60)}m ${call.duration % 60}s` : '--:--'}
+                            </span>
+                         </div>
+                       </td>
+                       <td className="px-8 py-5">
+                          <div className="flex items-center gap-2">
+                             <div className="size-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                                <img src="/images/exotel-badge.png" className="w-5 h-5 grayscale opacity-50" />
+                             </div>
+                             <div className="flex flex-col">
+                                <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase tracking-tighter">{call.provider} Voice</span>
+                                <span className="text-[8px] font-black text-[#00D4D4] uppercase tracking-widest leading-none">Masked Bridge</span>
+                             </div>
+                          </div>
+                       </td>
+                       <td className="px-8 py-5 text-right">
+                          <button className="text-slate-400 hover:text-primary transition-colors">
+                             <Info className="w-5 h-5" />
+                          </button>
+                       </td>
+                     </tr>
+                   ))}
+                   {calls.length === 0 && !loading && (
+                      <tr>
+                         <td colSpan={5} className="py-24 text-center">
+                            <div className="flex flex-col items-center">
+                               <div className="size-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
+                                  <Phone className="w-8 h-8 text-slate-300" />
+                               </div>
+                               <h4 className="text-xl font-black text-slate-800 dark:text-white">No Call Traffic Found</h4>
+                               <p className="text-sm font-bold text-slate-400 max-w-xs mx-auto">
+                                  When scanners start calling owners through the secure bridge, logs will appear here.
+                               </p>
+                            </div>
+                         </td>
+                      </tr>
+                   )}
+                 </tbody>
+               </table>
+             </div>
+           )}
+        </div>
+      </div>
+    </div>
   );
 }
