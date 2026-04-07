@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import axios from "axios";
+import api from "@/lib/api";
 import { 
   Phone, 
   MapPin, 
@@ -16,7 +16,8 @@ import {
   Navigation,
   Loader2,
   Building2,
-  ExternalLink
+  ExternalLink,
+  RotateCcw
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -58,7 +59,7 @@ export default function PublicTagPage() {
   useEffect(() => {
     const fetchTag = async () => {
       try {
-        const response = await axios.get(`${API_URL}/api/public/tag/${tagCode}`);
+        const response = await api.get(`/public/tag/${tagCode}`);
         setTag(response.data.tag);
         setActiveSponsors(response.data.activeSponsors || []);
         
@@ -77,7 +78,7 @@ export default function PublicTagPage() {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(async (position) => {
         try {
-          await axios.post(`${API_URL}/api/public/tag/${tagCode}/scan`, {
+          await api.post(`/public/tag/${tagCode}/scan`, {
             lat: position.coords.latitude,
             lng: position.coords.longitude
           });
@@ -121,7 +122,7 @@ export default function PublicTagPage() {
   const handleEmergencyAlert = async () => {
     setActionLoading(true);
     try {
-      await axios.post(`${API_URL}/api/public/tag/${tagCode}/emergency`);
+      await api.post(`/public/tag/${tagCode}/emergency`);
       toast.success("Emergency contacts have been notified via alert!", { duration: 5000 });
     } catch (error: any) {
       toast.error("No emergency contact configured for this tag");

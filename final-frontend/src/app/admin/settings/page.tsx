@@ -13,7 +13,9 @@ import {
   Loader2, 
   Info,
   CheckCircle2,
-  Lock
+  Lock,
+  Eye,
+  EyeOff
 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -201,7 +203,14 @@ export default function SettingsPage() {
   );
 }
 
-function TabButton({ active, onClick, icon, label }: any) {
+interface TabButtonProps {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}
+
+function TabButton({ active, onClick, icon, label }: TabButtonProps) {
   return (
     <button 
       onClick={onClick}
@@ -217,7 +226,15 @@ function TabButton({ active, onClick, icon, label }: any) {
   );
 }
 
-function SettingInput({ label, value, onChange, placeholder, isSecret }: any) {
+interface SettingInputProps {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+  isSecret?: boolean;
+}
+
+function SettingInput({ label, value, onChange, placeholder, isSecret }: SettingInputProps) {
   const [show, setShow] = useState(!isSecret);
   return (
     <div className="space-y-2">
@@ -236,7 +253,7 @@ function SettingInput({ label, value, onChange, placeholder, isSecret }: any) {
             onClick={() => setShow(!show)}
             className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary"
           >
-             {show ? <XCircle className="w-4 h-4" /> : <div className="text-[10px] font-black uppercase">Show</div>}
+             {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </button>
         )}
       </div>
@@ -244,7 +261,13 @@ function SettingInput({ label, value, onChange, placeholder, isSecret }: any) {
   );
 }
 
-function SettingTextarea({ label, value, onChange }: any) {
+interface SettingTextareaProps {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+}
+
+function SettingTextarea({ label, value, onChange }: SettingTextareaProps) {
   return (
     <div className="space-y-2">
       <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest px-1">{label}</label>
