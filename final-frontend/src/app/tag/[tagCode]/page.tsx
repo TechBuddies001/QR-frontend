@@ -113,7 +113,9 @@ export default function PublicTagPage() {
         toast.success("Ready to connect!", { id: toastId });
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to register call", { id: toastId });
+      const errorMsg = error.response?.data?.error || error.message || "Failed to register call";
+      toast.error(`Error: ${errorMsg}`, { id: toastId });
+      console.error("Call Request Error:", error);
     } finally {
       setActionLoading(false);
     }
