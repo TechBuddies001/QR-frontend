@@ -31,12 +31,12 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
     return await generateLandscapeQRCode(tagCode, publicUrl, filePath, fileName, sponsor, assetType);
   }
 
-  // DEFAULT: Standard Vertical Design (Optimized for 85mm x 53.34mm Tag)
-  const canvasWidth = 1200;
-  const canvasHeight = 1912; // Proportional to 85mm height for 1200 width
-  const topMargin = 350;     // ~15.5mm clearance for the 11mm slot
+  // DEFAULT: Standard Vertical Design (Exact 630 x 1004 pixels as requested)
+  const canvasWidth = 630;
+  const canvasHeight = 1004;
+  const logoTop = 155; 
   
-  const qrSize = 500;
+  const qrSize = 260; // Proportional for 630 width
   const qrBuffer = await QRCode.toBuffer(publicUrl, { errorCorrectionLevel: 'H', margin: 1, width: qrSize });
   const qrImage = await loadImage(qrBuffer);
 
@@ -59,8 +59,8 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // 2. Blue Header (Top Area - ~40% of height)
-    const blueHeight = 780;
+    // 2. Blue Header (Top Area - Scale down to ~410px height)
+    const blueHeight = 410;
     const bgGradient = ctx.createLinearGradient(0, 0, 0, blueHeight);
     bgGradient.addColorStop(0, '#002e8a');
     bgGradient.addColorStop(1, '#001a52');
@@ -68,68 +68,71 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
     ctx.fillRect(0, 0, canvasWidth, blueHeight);
 
     // 3. Header Divider
-    const sepGradient = ctx.createLinearGradient(0, blueHeight, 0, blueHeight + 15);
+    const sepGradient = ctx.createLinearGradient(0, blueHeight, 0, blueHeight + 8);
     sepGradient.addColorStop(0, '#737373');
     sepGradient.addColorStop(0.3, '#d4d4d4');
     sepGradient.addColorStop(1, '#f5f5f5');
     ctx.fillStyle = sepGradient;
-    ctx.fillRect(0, blueHeight, canvasWidth, 15);
+    ctx.fillRect(0, blueHeight, canvasWidth, 8);
 
-    // 4. Logo (Shifted down for slot clearance)
+    // 4. Logo (Explicitly starting at 155px)
     if (logoImage) {
-      const logoWidth = 220;
+      const logoWidth = 115;
       const logoAspect = logoImage.height / logoImage.width;
       const logoHeight = logoWidth * logoAspect;
-      ctx.drawImage(logoImage, (canvasWidth - logoWidth) / 2, topMargin + 30, logoWidth, logoHeight);
+      ctx.drawImage(logoImage, (canvasWidth - logoWidth) / 2, logoTop, logoWidth, logoHeight);
+      
+      // Calculate next text positions relative to logo
+      const textStartY = logoTop + logoHeight + 20;
+
+      // 5. Header Texts (Scaled for 630px)
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 48px "CustomArial"';
+      ctx.textAlign = 'center';
+      ctx.fillText('V-KAWACH', canvasWidth / 2, textStartY + 45);
+
+      ctx.font = 'bold 16px "CustomArial"';
+      ctx.letterSpacing = "3px";
+      ctx.globalAlpha = 0.8;
+      ctx.fillText('SECURING YOUR WORLD', canvasWidth / 2, textStartY + 80);
+
+      ctx.font = 'bold 26px "CustomArial"';
+      ctx.letterSpacing = "4px";
+      ctx.globalAlpha = 1.0;
+      const safetyLabelStd = assetType === 'pet' ? 'PET SAFETY' : 
+                            (assetType === 'person' ? 'PERSONAL SAFETY' : 
+                            (assetType === 'vehicle' ? 'VEHICLE SAFETY' : 
+                            (assetType === 'student' ? 'STUDENT SAFETY' : 'EMPLOYEE SAFETY')));
+      ctx.fillText(safetyLabelStd, canvasWidth / 2, textStartY + 120);
     }
-
-    // 5. Header Texts
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 90px "CustomArial"';
-    ctx.textAlign = 'center';
-    ctx.fillText('V-KAWACH', canvasWidth / 2, topMargin + 360);
-
-    ctx.font = 'bold 32px "CustomArial"';
-    ctx.letterSpacing = "6px";
-    ctx.globalAlpha = 0.8;
-    ctx.fillText('SECURING YOUR WORLD', canvasWidth / 2, topMargin + 430);
-
-    ctx.font = 'bold 50px "CustomArial"';
-    ctx.letterSpacing = "8px";
-    ctx.globalAlpha = 1.0;
-    const safetyLabelStd = assetType === 'pet' ? 'PET SAFETY' : 
-                          (assetType === 'person' ? 'PERSONAL SAFETY' : 
-                          (assetType === 'vehicle' ? 'VEHICLE SAFETY' : 
-                          (assetType === 'student' ? 'STUDENT SAFETY' : 'EMPLOYEE SAFETY')));
-    ctx.fillText(safetyLabelStd, canvasWidth / 2, topMargin + 500);
     ctx.globalAlpha = 1.0;
     ctx.letterSpacing = "0px";
 
     // 6. ID Text (White Section)
     ctx.fillStyle = '#000000';
-    ctx.font = 'bold 36px "CustomArial"';
-    ctx.letterSpacing = "10px";
-    ctx.fillText(`${assetType.toUpperCase()} ID: ${tagCode}`, canvasWidth / 2, blueHeight + 100);
+    ctx.font = 'bold 18px "CustomArial"';
+    ctx.letterSpacing = "5px";
+    ctx.fillText(`${assetType.toUpperCase()} ID: ${tagCode}`, canvasWidth / 2, blueHeight + 50);
     ctx.letterSpacing = "0px";
 
-    // 7. QR Box & Image
-    const boxSize = 600;
+    // 7. QR Box & Image (Scaled down)
+    const boxSize = 320;
     const boxX = (canvasWidth - boxSize) / 2;
-    const boxY = blueHeight + 180;
+    const boxY = blueHeight + 90;
     
     ctx.save();
     ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-    ctx.shadowBlur = 40;
+    ctx.shadowBlur = 20;
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.roundRect(boxX, boxY, boxSize, boxSize, 40);
+    ctx.roundRect(boxX, boxY, boxSize, boxSize, 20);
     ctx.fill();
     ctx.restore();
 
     ctx.drawImage(qrImage, (canvasWidth - qrSize) / 2, boxY + (boxSize - qrSize) / 2, qrSize, qrSize);
 
-    // 8. Red Footer Section (Proportional Bottom area)
-    const redHeight = 280;
+    // 8. Red Footer Section (Proportional - ~140px height)
+    const redHeight = 145;
     const redY = canvasHeight - redHeight;
     const redGradient = ctx.createLinearGradient(0, redY, 0, canvasHeight);
     redGradient.addColorStop(0, '#b31919');
@@ -138,25 +141,25 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
     ctx.fillRect(0, redY, canvasWidth, redHeight);
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 80px "CustomArial"';
-    ctx.fillText('SCAN IN EMERGENCY', canvasWidth / 2, redY + 120);
+    ctx.font = 'bold 42px "CustomArial"';
+    ctx.fillText('SCAN IN EMERGENCY', canvasWidth / 2, redY + 65);
 
-    ctx.font = 'bold 38px "CustomArial"';
-    ctx.fillText('FOR IMMEDIATE HELP & ALERTS', canvasWidth / 2, redY + 200);
+    ctx.font = 'bold 20px "CustomArial"';
+    ctx.fillText('FOR IMMEDIATE HELP & ALERTS', canvasWidth / 2, redY + 105);
 
     // 9. Sponsored Text (if any)
     if (sLogoImage) {
-      const sLogoWidth = 120;
+      const sLogoWidth = 60;
       const sLogoAspect = sLogoImage.height / sLogoImage.width;
       const sLogoHeight = sLogoWidth * sLogoAspect;
       ctx.fillStyle = '#94a3b8';
-      ctx.font = 'bold 18px "CustomArial"';
-      ctx.fillText('SPONSORED BY', canvasWidth / 2, boxY + boxSize + 40);
-      ctx.drawImage(sLogoImage, (canvasWidth - sLogoWidth) / 2, boxY + boxSize + 55, sLogoWidth, sLogoHeight);
+      ctx.font = 'bold 10px "CustomArial"';
+      ctx.fillText('SPONSORED BY', canvasWidth / 2, boxY + boxSize + 25);
+      ctx.drawImage(sLogoImage, (canvasWidth - sLogoWidth) / 2, boxY + boxSize + 32, sLogoWidth, sLogoHeight);
     } else {
       ctx.fillStyle = '#002e8a';
-      ctx.font = 'bold 22px "CustomArial"';
-      ctx.fillText('A PRODUCT OF TARKSHYA SOLUTION', canvasWidth / 2, redY - 40);
+      ctx.font = 'bold 12px "CustomArial"';
+      ctx.fillText('A PRODUCT OF TARKSHYA SOLUTION', canvasWidth / 2, redY - 20);
     }
   };
 
