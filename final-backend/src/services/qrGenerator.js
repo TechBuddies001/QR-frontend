@@ -59,8 +59,8 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // 2. Blue Header (Top Area - Scale down to ~410px height)
-    const blueHeight = 410;
+    // 2. Blue Header (Top Area - Extended for better text visibility)
+    const blueHeight = 480;
     const bgGradient = ctx.createLinearGradient(0, 0, 0, blueHeight);
     bgGradient.addColorStop(0, '#002e8a');
     bgGradient.addColorStop(1, '#001a52');
