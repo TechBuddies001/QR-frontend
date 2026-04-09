@@ -176,7 +176,8 @@ export default function Page() {
       designTypes: ["standard"],
       quantities: { standard: 1, circle: 1, landscape: 1 },
       customMessage: "",
-      address: ""
+      address: "",
+      customAssetType: ""
     });
     setQrResult(null);
   };
