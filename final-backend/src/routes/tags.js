@@ -303,6 +303,13 @@ router.post('/bulk', authenticateToken, uploadDoc.single('file'), async (req, re
         
         // Use designTypes from body if provided, else fallback to CSV designType or default
         const bodyDesignTypes = req.body.designTypes ? JSON.parse(req.body.designTypes) : null;
+        const bodySponsorId = req.body.sponsorId || null;
+
+        // Fetch sponsor once if provided
+        let sponsorObj = null;
+        if (bodySponsorId) {
+          sponsorObj = await prisma.sponsor.findUnique({ where: { id: bodySponsorId } });
+        }
 
         for (const row of results) {
           try {
@@ -322,7 +329,7 @@ router.post('/bulk', authenticateToken, uploadDoc.single('file'), async (req, re
             // Generate ALL requested designs
             const qrs = {};
             for (const dt of designsToGenerate) {
-              qrs[dt] = await generateQRCode(tagCode, dt, null, assetType);
+              qrs[dt] = await generateQRCode(tagCode, dt, sponsorObj, assetType);
             }
 
             const primaryDesignType = designsToGenerate[0];
@@ -344,6 +351,7 @@ router.post('/bulk', authenticateToken, uploadDoc.single('file'), async (req, re
                 designType: primaryDesignType,
                 adminId: req.admin.id,
                 expiresAt,
+                sponsorId: bodySponsorId,
               }
             });
             createdTags.push(tag);

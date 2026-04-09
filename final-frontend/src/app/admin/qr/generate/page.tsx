@@ -132,6 +132,7 @@ export default function Page() {
     const formDataUpload = new FormData();
     formDataUpload.append('file', file);
     formDataUpload.append('designTypes', JSON.stringify(formData.designTypes));
+    formDataUpload.append('sponsorId', formData.sponsorId);
 
     setBulkLoading(true);
     const toastId = toast.loading("Processing bulk tags...");
@@ -467,6 +468,19 @@ export default function Page() {
                     >
                       {plans.map(p => (
                         <option key={p.id} value={p.name}>{p.displayName} (₹{p.price})</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Corporate Sponsor</label>
+                    <select 
+                      className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-primary focus:border-primary px-4 py-2.5 outline-none transition-all font-medium appearance-none"
+                      value={formData.sponsorId}
+                      onChange={(e) => setFormData({...formData, sponsorId: e.target.value})}
+                    >
+                      <option value="">None (No Sponsor)</option>
+                      {sponsors.map(s => (
+                        <option key={s.id} value={s.id}>{s.name}</option>
                       ))}
                     </select>
                   </div>
