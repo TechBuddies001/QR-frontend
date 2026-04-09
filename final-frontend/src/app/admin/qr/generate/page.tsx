@@ -17,7 +17,8 @@ import {
   QrCode as QrIcon,
   FileSpreadsheet,
   AlertCircle,
-  FileText // Added for PDF
+  FileText,
+  PenTool
 } from "lucide-react";
 import { jsPDF } from "jspdf";
 
@@ -209,6 +210,30 @@ export default function Page() {
     }
   };
 
+  const handleDownloadSVG = () => {
+    if (!qrResult?.qrs) {
+      toast.error("Please generate a QR code first");
+      return;
+    }
+    
+    Object.keys(qrResult.qrs).forEach(dt => {
+      const svgUrl = qrResult.qrs[dt].qrSvgUrl;
+      // if svgUrl is relative starting with /uploads/ this will work
+      // usually API_URL is http://localhost:5000 and uploads are served from there
+      if (svgUrl) {
+        const fullUri = svgUrl.startsWith('http') ? svgUrl : `${API_URL.replace(/\/api$/, '')}${svgUrl}`;
+        const link = document.createElement('a');
+        link.href = fullUri;
+        link.setAttribute('download', `V_KAWACH_${qrResult.tag?.tagCode}_${dt}.svg`);
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+    });
+    toast.success("Vector SVG(s) Downloaded!");
+  };
+
   const handleDownloadPDF = async () => {
     if (!qrResult?.tag?.tagCode) {
       toast.error("Please generate a QR code first");
@@ -270,15 +295,15 @@ export default function Page() {
     }
   }
 
-  const downloadBulkZIP = async () => {
+  const downloadBulkZIP = async (format: 'png' | 'svg' = 'png') => {
     if (!bulkResult?.tagIds?.length) return;
-    const ids = bulkResult.tagIds.join(',');
     
-    const toastId = toast.loading("Preparing your ZIP file...");
+    const toastId = toast.loading(`Preparing your ${format.toUpperCase()} ZIP file...`);
     try {
       const response = await api.post("tags/bulk-download", {
         ids: bulkResult.tagIds,
-        quantities: formData.quantities // Respect selection for bulk too
+        quantities: formData.quantities, // Respect selection for bulk too
+        format
       }, {
         responseType: 'blob'
       });
@@ -741,11 +766,18 @@ export default function Page() {
                         {bulkResult && (
                             <div className="flex flex-col gap-2">
                                 <button 
-                                    onClick={downloadBulkZIP}
+                                    onClick={() => downloadBulkZIP('png')}
                                     className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-6 py-2 rounded-xl text-xs font-bold border border-emerald-100 hover:bg-emerald-100 transition-all shadow-sm"
                                 >
                                     <Download className="w-4 h-4" />
                                     Download {bulkResult.successCount} PNG Units (ZIP)
+                                </button>
+                                <button 
+                                    onClick={() => downloadBulkZIP('svg')}
+                                    className="flex items-center gap-2 text-fuchsia-600 bg-fuchsia-50 px-6 py-2 rounded-xl text-xs font-bold border border-fuchsia-100 hover:bg-fuchsia-100 transition-all shadow-sm"
+                                >
+                                    <PenTool className="w-4 h-4" />
+                                    Download {bulkResult.successCount} Vector SVG (ZIP)
                                 </button>
                                 <button 
                                     onClick={downloadBulkPDF}
@@ -799,8 +831,16 @@ export default function Page() {
                     <button 
                       onClick={handleDownloadQR}
                       className="size-10 flex items-center justify-center bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 rounded-xl transition-all text-slate-500 hover:text-primary hover:-translate-y-0.5"
+                      title="Download PNG (ZIP)"
                     >
                       <Download className="w-5 h-5" />
+                    </button>
+                    <button 
+                      onClick={handleDownloadSVG}
+                      className="size-10 flex items-center justify-center bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 rounded-xl transition-all text-slate-500 hover:text-fuchsia-500 hover:-translate-y-0.5"
+                      title="Download Vector (SVG)"
+                    >
+                      <PenTool className="w-5 h-5" />
                     </button>
                     <button 
                       onClick={() => window.print()}

@@ -1,7 +1,136 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import api from "@/lib/api";
+import toast from "react-hot-toast";
+
 export default function Page() {
+  const { tagId } = useParams();
+  const router = useRouter();
+  const [tag, setTag] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState<any>({});
+  
+  useEffect(() => {
+    if (tagId) {
+      api.get(`/tags/${tagId}`).then(res => {
+        setTag(res.data.tag);
+        setFormData({
+          ownerName: res.data.tag.ownerName || "",
+          ownerPhone: res.data.tag.ownerPhone || "",
+          emergencyContact: res.data.tag.emergencyContact || "",
+          address: res.data.tag.address || "",
+          planType: res.data.tag.planType || "basic",
+          assetType: res.data.tag.assetType || "vehicle",
+          isActive: res.data.tag.isActive ?? true
+        });
+      }).catch(err => {
+        toast.error("Failed to load tag details");
+      });
+    }
+  }, [tagId]);
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.put(`/tags/${tagId}`, formData);
+      toast.success("Tag details updated successfully!");
+      setIsEditing(false);
+      // Reload tag data
+      const res = await api.get(`/tags/${tagId}`);
+      setTag(res.data.tag);
+    } catch(err) {
+      toast.error("Failed to update tag!");
+    }
+  };
+
   return (
     <>
-      <div className="px-8 pb-12 flex flex-col gap-8">
+      <div className="px-8 pb-12 pt-6 flex flex-col gap-8">
+        
+        {tag && (
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div>
+              <div className="flex items-center gap-3 mb-1">
+                <h2 className="text-2xl font-black text-slate-800 dark:text-white">Tag: {tag.tagCode}</h2>
+                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${tag.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                  {tag.isActive ? "Active" : "Inactive"}
+                </span>
+                {tag.isLost && (
+                   <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-700">Lost</span>
+                )}
+              </div>
+              <p className="text-sm font-medium text-slate-500">
+                Owner: <span className="font-bold text-slate-700 dark:text-slate-300">{tag.ownerName}</span> ({tag.ownerPhone}) • Plan: <span className="uppercase text-primary font-bold">{tag.planType}</span> • Asset: <span className="uppercase font-bold text-slate-600 dark:text-slate-400">{tag.assetType}</span>
+              </p>
+            </div>
+            
+            <button
+              onClick={() => setIsEditing(!isEditing)}
+              className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all shadow-lg active:scale-95 flex items-center gap-2 ${
+                isEditing 
+                  ? "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200" 
+                  : "bg-primary text-white hover:bg-orange-600 shadow-primary/20"
+              }`}
+            >
+              {isEditing ? "Cancel Editing" : "Edit Tag Details"}
+            </button>
+          </div>
+        )}
+
+        {isEditing && tag && (
+          <form onSubmit={handleUpdate} className="bg-white dark:bg-slate-900 p-8 rounded-xl border border-slate-200 dark:border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 shadow-sm animate-in fade-in slide-in-from-top-4">
+             <div className="col-span-full mb-2">
+               <h3 className="text-lg font-black text-slate-800 dark:text-white">Edit Registration Information</h3>
+               <p className="text-sm font-medium text-slate-500 mt-1">Changes are saved immediately and updated on the public scan page.</p>
+             </div>
+             
+             <div>
+               <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Owner Name</label>
+               <input type="text" required value={formData.ownerName} onChange={(e) => setFormData({...formData, ownerName: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 font-bold text-slate-800 dark:text-white text-sm" />
+             </div>
+             <div>
+               <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Owner Phone <span className="text-[10px] text-slate-400 lowercase font-normal">(Used for call masking)</span></label>
+               <input type="text" required value={formData.ownerPhone} onChange={(e) => setFormData({...formData, ownerPhone: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 font-bold text-slate-800 dark:text-white text-sm" />
+             </div>
+             <div>
+               <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Emergency Contact Number</label>
+               <input type="text" value={formData.emergencyContact} onChange={(e) => setFormData({...formData, emergencyContact: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 font-bold text-slate-800 dark:text-white text-sm" />
+             </div>
+             <div>
+               <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Asset Type</label>
+               <select value={formData.assetType} onChange={(e) => setFormData({...formData, assetType: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 font-bold text-slate-800 dark:text-white text-sm">
+                 <option value="vehicle">Vehicle</option>
+                 <option value="pet">Pet</option>
+                 <option value="person">Person</option>
+                 <option value="other">Other</option>
+               </select>
+             </div>
+             <div className="col-span-full">
+               <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Address</label>
+               <textarea value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 font-bold text-slate-800 dark:text-white text-sm" rows={3}></textarea>
+             </div>
+             <div className="col-span-full flex items-center gap-3 pt-2">
+                <input 
+                  type="checkbox" 
+                  id="isActive" 
+                  checked={formData.isActive} 
+                  onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                  className="w-4 h-4 text-primary bg-slate-100 border-slate-300 rounded focus:ring-primary dark:ring-offset-slate-800 dark:bg-slate-700 dark:border-slate-600"
+                />
+                <label htmlFor="isActive" className="text-sm font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                  Tag is Active (allows scanning & calls)
+                </label>
+             </div>
+             <div className="col-span-full flex justify-end border-t border-slate-100 dark:border-slate-800 pt-6 mt-2">
+               <button type="submit" className="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm rounded-xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95 flex items-center gap-2">
+                 Save Updated Details
+               </button>
+             </div>
+          </form>
+        )}
+
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
             <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">

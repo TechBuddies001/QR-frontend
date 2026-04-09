@@ -148,7 +148,7 @@ router.post('/', authenticateToken, upload.single('photo'), [
       tag, 
       qr: primaryQr, // legacy support
       qrs: Object.keys(qrs).reduce((acc, dt) => {
-        acc[dt] = { base64: qrs[dt].base64, url: qrs[dt].publicUrl, imagePath: qrs[dt].qrImageUrl };
+        acc[dt] = { base64: qrs[dt].base64, url: qrs[dt].publicUrl, imagePath: qrs[dt].qrImageUrl, qrSvgUrl: qrs[dt].qrSvgUrl };
         return acc;
       }, {})
     });
@@ -261,7 +261,7 @@ router.post('/:id/regenerate-qr', authenticateToken, async (req, res) => {
     }
 
     res.json({ 
-      qr: { base64: qr.base64, url: qr.publicUrl, imagePath: qr.qrImageUrl },
+      qr: { base64: qr.base64, url: qr.publicUrl, imagePath: qr.qrImageUrl, qrSvgUrl: qr.qrSvgUrl },
       designType: targetDesign
     });
   } catch (err) {
@@ -410,7 +410,8 @@ router.post('/:id/batch-zip', authenticateToken, async (req, res) => {
 // POST /api/tags/bulk-download – download multiple QR codes as ZIP with quantities
 router.post('/bulk-download', authenticateToken, async (req, res) => {
   try {
-    const { ids, quantities } = req.body; 
+    const { ids, quantities, format } = req.body; 
+    const isSvg = format === 'svg';
     if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'Array of tag IDs required' });
 
     // Use quantities if provided, otherwise default to 1 copy of primary design
@@ -424,7 +425,7 @@ router.post('/bulk-download', authenticateToken, async (req, res) => {
     if (tags.length === 0) return res.status(404).json({ error: 'No tags found' });
 
     const archive = archiver('zip', { zlib: { level: 9 } });
-    res.attachment(`BULK_V_KAWACH_BATCH_${new Date().getTime()}.zip`);
+    res.attachment(`BULK_V_KAWACH_BATCH_${new Date().getTime()}_${isSvg ? 'SVG' : 'PNG'}.zip`);
     archive.pipe(res);
 
     for (const tag of tags) {
@@ -437,12 +438,13 @@ router.post('/bulk-download', authenticateToken, async (req, res) => {
 
         // Ensure QR is generated for this specific design
         const qr = await generateQRCode(tag.tagCode, designType, tagWithSponsor.sponsor, tagWithSponsor.assetType);
-        const fullPath = path.join(__dirname, '..', '..', qr.qrImageUrl);
+        const fullPath = path.join(__dirname, '..', '..', isSvg ? qr.qrSvgUrl : qr.qrImageUrl);
+        const ext = isSvg ? 'svg' : 'png';
 
         if (fs.existsSync(fullPath)) {
           for (let i = 0; i < qty; i++) {
             archive.file(fullPath, { 
-              name: `${tag.tagCode}/${designType.toUpperCase()}_COPY_${i + 1}.png` 
+              name: `${tag.tagCode}/${designType.toUpperCase()}_COPY_${i + 1}.${ext}` 
             });
           }
         }
