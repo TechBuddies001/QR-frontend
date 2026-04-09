@@ -186,13 +186,30 @@ export default function SponsorsPage() {
                  </div>
 
                  <div className="p-8">
-                    <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center justify-between gap-2">
                        <h3 className="text-lg font-black text-slate-800 dark:text-white uppercase truncate">{sponsor.name}</h3>
                        {sponsor.website && (
                          <a href={sponsor.website} target="_blank" className="text-primary hover:scale-110 transition-all">
                             <ExternalLink className="w-4 h-4" />
                          </a>
                        )}
+                    </div>
+                    
+                    {/* Sponsor ID Badge */}
+                    <div className="flex items-center gap-1.5 mt-1 mb-3">
+                       <button 
+                         onClick={() => {
+                           navigator.clipboard.writeText(sponsor.id);
+                           toast.success("ID Copied!");
+                         }}
+                         className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors group/id"
+                         title="Click to copy ID"
+                       >
+                          <p className="text-[10px] font-mono font-bold text-slate-400 group-hover/id:text-primary transition-colors flex items-center gap-1">
+                             ID: {sponsor.id.slice(0, 8)}...
+                             <PenTool className="w-2.5 h-2.5 opacity-0 group-hover/id:opacity-100 transition-opacity" />
+                          </p>
+                       </button>
                     </div>
                     <p className="text-xs font-bold text-slate-400 line-clamp-2 min-h-[2rem] mb-6 lowercase leading-relaxed">
                        {sponsor.description || 'No description provided for this sponsor.'}
