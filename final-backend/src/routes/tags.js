@@ -89,7 +89,7 @@ router.post('/', authenticateToken, upload.single('photo'), [
   try {
     const {
       ownerName, ownerPhone, emergencyContact, customMessage,
-      address, assetType, planType, tagCode: customCode, sponsorId, designType, designTypes: requestedDesigns,
+      address, assetType, customAssetType, planType, tagCode: customCode, sponsorId, designType, designTypes: requestedDesigns,
     } = req.body;
 
     // Generate unique tag code if not provided
@@ -112,7 +112,7 @@ router.post('/', authenticateToken, upload.single('photo'), [
 
     const qrs = {};
     for (const dt of designsToGenerate) {
-      qrs[dt] = await generateQRCode(tagCode, dt, sponsorObj, assetType);
+      qrs[dt] = await generateQRCode(tagCode, dt, sponsorObj, assetType, customAssetType);
     }
 
     // Set primary design (first one generated)
@@ -141,6 +141,7 @@ router.post('/', authenticateToken, upload.single('photo'), [
         adminId: req.admin.id,
         expiresAt,
         sponsorId: sponsorId || null,
+        customAssetType: customAssetType || null,
       },
     });
 
@@ -235,7 +236,7 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 // POST /api/tags/:id/regenerate-qr - Support specific design generation
 router.post('/:id/regenerate-qr', authenticateToken, async (req, res) => {
   try {
-    const { designType } = req.body;
+    const { designType, customAssetType } = req.body;
     const tag = await prisma.tag.findUnique({ where: { id: req.params.id } });
     if (!tag) return res.status(404).json({ error: 'Tag not found' });
 
@@ -248,7 +249,7 @@ router.post('/:id/regenerate-qr', authenticateToken, async (req, res) => {
       include: { sponsor: true }
     });
 
-    const qr = await generateQRCode(tag.tagCode, targetDesign, fullTag.sponsor, tag.assetType);
+    const qr = await generateQRCode(tag.tagCode, targetDesign, fullTag.sponsor, tag.assetType, customAssetType || tag.customAssetType);
 
     // Only update DB if designType was NOT explicitly passed (standard regeneration)
     // or if we want to change the primary design. 
@@ -396,7 +397,7 @@ router.post('/:id/batch-zip', authenticateToken, async (req, res) => {
       if (qty <= 0) continue;
 
       // Generate for this design type
-      const qr = await generateQRCode(tag.tagCode, designType, fullTag.sponsor, tag.assetType);
+      const qr = await generateQRCode(tag.tagCode, designType, fullTag.sponsor, tag.assetType, fullTag.customAssetType);
       const fullPath = path.join(__dirname, '..', '..', qr.qrImageUrl);
 
       if (fs.existsSync(fullPath)) {
@@ -450,7 +451,7 @@ router.post('/bulk-download', authenticateToken, async (req, res) => {
         if (qty <= 0) continue;
 
         // Ensure QR is generated for this specific design
-        const qr = await generateQRCode(tag.tagCode, designType, tagWithSponsor.sponsor, tagWithSponsor.assetType);
+        const qr = await generateQRCode(tag.tagCode, designType, tagWithSponsor.sponsor, tagWithSponsor.assetType, tagWithSponsor.customAssetType);
         const fullPath = path.join(__dirname, '..', '..', isSvg ? qr.qrSvgUrl : qr.qrImageUrl);
         const ext = isSvg ? 'svg' : 'png';
 
@@ -495,7 +496,8 @@ router.post('/bulk-pdf', authenticateToken, async (req, res) => {
         const qty = parseInt(qtyConfig[designType]) || 0;
         if (qty <= 0) continue;
 
-        const qr = await generateQRCode(tag.tagCode, designType, null, tag.assetType); // PDF usage
+        const tagWithFullInfo = await prisma.tag.findUnique({ where: { tagCode: tag.tagCode } });
+        const qr = await generateQRCode(tag.tagCode, designType, null, tag.assetType, tagWithFullInfo.customAssetType); // PDF usage
         const fullPath = path.join(__dirname, '..', '..', qr.qrImageUrl);
 
         if (fs.existsSync(fullPath)) {

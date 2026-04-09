@@ -37,6 +37,7 @@ model Tag {
 
   // Tag metadata
   assetType        String   @default("vehicle")  // vehicle | pet | person | other
+  customAssetType  String?                       // Dynamic value for 'other' asset types
   planType         String   @default("basic")    // basic | premium | standard
   designType       String   @default("standard") // standard | circle
   isActive         Boolean  @default(true)

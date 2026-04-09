@@ -19,16 +19,16 @@ try {
  * Generate branded QR code with different designs
  * Support for Standard vertical tag and New Circle design
  */
-const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, assetType = 'employee') => {
+const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, assetType = 'employee', customAssetType = null) => {
   const baseUrl = process.env.PUBLIC_TAG_BASE_URL || (process.env.NODE_ENV === 'production' ? 'https://q-rscanner-mu.vercel.app/tag' : 'http://localhost:3000/tag');
   const publicUrl = `${baseUrl}/${tagCode}`;
   const fileName = `qr_${designType}_${tagCode}.png`;
   const filePath = path.join(qrDir, fileName);
 
   if (designType === 'circle') {
-    return await generateCircleQRCode(tagCode, publicUrl, filePath, fileName, sponsor, assetType);
+    return await generateCircleQRCode(tagCode, publicUrl, filePath, fileName, sponsor, assetType, customAssetType);
   } else if (designType === 'landscape') {
-    return await generateLandscapeQRCode(tagCode, publicUrl, filePath, fileName, sponsor, assetType);
+    return await generateLandscapeQRCode(tagCode, publicUrl, filePath, fileName, sponsor, assetType, customAssetType);
   }
 
   // DEFAULT: Standard Vertical Design (Exact 630 x 1004 pixels as requested)
@@ -97,10 +97,18 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
       ctx.font = 'bold 26px "CustomArial"';
       ctx.letterSpacing = "4px";
       ctx.globalAlpha = 1.0;
-      const safetyLabelStd = assetType === 'pet' ? 'PET SAFETY' : 
+      
+      let safetyLabelStd = assetType === 'pet' ? 'PET SAFETY' : 
                             (assetType === 'person' ? 'PERSONAL SAFETY' : 
                             (assetType === 'vehicle' ? 'VEHICLE SAFETY' : 
                             (assetType === 'student' ? 'STUDENT SAFETY' : 'EMPLOYEE SAFETY')));
+      
+      if (assetType === 'other' && customAssetType) {
+        safetyLabelStd = `${customAssetType.toUpperCase()} SAFETY`;
+      } else if (assetType === 'other') {
+        safetyLabelStd = 'ASSET SAFETY';
+      }
+
       ctx.fillText(safetyLabelStd, canvasWidth / 2, textStartY + 120);
     }
     ctx.globalAlpha = 1.0;
@@ -110,7 +118,8 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
     ctx.fillStyle = '#000000';
     ctx.font = 'bold 18px "CustomArial"';
     ctx.letterSpacing = "5px";
-    ctx.fillText(`${assetType.toUpperCase()} ID: ${tagCode}`, canvasWidth / 2, blueHeight + 40);
+    const idPrefix = (assetType === 'other' && customAssetType) ? customAssetType : assetType;
+    ctx.fillText(`${idPrefix.toUpperCase()} ID: ${tagCode}`, canvasWidth / 2, blueHeight + 40);
     ctx.letterSpacing = "0px";
 
     // 6. QR Box & Image
@@ -187,7 +196,7 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
 /**
  * Generate Circle Branded QR Code
  */
-async function generateCircleQRCode(tagCode, publicUrl, filePath, fileName, sponsor = null, assetType = 'vehicle') {
+async function generateCircleQRCode(tagCode, publicUrl, filePath, fileName, sponsor = null, assetType = 'vehicle', customAssetType = null) {
   const size = 1200;
   const centerX = size / 2;
   const centerY = size / 2;
@@ -274,10 +283,18 @@ async function generateCircleQRCode(tagCode, publicUrl, filePath, fileName, spon
     ctx.font = 'bold 38px "CustomArial"';
     ctx.letterSpacing = "8px";
     ctx.globalAlpha = 1.0;
-    const safetyLabel = assetType === 'pet' ? 'PET SAFETY' : 
+    
+    let safetyLabel = assetType === 'pet' ? 'PET SAFETY' : 
                        (assetType === 'person' ? 'PERSONAL SAFETY' : 
                        (assetType === 'vehicle' ? 'VEHICLE SAFETY' : 
                        (assetType === 'student' ? 'STUDENT SAFETY' : 'EMPLOYEE SAFETY')));
+    
+    if (assetType === 'other' && customAssetType) {
+      safetyLabel = `${customAssetType.toUpperCase()} SAFETY`;
+    } else if (assetType === 'other') {
+      safetyLabel = 'ASSET SAFETY';
+    }
+
     ctx.fillText(safetyLabel, centerX, 455);
     ctx.globalAlpha = 1.0;
     ctx.letterSpacing = "0px";
@@ -285,7 +302,8 @@ async function generateCircleQRCode(tagCode, publicUrl, filePath, fileName, spon
     ctx.fillStyle = '#000000';
     ctx.font = 'bold 22px "CustomArial"';
     ctx.letterSpacing = "10px";
-    ctx.fillText(`${assetType.toUpperCase()} ID: ${tagCode}`, centerX, 525);
+    const idPrefix = (assetType === 'other' && customAssetType) ? customAssetType : assetType;
+    ctx.fillText(`${idPrefix.toUpperCase()} ID: ${tagCode}`, centerX, 525);
     ctx.letterSpacing = "0px";
 
     const qrTop = 550;
@@ -349,7 +367,7 @@ async function generateCircleQRCode(tagCode, publicUrl, filePath, fileName, spon
 /**
  * LANDSCAPE (Exact Credit Card Size: 3.37 x 2.125 inches)
  */
-const generateLandscapeQRCode = async (tagCode, publicUrl, filePath, fileName, sponsor, assetType) => {
+async function generateLandscapeQRCode(tagCode, publicUrl, filePath, fileName, sponsor, assetType, customAssetType = null) {
   const canvasWidth = 1011;
   const canvasHeight = 638;
 
@@ -404,10 +422,18 @@ const generateLandscapeQRCode = async (tagCode, publicUrl, filePath, fileName, s
     ctx.font = 'bold 36px "CustomArial"';
     ctx.letterSpacing = "8px";
     ctx.globalAlpha = 1.0;
-    const safetyLabel = assetType === 'pet' ? 'PET SAFETY' : 
+    
+    let safetyLabel = assetType === 'pet' ? 'PET SAFETY' : 
                        (assetType === 'person' ? 'PERSONAL SAFETY' : 
                        (assetType === 'vehicle' ? 'VEHICLE SAFETY' : 
                        (assetType === 'student' ? 'STUDENT SAFETY' : 'EMPLOYEE SAFETY')));
+    
+    if (assetType === 'other' && customAssetType) {
+      safetyLabel = `${customAssetType.toUpperCase()} SAFETY`;
+    } else if (assetType === 'other') {
+      safetyLabel = 'ASSET SAFETY';
+    }
+
     ctx.fillText(safetyLabel, blueWidth / 2, 400);
     ctx.globalAlpha = 1.0;
     ctx.letterSpacing = "0px";
@@ -421,7 +447,8 @@ const generateLandscapeQRCode = async (tagCode, publicUrl, filePath, fileName, s
     ctx.fillStyle = '#000000';
     ctx.font = 'bold 24px "CustomArial"';
     ctx.letterSpacing = "8px";
-    ctx.fillText(`${assetType.toUpperCase()} ID: ${tagCode}`, rightAreaX + rightAreaWidth/2, 60);
+    const idPrefix = (assetType === 'other' && customAssetType) ? customAssetType : assetType;
+    ctx.fillText(`${idPrefix.toUpperCase()} ID: ${tagCode}`, rightAreaX + rightAreaWidth/2, 60);
 
     const qrBoxSize = 340;
     const qrBoxX = rightAreaX + (rightAreaWidth - qrBoxSize) / 2;

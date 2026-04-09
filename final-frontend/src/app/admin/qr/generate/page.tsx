@@ -59,7 +59,8 @@ export default function Page() {
     designTypes: ["standard"] as string[],
     quantities: { standard: 1, circle: 1, landscape: 1 } as Record<string, number>,
     customMessage: "",
-    address: ""
+    address: "",
+    customAssetType: ""
   });
 
   // Fetch plans & sponsors on load
@@ -442,6 +443,19 @@ export default function Page() {
                       <option value="person">👤 Person</option>
                       <option value="other">📦 Other Asset</option>
                     </select>
+
+                    {formData.assetType === 'other' && (
+                      <div className="mt-4 p-4 bg-orange-50 dark:bg-orange-950/20 rounded-xl border border-orange-200 dark:border-orange-800 animate-in fade-in slide-in-from-top-1">
+                        <label className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider mb-1 block">Specify Custom Asset Name</label>
+                        <input
+                          className="w-full bg-transparent border-b-2 border-orange-200 focus:border-orange-500 outline-none py-1 font-bold text-orange-900 dark:text-orange-100 placeholder:text-orange-200"
+                          placeholder="e.g. Laptop, Bag, Equipment"
+                          type="text"
+                          value={formData.customAssetType || ''}
+                          onChange={(e) => setFormData({...formData, customAssetType: e.target.value})}
+                        />
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Plan</label>
