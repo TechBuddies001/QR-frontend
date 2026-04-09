@@ -55,16 +55,16 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
   }
 
   const renderCtx = (ctx) => {
-    // Fill background with white initially (especially for top margin)
+    // Fill background with white for the non-header area
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     const bgDepth = 650;
-    const bgGradient = ctx.createLinearGradient(0, topMargin, 0, topMargin + bgDepth);
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, topMargin + bgDepth);
     bgGradient.addColorStop(0, '#002e8a');
     bgGradient.addColorStop(1, '#001a52');
     ctx.fillStyle = bgGradient;
-    ctx.fillRect(0, topMargin, canvasWidth, bgDepth);
+    ctx.fillRect(0, 0, canvasWidth, topMargin + bgDepth);
 
     const sepGradient = ctx.createLinearGradient(0, topMargin + bgDepth, 0, topMargin + bgDepth + 20);
     sepGradient.addColorStop(0, '#737373');
