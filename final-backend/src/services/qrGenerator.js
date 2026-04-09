@@ -33,7 +33,7 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
 
   // DEFAULT: Standard Vertical Design
   const canvasWidth = 1200;
-  const topMargin = 365; // ~31mm (previously 34mm)
+  const topMargin = 600; // Increased to clear physical tag slots (~50.8mm)
   const canvasHeight = 1800 + topMargin;
   
   const qrSize = 540;
