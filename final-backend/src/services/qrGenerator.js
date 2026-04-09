@@ -33,7 +33,8 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
 
   // DEFAULT: Standard Vertical Design
   const canvasWidth = 1200;
-  const canvasHeight = 1800;
+  const topMargin = 153; // ~13mm at 300 DPI
+  const canvasHeight = 1800 + topMargin;
   
   const qrSize = 540;
   const qrBuffer = await QRCode.toBuffer(publicUrl, { errorCorrectionLevel: 'H', margin: 1, width: qrSize });
@@ -55,44 +56,44 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
 
   const renderCtx = (ctx) => {
     const bgDepth = 650;
-    const bgGradient = ctx.createLinearGradient(0, 0, 0, bgDepth);
+    const bgGradient = ctx.createLinearGradient(0, topMargin, 0, topMargin + bgDepth);
     bgGradient.addColorStop(0, '#002e8a');
     bgGradient.addColorStop(1, '#001a52');
     ctx.fillStyle = bgGradient;
-    ctx.fillRect(0, 0, canvasWidth, bgDepth);
+    ctx.fillRect(0, topMargin, canvasWidth, bgDepth);
 
-    const sepGradient = ctx.createLinearGradient(0, bgDepth, 0, bgDepth + 20);
+    const sepGradient = ctx.createLinearGradient(0, topMargin + bgDepth, 0, topMargin + bgDepth + 20);
     sepGradient.addColorStop(0, '#737373');
     sepGradient.addColorStop(0.3, '#d4d4d4');
     sepGradient.addColorStop(1, '#f5f5f5');
     ctx.fillStyle = sepGradient;
-    ctx.fillRect(0, bgDepth, canvasWidth, 20);
+    ctx.fillRect(0, topMargin + bgDepth, canvasWidth, 20);
 
     ctx.fillStyle = '#f9fafb';
-    ctx.fillRect(0, bgDepth + 20, canvasWidth, 1480 - (bgDepth + 20));
+    ctx.fillRect(0, topMargin + bgDepth + 20, canvasWidth, 1480 - (bgDepth + 20));
 
-    const redGradient = ctx.createLinearGradient(0, 1480, 0, 1800);
+    const redGradient = ctx.createLinearGradient(0, topMargin + 1480, 0, topMargin + 1800);
     redGradient.addColorStop(0, '#b31919');
     redGradient.addColorStop(1, '#7a0a0a');
     ctx.fillStyle = redGradient;
-    ctx.fillRect(0, 1480, canvasWidth, 320);
+    ctx.fillRect(0, topMargin + 1480, canvasWidth, 320);
 
     if (logoImage) {
       const logoWidth = 240;
       const logoAspect = logoImage.height / logoImage.width;
       const logoHeight = logoWidth * logoAspect;
-      ctx.drawImage(logoImage, (canvasWidth - logoWidth) / 2, 50, logoWidth, logoHeight);
+      ctx.drawImage(logoImage, (canvasWidth - logoWidth) / 2, topMargin + 50, logoWidth, logoHeight);
     }
 
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 100px "CustomArial"';
     ctx.textAlign = 'center';
-    ctx.fillText('V-KAWACH', canvasWidth / 2, 420);
+    ctx.fillText('V-KAWACH', canvasWidth / 2, topMargin + 420);
 
     ctx.font = 'bold 36px "CustomArial"';
     ctx.letterSpacing = "8px";
     ctx.globalAlpha = 0.8;
-    ctx.fillText('SECURING YOUR WORLD', canvasWidth / 2, 490);
+    ctx.fillText('SECURING YOUR WORLD', canvasWidth / 2, topMargin + 490);
 
     ctx.font = 'bold 58px "CustomArial"';
     ctx.letterSpacing = "10px";
@@ -101,14 +102,14 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
                           (assetType === 'person' ? 'PERSONAL SAFETY' : 
                           (assetType === 'vehicle' ? 'VEHICLE SAFETY' : 
                           (assetType === 'student' ? 'STUDENT SAFETY' : 'EMPLOYEE SAFETY')));
-    ctx.fillText(safetyLabelStd, canvasWidth / 2, 570);
+    ctx.fillText(safetyLabelStd, canvasWidth / 2, topMargin + 570);
     ctx.globalAlpha = 1.0;
     ctx.letterSpacing = "0px";
 
     ctx.fillStyle = '#000000';
     ctx.font = 'bold 36px "CustomArial"';
     ctx.letterSpacing = "12px";
-    ctx.fillText(`${assetType.toUpperCase()} ID: ${tagCode}`, canvasWidth / 2, 730);
+    ctx.fillText(`${assetType.toUpperCase()} ID: ${tagCode}`, canvasWidth / 2, topMargin + 730);
     ctx.letterSpacing = "0px";
 
     ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
@@ -117,7 +118,7 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
 
     const boxSize = 640;
     const boxX = (canvasWidth - boxSize) / 2;
-    const boxY = 760;
+    const boxY = topMargin + 760;
     const radius = 40;
 
     ctx.beginPath();
@@ -132,21 +133,21 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
       const sLogoAspect = sLogoImage.height / sLogoImage.width;
       const sLogoHeight = sLogoWidth * sLogoAspect;
       ctx.fillStyle = '#94a3b8';
-      ctx.font = 'bold 20px "Arial", sans-serif';
+      ctx.font = 'bold 20px "CustomArial"';
       ctx.fillText('SPONSORED BY', canvasWidth / 2, boxY + boxSize + 30);
       ctx.drawImage(sLogoImage, (canvasWidth - sLogoWidth) / 2, boxY + boxSize + 50, sLogoWidth, sLogoHeight);
     }
 
     ctx.fillStyle = '#002e8a';
     ctx.font = 'bold 24px "CustomArial"';
-    ctx.fillText('A PRODUCT OF TARKSHYA SOLUTION', canvasWidth / 2, 1440);
+    ctx.fillText('A PRODUCT OF TARKSHYA SOLUTION', canvasWidth / 2, topMargin + 1440);
 
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 85px "CustomArial"';
-    ctx.fillText('SCAN IN EMERGENCY', canvasWidth / 2, 1615);
+    ctx.fillText('SCAN IN EMERGENCY', canvasWidth / 2, topMargin + 1615);
 
     ctx.font = 'bold 42px "CustomArial"';
-    ctx.fillText('FOR IMMEDIATE HELP & ALERTS', canvasWidth / 2, 1705);
+    ctx.fillText('FOR IMMEDIATE HELP & ALERTS', canvasWidth / 2, topMargin + 1705);
   };
 
   // PNG Generate
