@@ -222,14 +222,22 @@ async function generateCircleQRCode(tagCode, publicUrl, filePath, fileName, spon
   }
 
   const renderCtx = (ctx) => {
+    // 1. Ensure transparency by clearing the canvas first
+    ctx.clearRect(0, 0, size, size);
+
+    // 2. Initial circular fill (the white disk)
     ctx.beginPath();
-    ctx.arc(centerX, centerY, size / 2 - 5, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, size / 2 - 10, 0, Math.PI * 2);
     ctx.fillStyle = '#ffffff';
     ctx.fill();
-    ctx.lineWidth = 15;
-    ctx.strokeStyle = '#f1f5f9';
-    ctx.stroke();
 
+    // 3. Global clipping to ensure no drawing ever spills into the corners
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, size / 2 - 10, 0, Math.PI * 2);
+    ctx.clip();
+
+    // 4. Draw Header Blue Section (Semi-circle)
     ctx.save();
     ctx.beginPath();
     ctx.arc(centerX, centerY, size / 2 - 10, Math.PI, 2 * Math.PI);
@@ -245,6 +253,7 @@ async function generateCircleQRCode(tagCode, publicUrl, filePath, fileName, spon
     ctx.fillRect(0, 0, size, 480);
     ctx.restore();
 
+    // 5. Draw Footer Red Section (Slice)
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(0, 920);
@@ -263,6 +272,7 @@ async function generateCircleQRCode(tagCode, publicUrl, filePath, fileName, spon
     ctx.fill();
     ctx.restore();
 
+    // ... rest of the design features (logo, text, QR) ...
     if (logoImage) {
       const logoWidth = 180;
       const logoAspect = logoImage.height / logoImage.width;
@@ -339,6 +349,9 @@ async function generateCircleQRCode(tagCode, publicUrl, filePath, fileName, spon
 
     ctx.font = 'bold 30px "CustomArial"';
     ctx.fillText('FOR IMMEDIATE HELP & ALERTS', centerX, 1085);
+
+    // End global clipping
+    ctx.restore();
   };
 
   // PNG

@@ -798,6 +798,34 @@ export default function Page() {
                         {bulkResult && (
                             <div className="flex flex-col gap-2">
                                 <button 
+                                    onClick={async () => {
+                                        if (!bulkResult?.tagIds?.length) return;
+                                        const toastId = toast.loading("Generating Excel Data...");
+                                        try {
+                                            const params = new URLSearchParams();
+                                            params.append('ids', bulkResult.tagIds.join(','));
+                                            const response = await api.get(`/tags/export-excel?${params.toString()}`, {
+                                                responseType: 'blob'
+                                            });
+                                            const url = window.URL.createObjectURL(new Blob([response.data]));
+                                            const link = document.createElement('a');
+                                            link.href = url;
+                                            link.setAttribute('download', `V_KAWACH_BULK_EXCEL_${new Date().getTime()}.xlsx`);
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            link.remove();
+                                            window.URL.revokeObjectURL(url);
+                                            toast.success("Excel Downloaded!", { id: toastId });
+                                        } catch (error) {
+                                            toast.error("Failed to download Excel", { id: toastId });
+                                        }
+                                    }}
+                                    className="flex items-center gap-2 text-indigo-600 bg-indigo-50 px-6 py-2 rounded-xl text-xs font-bold border border-indigo-100 hover:bg-indigo-100 transition-all shadow-sm"
+                                >
+                                    <FileSpreadsheet className="w-4 h-4" />
+                                    Download Results Data (Excel)
+                                </button>
+                                <button 
                                     onClick={() => downloadBulkZIP('png')}
                                     className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-6 py-2 rounded-xl text-xs font-bold border border-emerald-100 hover:bg-emerald-100 transition-all shadow-sm"
                                 >
@@ -888,8 +916,8 @@ export default function Page() {
                     {formData.designTypes.map((dt, idx) => (
                       <div key={dt} className="flex flex-col items-center gap-6 w-full">
                         {idx > 0 && <div className="w-full border-t border-slate-100 dark:border-slate-800 my-2" />}
-                        <div className="relative p-1 bg-gradient-to-br from-primary to-amber-500 rounded-[1.8rem] shadow-xl shadow-primary/10 w-full max-w-[280px]">
-                          <div className="bg-white p-2.5 rounded-[1.6rem] flex items-center justify-center">
+                        <div className={`relative p-1 bg-gradient-to-br from-primary to-amber-500 rounded-[1.8rem] shadow-xl shadow-primary/10 w-full max-w-[280px] ${dt === 'circle' ? 'rounded-full' : ''}`}>
+                          <div className={`p-2.5 rounded-[1.6rem] flex items-center justify-center ${dt === 'circle' ? 'bg-transparent rounded-full' : 'bg-white'}`}>
                             {qrResult?.qrs?.[dt]?.base64 ? (
                               <img 
                                 src={qrResult.qrs[dt].base64} 

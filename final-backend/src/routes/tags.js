@@ -10,6 +10,7 @@ const { generateQRCode } = require('../services/qrGenerator');
 const fs = require('fs');
 const csv = require('csv-parser');
 const archiver = require('archiver');
+const ExcelJS = require('exceljs');
 
 // GET /api/tags – list all tags (admin)
 router.get('/', authenticateToken, async (req, res) => {
@@ -54,6 +55,89 @@ router.get('/', authenticateToken, async (req, res) => {
     }));
 
     res.json({ tags: safeTags, total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / parseInt(limit)) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/tags/export-excel – download tags as Excel
+router.get('/export-excel', authenticateToken, async (req, res) => {
+  try {
+    const { search, status, planType, assetType, ids } = req.query;
+
+    const where = {};
+    if (ids) {
+      where.id = { in: ids.split(',') };
+    } else {
+      if (search) {
+        where.OR = [
+          { tagCode: { contains: search } },
+          { ownerName: { contains: search } },
+          { ownerPhone: { contains: search } },
+        ];
+      }
+      if (status === 'active') where.isActive = true;
+      if (status === 'inactive') where.isActive = false;
+      if (status === 'lost') where.isLost = true;
+      if (planType && planType !== 'all') where.planType = planType;
+      if (assetType && assetType !== 'all') where.assetType = assetType;
+    }
+
+    const tags = await prisma.tag.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        sponsor: { select: { name: true } }
+      }
+    });
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Tags');
+
+    worksheet.columns = [
+      { header: 'Vehicle ID / Tag Code', key: 'tagCode', width: 25 },
+      { header: 'Asset Type', key: 'assetType', width: 15 },
+      { header: 'Owner Name', key: 'ownerName', width: 25 },
+      { header: 'Owner Phone', key: 'ownerPhone', width: 20 },
+      { header: 'Portrait Link (PNG)', key: 'portraitPng', width: 60 },
+      { header: 'Circle Link (PNG)', key: 'circlePng', width: 60 },
+      { header: 'Portrait Link (SVG)', key: 'portraitSvg', width: 60 },
+      { header: 'Circle Link (SVG)', key: 'circleSvg', width: 60 },
+      { header: 'Landing Page Link', key: 'qrUrl', width: 60 },
+      { header: 'Plan Type', key: 'planType', width: 15 },
+      { header: 'Status', key: 'status', width: 15 },
+      { header: 'Sponsor', key: 'sponsor', width: 20 },
+      { header: 'Expires At', key: 'expiresAt', width: 25 },
+    ];
+
+    const baseUrl = process.env.APP_BASE_URL || `http://${req.get('host')}`;
+
+    tags.forEach(tag => {
+      worksheet.addRow({
+        tagCode: tag.tagCode,
+        assetType: tag.assetType,
+        ownerName: tag.ownerName,
+        ownerPhone: tag.ownerPhone,
+        portraitPng: `${baseUrl}/uploads/qrcodes/qr_standard_${tag.tagCode}.png`,
+        circlePng: `${baseUrl}/uploads/qrcodes/qr_circle_${tag.tagCode}.png`,
+        portraitSvg: `${baseUrl}/uploads/qrcodes/qr_standard_${tag.tagCode}.svg`,
+        circleSvg: `${baseUrl}/uploads/qrcodes/qr_circle_${tag.tagCode}.svg`,
+        qrUrl: tag.qrUrl,
+        planType: tag.planType,
+        status: tag.isActive ? 'Active' : 'Inactive',
+        sponsor: tag.sponsor ? tag.sponsor.name : 'None',
+        expiresAt: tag.expiresAt ? new Date(tag.expiresAt).toLocaleString() : 'N/A',
+      });
+    });
+
+    // Style the header
+    worksheet.getRow(1).font = { bold: true };
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=Tags_Export_${new Date().getTime()}.xlsx`);
+
+    await workbook.xlsx.write(res);
+    res.end();
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
