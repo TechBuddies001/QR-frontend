@@ -41,6 +41,7 @@ export default function Page() {
     planType: "all",
     assetType: "all"
   });
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const fetchTags = async (page = 1, currentLimit = pagination.limit) => {
     setLoading(true);
@@ -83,6 +84,50 @@ export default function Page() {
     fetchTags(1, newLimit);
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const params = new URLSearchParams(
+        selectedIds.length > 0 
+          ? { ids: selectedIds.join(',') }
+          : {
+              ...(filters.search && { search: filters.search }),
+              ...(filters.status !== "all" && { status: filters.status }),
+              ...(filters.planType !== "all" && { planType: filters.planType }),
+              ...(filters.assetType !== "all" && { assetType: filters.assetType })
+            }
+      );
+      
+      const response = await api.get(`/tags/export-excel?${params.toString()}`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Tags_Export_${new Date().getTime()}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success("Excel exported successfully");
+    } catch (error) {
+      toast.error("Failed to export Excel");
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === tags.length && tags.length > 0) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(tags.map(t => t.id));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-50/50 dark:bg-slate-950">
       {/* Header Bar */}
@@ -109,6 +154,18 @@ export default function Page() {
             />
           </form>
 
+          <button
+            onClick={handleExportExcel}
+            className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-black transition-all shadow-lg active:scale-95 border-2 ${
+              selectedIds.length > 0 
+                ? "bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700" 
+                : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-emerald-600 dark:text-emerald-400 hover:border-emerald-500/30"
+            }`}
+          >
+            <Download className="w-5 h-5" />
+            {selectedIds.length > 0 ? `Export Selected (${selectedIds.length})` : 'Download Excel for Print'}
+          </button>
+ 
           <Link 
             href="/admin/qr/generate"
             className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-orange-600 text-white rounded-2xl text-sm font-black transition-all shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]"
@@ -198,7 +255,15 @@ export default function Page() {
               <table className="w-full text-left border-collapse table-fixed">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800">
-                    <th className="w-[180px] px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-nowrap">Tag ID</th>
+                    <th className="w-[60px] px-8 py-5">
+                      <input 
+                        type="checkbox" 
+                        className="size-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                        checked={selectedIds.length === tags.length && tags.length > 0}
+                        onChange={toggleSelectAll}
+                      />
+                    </th>
+                    <th className="w-[180px] px-4 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-nowrap">Tag ID</th>
                     <th className="min-w-[250px] px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-nowrap">Primary Owner</th>
                     <th className="w-[130px] px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center text-nowrap">Stats</th>
                     <th className="w-[200px] px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-nowrap">Plan details</th>
@@ -207,8 +272,16 @@ export default function Page() {
                 </thead>
                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
                   {tags.map((tag) => (
-                    <tr key={tag.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all group">
+                    <tr key={tag.id} className={`hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all group ${selectedIds.includes(tag.id) ? 'bg-primary/5 dark:bg-primary/5' : ''}`}>
                       <td className="px-8 py-5">
+                        <input 
+                          type="checkbox" 
+                          className="size-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
+                          checked={selectedIds.includes(tag.id)}
+                          onChange={() => toggleSelect(tag.id)}
+                        />
+                      </td>
+                      <td className="px-4 py-5">
                          <div className="flex flex-col gap-1 truncate">
                             <span className="font-mono text-xs font-black text-primary bg-primary/5 px-2 py-0.5 rounded-lg w-fit truncate">
                               {tag.tagCode}
