@@ -6,6 +6,20 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
 const { rateLimit } = require('express-rate-limit');
+const fs = require('fs');
+
+// Ensure upload directories exist
+const uploadDirs = [
+  path.join(__dirname, '..', 'uploads'),
+  path.join(__dirname, '..', 'uploads', 'qrcodes'),
+  path.join(__dirname, '..', 'uploads', 'photos')
+];
+uploadDirs.forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    console.log(`✅ Created missing directory: ${dir}`);
+  }
+});
 
 const authRoutes = require('./routes/auth');
 const tagRoutes = require('./routes/tags');
