@@ -57,6 +57,40 @@ app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Database & Services for Fallback
+const prisma = require('./lib/prisma');
+const { generateQRCode } = require('./services/qrGenerator');
+
+// Dynamic QR Fallback (Auto-generate missing images)
+app.get('/uploads/qrcodes/:filename', async (req, res, next) => {
+  const { filename } = req.params;
+  const filePath = path.join(__dirname, '..', 'uploads', 'qrcodes', filename);
+
+  if (fs.existsSync(filePath)) return next();
+
+  try {
+    const match = filename.match(/^qr_(standard|circle|landscape)_(.+)\.(png|svg)$/i);
+    if (!match) return next();
+
+    const [_, designType, tagCode] = match;
+    const tag = await prisma.tag.findUnique({
+      where: { tagCode },
+      include: { sponsor: true }
+    });
+
+    if (!tag) return next();
+
+    console.log(`🔨 Missing QR detected: ${filename}. Generating...`);
+    await generateQRCode(tagCode, designType, tag.sponsor, tag.assetType, tag.customAssetType);
+
+    if (fs.existsSync(filePath)) return res.sendFile(filePath);
+    next();
+  } catch (err) {
+    console.error('Dynamic QR Fallback Error:', err);
+    next();
+  }
+});
+
 // Static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
