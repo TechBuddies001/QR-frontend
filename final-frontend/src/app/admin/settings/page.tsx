@@ -15,14 +15,19 @@ import {
   CheckCircle2,
   Lock,
   Eye,
-  EyeOff
+  EyeOff,
+  User,
+  Users as UsersIcon
 } from "lucide-react";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState("general");
+  const [activeTab, setActiveTab] = useState("profile");
   const [settings, setSettings] = useState<Record<string, string>>({});
+  const [profile, setProfile] = useState({ name: "", email: "" });
+  const [employeeForm, setEmployeeForm] = useState({ name: "", email: "", password: "" });
+  const [adminUser, setAdminUser] = useState<any>(null);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -36,6 +41,14 @@ export default function SettingsPage() {
       }
     };
     fetchSettings();
+    
+    // Load local user profile state
+    const stored = localStorage.getItem("admin_user");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      setAdminUser(parsed);
+      setProfile({ name: parsed.name, email: parsed.email });
+    }
   }, []);
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -75,8 +88,8 @@ export default function SettingsPage() {
         </div>
         <button 
           onClick={handleUpdate}
-          disabled={saving}
-          className="bg-primary hover:bg-orange-600 text-white px-8 py-3.5 rounded-2xl font-black text-sm flex items-center gap-2 shadow-xl shadow-primary/20 transition-all active:scale-95"
+          disabled={saving || activeTab === 'profile' || activeTab === 'team'}
+          className={`px-8 py-3.5 rounded-2xl font-black text-sm flex items-center gap-2 shadow-xl transition-all active:scale-95 ${activeTab === 'profile' || activeTab === 'team' ? 'opacity-0 pointer-events-none' : 'bg-primary hover:bg-orange-600 text-white shadow-primary/20'}`}
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Apply Changes
@@ -86,6 +99,12 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
         {/* Sidebar Nav */}
         <div className="md:col-span-3 space-y-2">
+          <TabButton 
+            active={activeTab === 'profile'} 
+            onClick={() => setActiveTab('profile')} 
+            icon={<User className="w-4 h-4" />} 
+            label="My Profile" 
+          />
           <TabButton 
             active={activeTab === 'general'} 
             onClick={() => setActiveTab('general')} 
@@ -104,11 +123,102 @@ export default function SettingsPage() {
             icon={<Shield className="w-4 h-4" />} 
             label="Security" 
           />
+          <TabButton 
+            active={activeTab === 'team'} 
+            onClick={() => setActiveTab('team')} 
+            icon={<UsersIcon className="w-4 h-4" />} 
+            label="Team / Staff" 
+          />
         </div>
 
         {/* Content Area */}
         <div className="md:col-span-9">
-          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 p-10 shadow-2xl shadow-black/5">
+          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 p-10 shadow-2xl shadow-black/5 min-h-[400px]">
+            
+            {activeTab === 'profile' && (
+              <div className="space-y-8 animate-in fade-in duration-300">
+                <div className="grid grid-cols-2 gap-8">
+                  <SettingInput 
+                    label="Full Name" 
+                    value={profile.name} 
+                    onChange={(v) => setProfile({...profile, name: v})} 
+                    placeholder="Your Name"
+                  />
+                  <SettingInput 
+                    label="Email Address" 
+                    value={profile.email} 
+                    onChange={(v) => setProfile({...profile, email: v})} 
+                    placeholder="email@example.com"
+                  />
+                </div>
+                <button 
+                  onClick={async () => {
+                    setSaving(true);
+                    try {
+                      const res = await api.put("/auth/profile", profile);
+                      localStorage.setItem("admin_user", JSON.stringify(res.data.admin));
+                      toast.success("Profile updated! Data syncs instantly.");
+                      // Update Header automatically by triggering a small event or just reloading
+                      window.location.reload(); 
+                    } catch (e) {
+                      toast.error("Failed to update profile");
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                  disabled={saving}
+                  className="bg-primary hover:bg-orange-600 text-white px-8 py-3.5 rounded-2xl font-black text-sm flex items-center gap-2 shadow-xl shadow-primary/20 transition-all active:scale-95"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Update Profile
+                </button>
+              </div>
+            )}
+            
+            {activeTab === 'team' && (
+              <div className="space-y-8 animate-in fade-in duration-300">
+                {(adminUser?.role === 'admin' || adminUser?.role === 'superadmin') ? (
+                  <>
+                  <div className="flex items-center gap-4 p-6 bg-primary/5 rounded-3xl border border-primary/20 mb-4">
+                     <div>
+                        <h4 className="font-black text-primary text-sm uppercase">Add Office Employee</h4>
+                        <p className="text-xs font-medium text-slate-500">Create login credentials for new staff members to access the dashboard.</p>
+                     </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <SettingInput label="Employee Name" value={employeeForm.name} onChange={(v) => setEmployeeForm({...employeeForm, name: v})} placeholder="Staff Name" />
+                    <SettingInput label="Email ID" value={employeeForm.email} onChange={(v) => setEmployeeForm({...employeeForm, email: v})} placeholder="staff@example.com" />
+                    <div className="col-span-2 md:col-span-1">
+                      <SettingInput label="Secure Password" isSecret value={employeeForm.password} onChange={(v) => setEmployeeForm({...employeeForm, password: v})} />
+                    </div>
+                  </div>
+                  <button 
+                    disabled={saving}
+                    onClick={async () => {
+                      if (!employeeForm.name || !employeeForm.email || !employeeForm.password) return toast.error("All fields are required");
+                      setSaving(true);
+                      try {
+                        await api.post("/auth/employee", employeeForm);
+                        toast.success("Employee added successfully!");
+                        setEmployeeForm({ name: "", email: "", password: "" });
+                      } catch (e: any) {
+                        toast.error(e.response?.data?.error || "Failed to add employee");
+                      } finally {
+                        setSaving(false);
+                      }
+                    }}
+                    className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 px-8 py-3.5 rounded-2xl font-black text-sm transition-all shadow-xl"
+                  >
+                    {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create Employee'}
+                  </button>
+                  </>
+                ) : (
+                  <div className="text-center py-20">
+                    <p className="text-slate-500 font-bold mb-4 flex justify-center"><Shield className="w-10 h-10 text-slate-300"/></p>
+                    <p className="text-slate-500 font-bold">You don't have permission to add employees.</p>
+                  </div>
+                )}
+              </div>
+            )}
             
             {activeTab === 'general' && (
               <div className="space-y-8 animate-in fade-in duration-300">
@@ -174,11 +284,34 @@ export default function SettingsPage() {
                   />
                 </div>
                 
-                <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-2xl flex items-start gap-3 border border-amber-100 dark:border-amber-900/30">
+                <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-2xl flex items-start gap-3 border border-amber-100 dark:border-amber-900/30 mb-8">
                    <Info className="w-5 h-5 text-amber-600 mt-0.5" />
                    <p className="text-xs text-amber-700 dark:text-amber-400 font-medium leading-relaxed">
                       <b>Security Note:</b> These credentials are encrypted at rest. For maximum security, we recommend setting these in your server's .env file. Frontend configuration will take precedence if provided.
                    </p>
+                </div>
+
+                <div className="flex items-center gap-4 p-6 bg-emerald-500/5 rounded-3xl border border-emerald-500/20 mb-4">
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" className="w-10 h-10" alt="WhatsApp" />
+                   <div>
+                      <h4 className="font-black text-emerald-600 text-sm uppercase">Exotel WhatsApp Integration</h4>
+                      <p className="text-xs font-medium text-slate-500">Configure Exotel Business WhatsApp for instant alert delivery & multimedia scanning alerts.</p>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-8">
+                  <SettingInput 
+                    label="WhatsApp Business Number" 
+                    value={settings.exotelWhatsappNumber || ""} 
+                    onChange={(v) => handleChange('exotelWhatsappNumber', v)} 
+                    placeholder="e.g. +919876543210"
+                  />
+                  <SettingInput 
+                    label="Scan Alert Template Name" 
+                    value={settings.exotelWhatsappTemplate || ""} 
+                    onChange={(v) => handleChange('exotelWhatsappTemplate', v)} 
+                    placeholder="e.g. scan_alert_v1"
+                  />
                 </div>
               </div>
             )}

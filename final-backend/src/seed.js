@@ -22,6 +22,7 @@ async function main() {
 
   // Seed Plans
   const plans = [
+    { name: 'free_trial', displayName: 'Free Trial', price: 0, validityDays: 30, features: JSON.stringify(['1 QR Tag', 'Basic Alert System', 'Standard Support']) },
     { name: 'basic', displayName: 'Basic', price: 299, validityDays: 365, features: JSON.stringify(['1 QR Tag', 'Call Masking', 'Scan Alerts', 'Email Support']) },
     { name: 'standard', displayName: 'Standard', price: 599, validityDays: 730, features: JSON.stringify(['3 QR Tags', 'Call Masking', 'SMS Alerts', 'Priority Support', 'Emergency Contact']) },
     { name: 'premium', displayName: 'Premium', price: 1499, validityDays: 1825, features: JSON.stringify(['10 QR Tags', 'Call Masking', 'SMS Alerts', 'Emergency Contact', 'Sponsor Branding', '24/7 Support', 'Analytics']) },

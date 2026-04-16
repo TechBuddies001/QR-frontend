@@ -23,6 +23,9 @@ export default function PlansPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
+  const [availableFeatures, setAvailableFeatures] = useState<string[]>([]);
+  const [customFeature, setCustomFeature] = useState("");
+  
   
   // Form State
   const [formData, setFormData] = useState({
@@ -40,8 +43,16 @@ export default function PlansPage() {
     try {
       const response = await api.get("/plans?showAll=true");
       setPlans(response.data.plans);
+      
+      const settingsRes = await api.get("/settings");
+      if (settingsRes.data.settings?.plan_features) {
+         setAvailableFeatures(JSON.parse(settingsRes.data.settings.plan_features));
+      } else {
+         const def = ['1 QR Tag', 'Call Masking', 'Scan Alerts', 'Email Support', 'Priority Support', 'Sponsor Branding'];
+         setAvailableFeatures(def);
+      }
     } catch (error) {
-      toast.error("Failed to fetch plans");
+      toast.error("Failed to fetch plans & features");
     } finally {
       setLoading(false);
     }
@@ -111,9 +122,35 @@ export default function PlansPage() {
   };
 
   const addFeature = () => {
-    if (!newFeature) return;
+    if (!newFeature || formData.features.includes(newFeature)) return;
     setFormData({ ...formData, features: [...formData.features, newFeature] });
     setNewFeature("");
+  };
+
+  const addGlobalFeature = async () => {
+    if (!customFeature || availableFeatures.includes(customFeature)) return;
+    const newList = [...availableFeatures, customFeature];
+    setAvailableFeatures(newList);
+    setCustomFeature("");
+    try {
+      await api.put("/settings", { plan_features: JSON.stringify(newList) });
+      toast.success("Feature added to global master list");
+    } catch(e) {
+      toast.error("Failed to save global feature");
+    }
+  };
+
+  const deleteGlobalFeature = async (featureToDelete: string) => {
+    const newList = availableFeatures.filter(f => f !== featureToDelete);
+    setAvailableFeatures(newList);
+    if (newFeature === featureToDelete) setNewFeature(""); 
+    
+    try {
+      await api.put("/settings", { plan_features: JSON.stringify(newList) });
+      toast.success("Feature removed from global master list");
+    } catch(e) {
+      toast.error("Failed to delete feature");
+    }
   };
 
   const removeFeature = (index: number) => {
@@ -310,20 +347,61 @@ export default function PlansPage() {
                 <div className="space-y-4">
                   <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest px-1 block">Plan Features List</label>
                   <div className="flex gap-2">
-                    <input 
-                      className="flex-1 px-5 py-3.5 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-primary focus:bg-white dark:focus:bg-slate-900 rounded-2xl text-sm font-bold transition-all outline-none"
-                      placeholder="Add a feature (e.g. Call Masking)..."
+                    <select 
+                      className="flex-1 px-5 py-3.5 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-primary focus:bg-white dark:focus:bg-slate-900 rounded-2xl text-sm font-bold transition-all outline-none appearance-none"
                       value={newFeature}
                       onChange={(e) => setNewFeature(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
-                    />
+                    >
+                      <option value="">Select a feature from master list...</option>
+                      {availableFeatures.map(f => (
+                         <option key={f} value={f}>{f}</option>
+                      ))}
+                    </select>
                     <button 
                       type="button"
                       onClick={addFeature}
-                      className="px-6 bg-slate-800 text-white rounded-2xl font-black text-xs hover:bg-slate-900 transition-all uppercase"
+                      disabled={!newFeature}
+                      className="px-6 bg-slate-800 text-white rounded-2xl font-black text-xs hover:bg-slate-900 transition-all uppercase disabled:opacity-50"
                     >
-                      Add
+                      Add To Plan
                     </button>
+                  </div>
+                  
+                  <div className="mt-4 p-4 bg-slate-50/50 dark:bg-slate-800/10 rounded-2xl border border-slate-100 dark:border-slate-800/50">
+                    <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest px-1 block mb-3">Manage Global Master Features</label>
+                    <div className="flex gap-2 mb-4">
+                      <input 
+                        className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 focus:border-slate-300 dark:focus:border-slate-700 rounded-xl text-xs font-bold transition-all outline-none"
+                        placeholder="Type a new global feature here..."
+                        value={customFeature}
+                        onChange={(e) => setCustomFeature(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addGlobalFeature())}
+                      />
+                      <button 
+                        type="button"
+                        onClick={addGlobalFeature}
+                        className="px-4 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-black text-[10px] hover:bg-slate-300 dark:hover:bg-slate-600 transition-all uppercase whitespace-nowrap"
+                      >
+                        Add Global
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                       {availableFeatures.map(f => (
+                         <div key={f} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-400 group">
+                           {f}
+                           <button 
+                             type="button" 
+                             onClick={() => deleteGlobalFeature(f)} 
+                             className="text-slate-300 hover:text-red-500 opacity-50 group-hover:opacity-100 transition-all"
+                             title={`Delete ${f}`}
+                           >
+                             <X className="w-3.5 h-3.5" />
+                           </button>
+                         </div>
+                       ))}
+                       {availableFeatures.length === 0 && <span className="text-[10px] text-slate-400 italic font-medium">No master features exist.</span>}
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap gap-2 pt-2">

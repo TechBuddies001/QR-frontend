@@ -1,8 +1,8 @@
-const { sendExotelSms } = require('./exotel');
+const { sendExotelWhatsapp } = require('./exotel');
 const prisma = require('../lib/prisma');
 
 /**
- * Send scan alert SMS to tag owner
+ * Send scan alert WhatsApp to tag owner
  */
 const sendScanAlert = async ({ tag, scannerLat, scannerLng, scannerCity }) => {
   try {
@@ -12,11 +12,13 @@ const sendScanAlert = async ({ tag, scannerLat, scannerLng, scannerCity }) => {
 
     const location = scannerCity || (scannerLat ? `${scannerLat}, ${scannerLng}` : 'Unknown');
 
-    const message = `[Tarkshya] Your tag (${tag.tagCode}) was scanned.\nTime: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}\nLocation: ${location}\nMap: ${mapsLink}`;
-
-    const result = await sendExotelSms({
+    // Assume settings fetched template name, otherwise fallback
+    const result = await sendExotelWhatsapp({
       to: tag.ownerPhone,
-      message,
+      templateName: "scan_alert_wa",
+      components: [
+        { type: "body", parameters: [{ type: "text", text: tag.tagCode }, { type: "text", text: location }, { type: "text", text: mapsLink }] }
+      ]
     });
 
     // Log to DB
@@ -24,22 +26,22 @@ const sendScanAlert = async ({ tag, scannerLat, scannerLng, scannerCity }) => {
       data: {
         tagId: tag.id,
         recipient: tag.ownerPhone,
-        message,
+        message: `Template: scan_alert_wa [Location: ${location}]`,
         status: 'sent',
-        provider: 'exotel',
+        provider: 'exotel_whatsapp',
       },
     });
 
     return result;
   } catch (err) {
-    console.error('SMS send failed:', err.message);
+    console.error('WhatsApp send failed:', err.message);
     await prisma.smsLog.create({
       data: {
         tagId: tag.id,
         recipient: tag.ownerPhone,
-        message: `Scan alert for tag ${tag.tagCode}`,
+        message: `Template: scan_alert_wa [Location: ${scannerCity || 'Unknown'}]`,
         status: 'failed',
-        provider: 'exotel',
+        provider: 'exotel_whatsapp',
       },
     });
     throw err;
