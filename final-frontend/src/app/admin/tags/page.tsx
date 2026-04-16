@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import api from "@/lib/api";
 import { 
   ChevronLeft, ChevronRight, Download, Edit2, 
@@ -26,7 +27,10 @@ interface Tag {
   };
 }
 
-export default function Page() {
+function TagsContent() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+
   const [loading, setLoading] = useState(true);
   const [tags, setTags] = useState<Tag[]>([]);
   const [pagination, setPagination] = useState({
@@ -36,20 +40,20 @@ export default function Page() {
     limit: 100
   });
   const [filters, setFilters] = useState({
-    search: "",
+    search: initialSearch,
     status: "all",
     planType: "all",
     assetType: "all"
   });
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const fetchTags = async (page = 1, currentLimit = pagination.limit) => {
+  const fetchTags = async (page = 1, currentLimit = pagination.limit, currentSearch = filters.search) => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: currentLimit.toString(),
-        ...(filters.search && { search: filters.search }),
+        ...(currentSearch && { search: currentSearch }),
         ...(filters.status !== "all" && { status: filters.status }),
         ...(filters.planType !== "all" && { planType: filters.planType }),
         ...(filters.assetType !== "all" && { assetType: filters.assetType })
@@ -74,6 +78,14 @@ export default function Page() {
   useEffect(() => {
     fetchTags(1);
   }, [filters.status, filters.planType, filters.assetType]);
+
+  useEffect(() => {
+    const urlSearch = searchParams.get("search");
+    if (urlSearch !== null && urlSearch !== filters.search) {
+      setFilters(prev => ({ ...prev, search: urlSearch }));
+      fetchTags(1, pagination.limit, urlSearch);
+    }
+  }, [searchParams]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -203,6 +215,7 @@ export default function Page() {
              onChange={(e) => setFilters({...filters, planType: e.target.value})}
            >
              <option value="all">All Plans</option>
+             <option value="free_trial">Free Trial</option>
              <option value="basic">Basic</option>
              <option value="standard">Standard</option>
              <option value="premium">Premium</option>
@@ -413,5 +426,17 @@ export default function Page() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="w-10 h-10 text-primary animate-spin" />
+      </div>
+    }>
+      <TagsContent />
+    </Suspense>
   );
 }

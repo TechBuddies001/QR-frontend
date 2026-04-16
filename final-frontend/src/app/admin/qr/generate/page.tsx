@@ -45,6 +45,7 @@ export default function Page() {
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
   const [qrResult, setQrResult] = useState<any>(null);
   const [bulkResult, setBulkResult] = useState<any>(null);
+  const [activeMode, setActiveMode] = useState<'single'|'bulk'>('single');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -359,283 +360,263 @@ export default function Page() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-8 bg-slate-50 dark:bg-slate-950">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+    <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-slate-50 dark:bg-slate-950">
+      <div className="w-full max-w-[1600px] mx-auto">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+          <div>
+            <h2 className="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Generate QR Tags</h2>
+            <p className="text-sm font-medium text-slate-500 mt-1">Create single smart tags or generate batches via CSV.</p>
+          </div>
+          <div className="bg-slate-200/50 dark:bg-slate-800/50 p-1 rounded-xl flex items-center gap-1">
+            <button 
+               onClick={() => setActiveMode('single')}
+               className={`px-5 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${activeMode === 'single' ? 'bg-white dark:bg-slate-800 text-primary shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+               <QrIcon className="w-4 h-4" /> Single Tag
+            </button>
+            <button 
+               onClick={() => setActiveMode('bulk')}
+               className={`px-5 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2 ${activeMode === 'bulk' ? 'bg-white dark:bg-slate-800 text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+            >
+               <FileSpreadsheet className="w-4 h-4" /> Bulk Export
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Form Section */}
-          <div className="md:col-span-7 space-y-6">
-            <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-3 mb-8">
-                 <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                    <QrIcon className="w-5 h-5" />
-                 </div>
-                 <h3 className="text-xl font-bold">Generate Smart QR Tag</h3>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Owner Name</label>
-                    <input
-                      className={`w-full rounded-xl border-2 ${errors.ownerName ? 'border-red-500 bg-red-50 dark:bg-red-950/10' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'} focus:ring-primary focus:border-primary px-4 py-2.5 outline-none transition-all font-medium`}
-                      placeholder="e.g. Vikas Kumar"
-                      type="text"
-                      value={formData.ownerName}
-                      onChange={(e) => {
-                        setFormData({...formData, ownerName: e.target.value});
-                        if (errors.ownerName) setErrors({...errors, ownerName: ""});
-                      }}
-                    />
-                    {errors.ownerName && <p className="text-[10px] font-bold text-red-500 px-1">{errors.ownerName}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Owner Phone</label>
-                    <input
-                      className={`w-full rounded-xl border-2 ${errors.ownerPhone ? 'border-red-500 bg-red-50 dark:bg-red-950/10' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'} focus:ring-primary focus:border-primary px-4 py-2.5 outline-none transition-all font-medium`}
-                      placeholder="10-digit mobile"
-                      type="tel"
-                      maxLength={10}
-                      value={formData.ownerPhone}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, '').slice(0, 10);
-                        setFormData({...formData, ownerPhone: val});
-                        if (errors.ownerPhone) setErrors({...errors, ownerPhone: ""});
-                      }}
-                    />
-                    {errors.ownerPhone && <p className="text-[10px] font-bold text-red-500 px-1">{errors.ownerPhone}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Emergency Contact</label>
-                    <input
-                      className={`w-full rounded-xl border-2 ${errors.emergencyContact ? 'border-red-500 bg-red-50 dark:bg-red-950/10' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'} focus:ring-primary focus:border-primary px-4 py-2.5 outline-none transition-all font-medium`}
-                      placeholder="Optional alternate"
-                      type="tel"
-                      maxLength={10}
-                      value={formData.emergencyContact}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, '').slice(0, 10);
-                        setFormData({...formData, emergencyContact: val});
-                        if (errors.emergencyContact) setErrors({...errors, emergencyContact: ""});
-                      }}
-                    />
-                    {errors.emergencyContact && <p className="text-[10px] font-bold text-red-500 px-1">{errors.emergencyContact}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Tag ID / Vehicle No.</label>
-                    <input
-                      className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-primary focus:border-primary px-4 py-2.5 outline-none transition-all font-medium"
-                      placeholder="Auto-generated if empty"
-                      type="text"
-                      value={formData.tagCode}
-                      onChange={(e) => setFormData({...formData, tagCode: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Asset Type</label>
-                    <select 
-                      className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-primary focus:border-primary px-4 py-2.5 outline-none transition-all font-medium appearance-none"
-                      value={formData.assetType}
-                      onChange={(e) => setFormData({...formData, assetType: e.target.value})}
-                    >
-                      <option value="employee">💼 Employee</option>
-                      <option value="student">🎒 Student</option>
-                      <option value="vehicle">🚗 Vehicle</option>
-                      <option value="pet">🐕 Pet</option>
-                      <option value="person">👤 Person</option>
-                      <option value="other">📦 Other Asset</option>
-                    </select>
-
-                    {formData.assetType === 'other' && (
-                      <div className="mt-4 p-4 bg-orange-50 dark:bg-orange-950/20 rounded-xl border border-orange-200 dark:border-orange-800 animate-in fade-in slide-in-from-top-1">
-                        <label className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider mb-1 block">Specify Custom Asset Name</label>
+          {/* Main Action Section */}
+          <div className="lg:col-span-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            
+            {activeMode === 'single' ? (
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Left Column: Owner */}
+                  <div className="space-y-5">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                      <span className="bg-primary/10 text-primary size-5 rounded-md flex items-center justify-center">1</span>
+                      Owner Identity
+                    </h4>
+                    <div className="space-y-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Owner Name</label>
                         <input
-                          className="w-full bg-transparent border-b-2 border-orange-200 focus:border-orange-500 outline-none py-1 font-bold text-orange-900 dark:text-orange-100 placeholder:text-orange-200"
-                          placeholder="e.g. Laptop, Bag, Equipment"
+                          className={`w-full rounded-xl border-2 ${errors.ownerName ? 'border-red-500 bg-red-50' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50'} focus:ring-primary focus:border-primary px-4 py-3 outline-none transition-all font-medium`}
+                          placeholder="e.g. Vikas Kumar"
                           type="text"
-                          value={formData.customAssetType || ''}
-                          onChange={(e) => setFormData({...formData, customAssetType: e.target.value})}
+                          value={formData.ownerName}
+                          onChange={(e) => {
+                            setFormData({...formData, ownerName: e.target.value});
+                            if (errors.ownerName) setErrors({...errors, ownerName: ""});
+                          }}
                         />
                       </div>
-                    )}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Mobile Number (10 Digit)</label>
+                        <input
+                          className={`w-full rounded-xl border-2 ${errors.ownerPhone ? 'border-red-500 bg-red-50' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50'} focus:ring-primary focus:border-primary px-4 py-3 outline-none transition-all font-medium`}
+                          placeholder="Primary contact"
+                          type="tel"
+                          maxLength={10}
+                          value={formData.ownerPhone}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                            setFormData({...formData, ownerPhone: val});
+                            if (errors.ownerPhone) setErrors({...errors, ownerPhone: ""});
+                          }}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Emergency Number (Optional)</label>
+                        <input
+                          className={`w-full rounded-xl border-2 ${errors.emergencyContact ? 'border-red-500 bg-red-50' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50'} focus:ring-primary focus:border-primary px-4 py-3 outline-none transition-all font-medium`}
+                          placeholder="Alternate contact"
+                          type="tel"
+                          maxLength={10}
+                          value={formData.emergencyContact}
+                          onChange={(e) => setFormData({...formData, emergencyContact: e.target.value})}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Plan</label>
-                    <select 
-                      className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-primary focus:border-primary px-4 py-2.5 outline-none transition-all font-bold text-primary appearance-none"
-                      value={formData.planType}
-                      onChange={(e) => setFormData({...formData, planType: e.target.value})}
-                    >
-                      {plans.map(p => (
-                        <option key={p.id} value={p.name}>{p.displayName} (₹{p.price})</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Corporate Sponsor</label>
-                    <select 
-                      className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-primary focus:border-primary px-4 py-2.5 outline-none transition-all font-medium appearance-none"
-                      value={formData.sponsorId}
-                      onChange={(e) => setFormData({...formData, sponsorId: e.target.value})}
-                    >
-                      <option value="">None (No Sponsor)</option>
-                      {sponsors.map(s => (
-                        <option key={s.id} value={s.id}>{s.name}</option>
-                      ))}
-                    </select>
+
+                  {/* Right Column: Asset Config */}
+                  <div className="space-y-5">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                      <span className="bg-primary/10 text-primary size-5 rounded-md flex items-center justify-center">2</span>
+                      Asset Configuration
+                    </h4>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Asset Type</label>
+                          <select 
+                            className="w-full rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-primary focus:border-primary px-4 py-3 outline-none transition-all font-medium appearance-none"
+                            value={formData.assetType}
+                            onChange={(e) => setFormData({...formData, assetType: e.target.value})}
+                          >
+                            <option value="employee">💼 Employee</option>
+                            <option value="vehicle">🚗 Vehicle</option>
+                            <option value="pet">🐕 Pet</option>
+                            <option value="other">📦 Other</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Plan Tier</label>
+                          <select 
+                            className="w-full rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-primary focus:border-primary px-4 py-3 outline-none transition-all font-bold text-primary appearance-none"
+                            value={formData.planType}
+                            onChange={(e) => setFormData({...formData, planType: e.target.value})}
+                          >
+                            {plans.map(p => (<option key={p.id} value={p.name}>{p.displayName}</option>))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {formData.assetType === 'other' && (
+                        <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 p-3 bg-orange-50 dark:bg-orange-900/10 rounded-xl border border-orange-200 dark:border-orange-900/30">
+                          <label className="text-xs font-bold text-orange-700 dark:text-orange-400">Specify Custom Asset Name</label>
+                          <input
+                            className="w-full bg-white dark:bg-slate-800 rounded-lg border border-orange-200 dark:border-orange-800/50 focus:ring-orange-500 focus:border-orange-500 px-3 py-2 outline-none transition-all font-medium text-sm"
+                            placeholder="e.g. Laptop, Bag, Equipment"
+                            type="text"
+                            value={formData.customAssetType || ''}
+                            onChange={(e) => setFormData({...formData, customAssetType: e.target.value})}
+                          />
+                        </div>
+                      )}
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Sponsorship (Optional)</label>
+                        <select 
+                          className="w-full rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-primary focus:border-primary px-4 py-3 outline-none transition-all font-medium appearance-none"
+                          value={formData.sponsorId}
+                          onChange={(e) => setFormData({...formData, sponsorId: e.target.value})}
+                        >
+                          <option value="">No Corporate Sponsor</option>
+                          {sponsors.map(s => (<option key={s.id} value={s.id}>{s.name}</option>))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Custom Tag ID (Leave blank to auto-generate)</label>
+                        <input
+                          className="w-full rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-primary focus:border-primary px-4 py-3 outline-none transition-all font-medium"
+                          placeholder="e.g. DL-4C-1234"
+                          type="text"
+                          value={formData.tagCode}
+                          onChange={(e) => setFormData({...formData, tagCode: e.target.value})}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Design Selection */}
-                <div className="space-y-4">
-                  <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">QR Design Templates & Quantities</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div 
-                      className={`relative p-4 rounded-xl border-2 transition-all group ${formData.designTypes.includes('standard') ? 'border-primary bg-primary/5' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700'}`}
-                    >
-                      <div 
-                        onClick={() => {
-                          const designs = formData.designTypes.includes('standard')
-                            ? formData.designTypes.filter(d => d !== 'standard')
-                            : [...formData.designTypes, 'standard'];
-                          if (designs.length === 0) designs.push('standard');
-                          setFormData({...formData, designTypes: designs});
-                        }}
-                        className="cursor-pointer flex items-center gap-3 mb-3"
-                      >
-                        <div className={`p-1.5 rounded-lg ${formData.designTypes.includes('standard') ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
-                          <QrIcon className="size-4" />
-                        </div>
-                        <span className={`font-bold text-sm ${formData.designTypes.includes('standard') ? 'text-primary' : 'text-slate-600 dark:text-slate-400'}`}>Standard Vertical</span>
-                        {formData.designTypes.includes('standard') && <CheckCircle2 className="size-4 ml-auto text-primary" />}
+                <div className="border-t border-slate-100 dark:border-slate-800 pt-8" />
+
+                <div className="space-y-6 flex-1">
+                  <h4 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                    <span className="bg-primary/10 text-primary size-5 rounded-md flex items-center justify-center">3</span>
+                    Design Print Options
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* STANDARD */}
+                    <div className={`relative p-5 rounded-xl border-2 transition-all group ${formData.designTypes.includes('standard') ? 'border-primary bg-primary/5' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200'}`}>
+                      <div onClick={() => {
+                        const designs = formData.designTypes.includes('standard') ? formData.designTypes.filter(d => d !== 'standard') : [...formData.designTypes, 'standard'];
+                        if (designs.length === 0) designs.push('standard');
+                        setFormData({...formData, designTypes: designs});
+                      }} className="cursor-pointer flex items-center gap-3 mb-2">
+                        <div className={`p-2 rounded-lg ${formData.designTypes.includes('standard') ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}><QrIcon className="size-5" /></div>
+                        <span className={`font-bold text-sm ${formData.designTypes.includes('standard') ? 'text-primary' : 'text-slate-600'}`}>Standard</span>
+                        {formData.designTypes.includes('standard') && <CheckCircle2 className="size-5 ml-auto text-primary" />}
                       </div>
-                      <p className="text-[10px] text-slate-400 leading-tight mb-4">Ideal for vehicles and larger assets. Clear branding.</p>
-                      
                       {formData.designTypes.includes('standard') && (
-                        <div className="flex items-center gap-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-primary/20">
+                        <div className="flex items-center gap-3 bg-white p-2.5 mt-4 rounded-lg border border-primary/20">
                           <span className="text-[10px] font-bold text-slate-400 uppercase">Qty:</span>
-                          <input 
-                            type="number" 
-                            min="1" 
-                            className="bg-transparent text-sm font-black text-primary outline-none w-full"
-                            value={formData.quantities.standard}
-                            onChange={(e) => setFormData({...formData, quantities: {...formData.quantities, standard: parseInt(e.target.value) || 1}})}
-                          />
+                          <input type="number" min="1" className="bg-transparent text-sm font-black text-primary w-full outline-none" value={formData.quantities.standard} onChange={(e) => setFormData({...formData, quantities: {...formData.quantities, standard: parseInt(e.target.value) || 1}})} />
                         </div>
                       )}
                     </div>
-
-                    <div 
-                      className={`relative p-4 rounded-xl border-2 transition-all group ${formData.designTypes.includes('circle') ? 'border-primary bg-primary/5' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700'}`}
-                    >
-                      <div 
-                        onClick={() => {
-                          const designs = formData.designTypes.includes('circle')
-                            ? formData.designTypes.filter(d => d !== 'circle')
-                            : [...formData.designTypes, 'circle'];
-                          if (designs.length === 0) designs.push('standard');
-                          setFormData({...formData, designTypes: designs});
-                        }}
-                        className="cursor-pointer flex items-center gap-3 mb-3"
-                      >
-                        <div className={`p-1.5 rounded-lg ${formData.designTypes.includes('circle') ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
-                          <div className="size-4 rounded-full border-2 border-current" />
-                        </div>
-                        <span className={`font-bold text-sm ${formData.designTypes.includes('circle') ? 'text-primary' : 'text-slate-600 dark:text-slate-400'}`}>Circular Premium</span>
-                        {formData.designTypes.includes('circle') && <CheckCircle2 className="size-4 ml-auto text-primary" />}
+                    {/* CIRCULAR */}
+                    <div className={`relative p-5 rounded-xl border-2 transition-all group ${formData.designTypes.includes('circle') ? 'border-primary bg-primary/5' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200'}`}>
+                      <div onClick={() => {
+                        const designs = formData.designTypes.includes('circle') ? formData.designTypes.filter(d => d !== 'circle') : [...formData.designTypes, 'circle'];
+                        if (designs.length === 0) designs.push('standard');
+                        setFormData({...formData, designTypes: designs});
+                      }} className="cursor-pointer flex items-center gap-3 mb-2">
+                        <div className={`p-2 rounded-lg ${formData.designTypes.includes('circle') ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}><div className="size-5 rounded-full border-2 border-current" /></div>
+                        <span className={`font-bold text-sm ${formData.designTypes.includes('circle') ? 'text-primary' : 'text-slate-600'}`}>Circular</span>
+                        {formData.designTypes.includes('circle') && <CheckCircle2 className="size-5 ml-auto text-primary" />}
                       </div>
-                      <p className="text-[10px] text-slate-400 leading-tight mb-4">Perfect for stickers and small equipment. Modern look.</p>
-                      
                       {formData.designTypes.includes('circle') && (
-                        <div className="flex items-center gap-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-primary/20">
+                        <div className="flex items-center gap-3 bg-white p-2.5 mt-4 rounded-lg border border-primary/20">
                           <span className="text-[10px] font-bold text-slate-400 uppercase">Qty:</span>
-                          <input 
-                            type="number" 
-                            min="1" 
-                            className="bg-transparent text-sm font-black text-primary outline-none w-full"
-                            value={formData.quantities.circle}
-                            onChange={(e) => setFormData({...formData, quantities: {...formData.quantities, circle: parseInt(e.target.value) || 1}})}
-                          />
+                          <input type="number" min="1" className="bg-transparent text-sm font-black text-primary w-full outline-none" value={formData.quantities.circle} onChange={(e) => setFormData({...formData, quantities: {...formData.quantities, circle: parseInt(e.target.value) || 1}})} />
                         </div>
                       )}
                     </div>
-
-                    <div 
-                      className={`relative p-4 rounded-xl border-2 transition-all group ${formData.designTypes.includes('landscape') ? 'border-primary bg-primary/5' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700'}`}
-                    >
-                      <div 
-                        onClick={() => {
-                          const designs = formData.designTypes.includes('landscape')
-                            ? formData.designTypes.filter(d => d !== 'landscape')
-                            : [...formData.designTypes, 'landscape'];
-                          if (designs.length === 0) designs.push('standard');
-                          setFormData({...formData, designTypes: designs});
-                        }}
-                        className="cursor-pointer flex items-center gap-3 mb-3"
-                      >
-                        <div className={`p-1.5 rounded-lg ${formData.designTypes.includes('landscape') ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}>
-                           <Zap className="size-4" />
-                        </div>
-                        <span className={`font-bold text-sm ${formData.designTypes.includes('landscape') ? 'text-primary' : 'text-slate-600 dark:text-slate-400'}`}>Landscape (Card)</span>
-                        {formData.designTypes.includes('landscape') && <CheckCircle2 className="size-4 ml-auto text-primary" />}
+                    {/* LANDSCAPE */}
+                    <div className={`relative p-5 rounded-xl border-2 transition-all group ${formData.designTypes.includes('landscape') ? 'border-primary bg-primary/5' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200'}`}>
+                      <div onClick={() => {
+                        const designs = formData.designTypes.includes('landscape') ? formData.designTypes.filter(d => d !== 'landscape') : [...formData.designTypes, 'landscape'];
+                        if (designs.length === 0) designs.push('standard');
+                        setFormData({...formData, designTypes: designs});
+                      }} className="cursor-pointer flex items-center gap-3 mb-2">
+                        <div className={`p-2 rounded-lg ${formData.designTypes.includes('landscape') ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}><Zap className="size-5" /></div>
+                        <span className={`font-bold text-sm ${formData.designTypes.includes('landscape') ? 'text-primary' : 'text-slate-600'}`}>Landscape</span>
+                        {formData.designTypes.includes('landscape') && <CheckCircle2 className="size-5 ml-auto text-primary" />}
                       </div>
-                      <p className="text-[10px] text-slate-400 leading-tight mb-4">Credit card sized tags. Ideal for wallets, ID cards etc.</p>
-                      
                       {formData.designTypes.includes('landscape') && (
-                        <div className="flex items-center gap-2 bg-white dark:bg-slate-800 p-2 rounded-lg border border-primary/20">
+                        <div className="flex items-center gap-3 bg-white p-2.5 mt-4 rounded-lg border border-primary/20">
                           <span className="text-[10px] font-bold text-slate-400 uppercase">Qty:</span>
-                          <input 
-                            type="number" 
-                            min="1" 
-                            className="bg-transparent text-sm font-black text-primary outline-none w-full"
-                            value={formData.quantities.landscape}
-                            onChange={(e) => setFormData({...formData, quantities: {...formData.quantities, landscape: parseInt(e.target.value) || 1}})}
-                          />
+                          <input type="number" min="1" className="bg-transparent text-sm font-black text-primary w-full outline-none" value={formData.quantities.landscape} onChange={(e) => setFormData({...formData, quantities: {...formData.quantities, landscape: parseInt(e.target.value) || 1}})} />
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                   <label className="text-sm font-semibold text-slate-600 dark:text-slate-400">Custom Message (Shown on Scan)</label>
+                <div className="space-y-3">
+                   <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Custom Message (Shown on Scan)</label>
                    <textarea
-                      className="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-primary focus:border-primary px-4 py-2.5 outline-none transition-all min-h-[100px] font-medium"
+                      className="w-full rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-primary focus:border-primary px-4 py-3 outline-none transition-all min-h-[80px] font-medium resize-none shadow-sm"
                       placeholder="e.g. Please contact me if my vehicle is causing issues."
                       value={formData.customMessage}
                       onChange={(e) => setFormData({...formData, customMessage: e.target.value})}
                    />
                 </div>
 
-                <div className="flex gap-4 pt-4">
+                <div className="flex gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                   <button 
                     type="submit"
                     disabled={loading || bulkLoading}
-                    className="flex-1 bg-primary text-white py-4 rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20 disabled:opacity-70 disabled:pointer-events-none"
+                    className="flex-1 bg-primary text-white py-4 rounded-xl font-bold hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-xl shadow-primary/20 disabled:opacity-70 disabled:pointer-events-none"
                   >
                     {loading ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                       <>
                         <Zap className="w-5 h-5 fill-current" />
-                        Generate & Save
+                        Generate Space Tag
                       </>
                     )}
                   </button>
                   <button 
                     type="button"
                     onClick={handleReset}
-                    className="px-8 py-4 border border-slate-200 dark:border-slate-800 rounded-xl font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2 text-slate-600 dark:text-slate-400"
+                    className="px-8 py-4 bg-slate-50 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 rounded-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-all flex items-center gap-2 text-slate-600 dark:text-slate-400"
                   >
                     <RotateCcw className="w-5 h-5" />
-                    Reset
+                    Reset Form
                   </button>
                 </div>
               </form>
             </div>
-
-            {/* Bulk Generation Section */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm group">
+            ) : (
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm group">
+                {/* Bulk Generation Section */}
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-600">
@@ -863,17 +844,20 @@ export default function Page() {
                    </div>
                 </div>
 
-                <div className="mt-6 flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30">
-                    <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
-                    <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed font-medium">
-                        Ensure your CSV columns strictly follow our template: <b>ownerName, ownerPhone, emergencyContact, assetType, planType</b>.
+                <div className="mt-6 flex flex-col md:flex-row items-center gap-4 p-5 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                    <div className="size-10 bg-amber-100 dark:bg-amber-900/50 rounded-full flex items-center justify-center shrink-0">
+                        <AlertCircle className="w-5 h-5 text-amber-600" />
+                    </div>
+                    <p className="text-sm text-amber-700 dark:text-amber-400 leading-relaxed font-medium">
+                        Ensure your CSV columns strictly follow our template format: <br/><b className="font-black">ownerName, ownerPhone, emergencyContact, assetType, planType</b>.
                     </p>
                 </div>
             </div>
+            )}
           </div>
 
           {/* Preview Section */}
-          <div className="md:col-span-5">
+          <div className="lg:col-span-4 max-w-sm w-full mx-auto lg:max-w-none">
             <div className="sticky top-8 space-y-6">
               <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
                 <div className="bg-slate-50 dark:bg-slate-800/50 p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">

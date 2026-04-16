@@ -27,7 +27,7 @@ const NAV_ITEMS = [
   { label: "Subscriptions", href: "/admin/subscriptions", icon: CreditCard },
   { label: "Sponsors", href: "/admin/sponsors", icon: Users },
   { label: "Call Logs", href: "/admin/calls", icon: PhoneCall },
-  { label: "SMS Logs", href: "/admin/sms", icon: MessageSquare },
+  { label: "WhatsApp Logs", href: "/admin/sms", icon: MessageSquare },
   { label: "Scan History", href: "/admin/scans", icon: History },
 ];
 
@@ -43,13 +43,13 @@ export default function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 w-64 bg-primary dark:bg-slate-900 text-white flex flex-col z-20 shadow-2xl">
       {/* Brand Logo Section */}
-      <div className="p-8 pb-4 flex items-center gap-4">
-        <div className="size-12 bg-white rounded-2xl flex items-center justify-center shadow-xl shadow-black/10 p-2 overflow-hidden ring-4 ring-white/10">
-          <img src="/images/logo.png" alt="V-Kawach" className="w-full h-full object-contain" />
+      <div className="px-5 py-8 pb-4 flex items-center gap-3">
+        <div className="size-14 shrink-0 flex items-center justify-center">
+          <img src="/images/new_logo.png" alt="Tarkshya" className="w-full h-full object-contain drop-shadow-xl" />
         </div>
-        <div>
-          <h1 className="font-black text-xl leading-tight tracking-[0.2em] uppercase">Tarkshya</h1>
-          <p className="text-[10px] text-white/60 uppercase tracking-[0.4em] font-black">
+        <div className="flex flex-col justify-center overflow-hidden">
+          <h1 className="font-black text-xl leading-none tracking-[0.15em] uppercase truncate">Tarkshya</h1>
+          <p className="text-[9px] text-white/70 uppercase tracking-[0.25em] font-black mt-1 truncate">
             Solution
           </p>
         </div>

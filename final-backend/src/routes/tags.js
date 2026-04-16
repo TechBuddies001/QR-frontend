@@ -184,8 +184,8 @@ router.post('/', authenticateToken, upload.single('photo'), [
     if (existing) return res.status(409).json({ error: 'Tag code already exists' });
 
     // Handle multiple designs if requested
-    const designsToGenerate = Array.isArray(requestedDesigns) && requestedDesigns.length > 0 
-      ? requestedDesigns 
+    const designsToGenerate = Array.isArray(requestedDesigns) && requestedDesigns.length > 0
+      ? requestedDesigns
       : [designType || 'standard'];
 
     // Resolve Sponsor
@@ -229,8 +229,8 @@ router.post('/', authenticateToken, upload.single('photo'), [
       },
     });
 
-    res.status(201).json({ 
-      tag, 
+    res.status(201).json({
+      tag,
       qr: primaryQr, // legacy support
       qrs: Object.keys(qrs).reduce((acc, dt) => {
         acc[dt] = { base64: qrs[dt].base64, url: qrs[dt].publicUrl, imagePath: qrs[dt].qrImageUrl, qrSvgUrl: qrs[dt].qrSvgUrl };
@@ -264,7 +264,7 @@ router.put('/:id', authenticateToken, upload.single('photo'), async (req, res) =
     if (req.file) updateData.ownerPhoto = `/uploads/photos/${req.file.filename}`;
 
     const tag = await prisma.tag.update({ where: { id: req.params.id }, data: updateData });
-    
+
     // If sponsor changed, regenerate QR
     if (sponsorId !== undefined) {
       const refreshedTag = await prisma.tag.findUnique({ where: { id: tag.id }, include: { sponsor: true } });
@@ -326,9 +326,9 @@ router.post('/:id/regenerate-qr', authenticateToken, async (req, res) => {
 
     // Generate for requested design or default to tag's current design
     const targetDesign = designType || tag.designType || 'standard';
-    
+
     // Fetch sponsor if linked
-    const fullTag = await prisma.tag.findUnique({ 
+    const fullTag = await prisma.tag.findUnique({
       where: { id: req.params.id },
       include: { sponsor: true }
     });
@@ -339,13 +339,13 @@ router.post('/:id/regenerate-qr', authenticateToken, async (req, res) => {
     // or if we want to change the primary design. 
     // For batch downloads, we just want the base64.
     if (!designType) {
-      await prisma.tag.update({ 
-        where: { id: req.params.id }, 
-        data: { qrImagePath: qr.qrImageUrl, qrUrl: qr.publicUrl } 
+      await prisma.tag.update({
+        where: { id: req.params.id },
+        data: { qrImagePath: qr.qrImageUrl, qrUrl: qr.publicUrl }
       });
     }
 
-    res.json({ 
+    res.json({
       qr: { base64: qr.base64, url: qr.publicUrl, imagePath: qr.qrImageUrl, qrSvgUrl: qr.qrSvgUrl },
       designType: targetDesign
     });
@@ -384,7 +384,7 @@ router.post('/bulk', authenticateToken, uploadDoc.single('file'), async (req, re
       try {
         const createdTags = [];
         const planDays = { basic: 365, standard: 730, premium: 1825 };
-        
+
         // Use designTypes from body if provided, else fallback to CSV designType or default
         const bodyDesignTypes = req.body.designTypes ? JSON.parse(req.body.designTypes) : null;
         const bodySponsorId = req.body.sponsorId || null;
@@ -398,7 +398,7 @@ router.post('/bulk', authenticateToken, uploadDoc.single('file'), async (req, re
         for (const row of results) {
           try {
             const { ownerName, ownerPhone, assetType, planType, emergencyContact, designType: rowDesign } = row;
-            
+
             if (!ownerName || !ownerPhone) {
               errors.push({ row, error: 'Missing required fields' });
               continue;
@@ -409,7 +409,7 @@ router.post('/bulk', authenticateToken, uploadDoc.single('file'), async (req, re
               : [rowDesign || 'standard'];
 
             const tagCode = generateTagCode(assetType || 'vehicle');
-            
+
             // Generate ALL requested designs
             const qrs = {};
             for (const dt of designsToGenerate) {
@@ -443,16 +443,16 @@ router.post('/bulk', authenticateToken, uploadDoc.single('file'), async (req, re
             errors.push({ row, error: e.message });
           }
         }
-        
+
         // Clean up uploaded file
         fs.unlinkSync(filePath);
 
-        res.json({ 
+        res.json({
           message: `Bulk processing complete. ${createdTags.length} tags created.`,
           successCount: createdTags.length,
           errorCount: errors.length,
           tagIds: createdTags.map(t => t.id),
-          errors 
+          errors
         });
       } catch (err) {
         res.status(500).json({ error: err.message });
@@ -473,8 +473,8 @@ router.post('/:id/batch-zip', authenticateToken, async (req, res) => {
     if (!tag) return res.status(404).json({ error: 'Tag not found' });
 
     const qtyConfig = quantities || { standard: 1 };
-    const designsToProcess = Array.isArray(designTypes) && designTypes.length > 0 
-      ? designTypes 
+    const designsToProcess = Array.isArray(designTypes) && designTypes.length > 0
+      ? designTypes
       : Object.keys(qtyConfig);
 
     const archive = archiver('zip', { zlib: { level: 9 } });
@@ -498,7 +498,7 @@ router.post('/:id/batch-zip', authenticateToken, async (req, res) => {
         }
       }
     }
-    
+
     archive.finalize();
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -508,14 +508,14 @@ router.post('/:id/batch-zip', authenticateToken, async (req, res) => {
 // POST /api/tags/bulk-download – download multiple QR codes as ZIP with quantities
 router.post('/bulk-download', authenticateToken, async (req, res) => {
   try {
-    const { ids, quantities, format, designTypes } = req.body; 
+    const { ids, quantities, format, designTypes } = req.body;
     const isSvg = format === 'svg';
     if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'Array of tag IDs required' });
 
     // Use quantities and filter by designTypes if provided
     const qtyConfig = quantities || { standard: 1 };
-    const designsToProcess = Array.isArray(designTypes) && designTypes.length > 0 
-      ? designTypes 
+    const designsToProcess = Array.isArray(designTypes) && designTypes.length > 0
+      ? designTypes
       : Object.keys(qtyConfig);
 
     const tagsRaw = await prisma.tag.findMany({
@@ -549,8 +549,8 @@ router.post('/bulk-download', authenticateToken, async (req, res) => {
 
         if (fs.existsSync(fullPath)) {
           for (let i = 0; i < qty; i++) {
-            archive.file(fullPath, { 
-              name: `${paddedSeq}_${tag.tagCode}/${designType.toUpperCase()}_COPY_${i + 1}.${ext}` 
+            archive.file(fullPath, {
+              name: `${paddedSeq}_${tag.tagCode}/${designType.toUpperCase()}_COPY_${i + 1}.${ext}`
             });
           }
         }
@@ -570,8 +570,8 @@ router.post('/bulk-pdf', authenticateToken, async (req, res) => {
     if (!ids || !Array.isArray(ids)) return res.status(400).json({ error: 'Array of tag IDs required' });
 
     const qtyConfig = quantities || { standard: 1 };
-    const designsToProcess = Array.isArray(designTypes) && designTypes.length > 0 
-      ? designTypes 
+    const designsToProcess = Array.isArray(designTypes) && designTypes.length > 0
+      ? designTypes
       : Object.keys(qtyConfig);
     const tags = await prisma.tag.findMany({
       where: { id: { in: ids } },
@@ -597,7 +597,7 @@ router.post('/bulk-pdf', authenticateToken, async (req, res) => {
             doc.addPage();
             const isCircle = designType === 'circle';
             const isLandscape = designType === 'landscape';
-            
+
             let imgWidth, imgHeight;
             if (isCircle) {
               imgWidth = 400; imgHeight = 400;
@@ -606,7 +606,7 @@ router.post('/bulk-pdf', authenticateToken, async (req, res) => {
             } else {
               imgWidth = 400; imgHeight = 550;
             }
-            
+
             doc.image(fullPath, (doc.page.width - imgWidth) / 2, 50, { width: imgWidth });
             doc.fontSize(12).text(`ID: ${tag.tagCode} | Design: ${designType.toUpperCase()} | Copy ${i + 1}`, 0, isLandscape ? 400 : 650, { align: 'center' });
           }

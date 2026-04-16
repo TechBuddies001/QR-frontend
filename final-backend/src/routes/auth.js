@@ -76,4 +76,44 @@ router.post('/change-password', authenticateToken, [
   }
 });
 
+// PUT /api/auth/profile - Update current user profile
+router.put('/profile', authenticateToken, async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    const admin = await prisma.admin.update({
+      where: { id: req.admin.id },
+      data: { ...(name && { name }), ...(email && { email }) },
+    });
+    res.json({ 
+      message: 'Profile updated successfully', 
+      admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role } 
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/auth/employee - Create a sub-employee
+router.post('/employee', authenticateToken, async (req, res) => {
+  try {
+    if (req.admin.role !== 'admin' && req.admin.role !== 'superadmin') {
+      return res.status(403).json({ error: 'Only admins can create employees' });
+    }
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+    const existing = await prisma.admin.findUnique({ where: { email } });
+    if (existing) return res.status(400).json({ error: 'Email already in use' });
+
+    const hashed = await bcrypt.hash(password, 12);
+    const employee = await prisma.admin.create({
+      data: { name, email, password: hashed, role: 'employee' }
+    });
+    res.json({ message: 'Employee added successfully', employee: { id: employee.id, name: employee.name, email: employee.email, role: employee.role } });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;

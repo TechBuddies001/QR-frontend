@@ -128,8 +128,6 @@ export default function Page() {
         <div className="flex flex-wrap gap-4">
           <ActionButton href="/admin/tags" icon={<PlusCircle />} label="Generate QR" primary />
           <ActionButton href="/admin/tags" icon={<FileOutput />} label="Export Tags" />
-          <ActionButton href="/admin/sms" icon={<Mail />} label="Bulk Notify" />
-          <ActionButton href="/admin/settings" icon={<Settings />} label="Batch Update" />
         </div>
       </div>
 

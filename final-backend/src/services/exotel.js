@@ -46,4 +46,46 @@ const sendExotelSms = async ({ to, message }) => {
   return response.data;
 };
 
-module.exports = { initiateExotelCall, sendExotelSms };
+/**
+ * Send WhatsApp via Exotel
+ */
+const sendExotelWhatsapp = async ({ to, templateName, components = [] }) => {
+  const { EXOTEL_SID, EXOTEL_API_KEY, EXOTEL_API_TOKEN, EXOTEL_SUBDOMAIN } = process.env;
+  
+  // Needs whatsapp credentials from DB settings in real flow, or env.
+  // For Exotel WhatsApp (v2 API):
+  const url = `https://${EXOTEL_API_KEY}:${EXOTEL_API_TOKEN}@${EXOTEL_SUBDOMAIN}/v2/accounts/${EXOTEL_SID}/messages`;
+  
+  // Here we assume settings will be injected or parsed 
+  // Exotel requires 'from' number which is the WhatsApp Business Number.
+  // Currently we just log this intent as the full integration depends on the user entering their WhatsApp number in settings.
+  
+  const payload = {
+    whatsapp: {
+      messages: [
+        {
+          to: to,
+          content: {
+            type: "template",
+            template: {
+              name: templateName,
+              language: {
+                policy: "deterministic",
+                code: "en"
+              },
+              components: components
+            }
+          }
+        }
+      ]
+    }
+  };
+
+  const response = await axios.post(url, payload, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  return response.data;
+};
+
+module.exports = { initiateExotelCall, sendExotelSms, sendExotelWhatsapp };
