@@ -33,12 +33,6 @@ router.get('/tag/:tagCode', async (req, res) => {
       },
     });
 
-    // Fetch all active sponsors to show as partners if no specific sponsor linked
-    const activeSponsors = await prisma.sponsor.findMany({
-      where: { isActive: true },
-      select: { name: true, logo: true, website: true, description: true }
-    });
-
     // Return public-safe data (NO phone numbers)
     res.json({
       tag: {
@@ -47,11 +41,13 @@ router.get('/tag/:tagCode', async (req, res) => {
         ownerPhoto: tag.ownerPhoto,
         customMessage: tag.customMessage,
         assetType: tag.assetType,
+        assetModel: tag.assetModel,
+        assetColor: tag.assetColor,
+        assetNumber: tag.assetNumber,
         isLost: tag.isLost,
         address: tag.address,
         sponsor: tag.sponsor,
       },
-      activeSponsors,
       scanId: scanLog.id,
     });
   } catch (err) {
@@ -220,6 +216,27 @@ router.post('/tag/:tagCode/emergency', async (req, res) => {
     }
 
     res.json({ success: true, message: 'Emergency contact notified' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/public/tag/:tagCode/alert – Manual alert from pedestrian
+router.post('/tag/:tagCode/alert', async (req, res) => {
+  try {
+    const { tagCode } = req.params;
+    const { scannerPhone } = req.body;
+
+    const tag = await prisma.tag.findUnique({ where: { tagCode } });
+    if (!tag || !tag.isActive) return res.status(404).json({ error: 'Tag not found' });
+
+    // Send WhatsApp alert to owner
+    await sendScanAlert({ 
+      tag, 
+      scannerCity: `Manual Alert from ${scannerPhone || 'a concerned citizen'}` 
+    });
+
+    res.json({ success: true, message: 'Alert sent to owner' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
