@@ -1,0 +1,14 @@
+{
+  "redirects": [
+    {
+      "source": "/scan/:id",
+      "destination": "https://tarkshyasolution.in/scan/:id",
+      "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "destination": "https://tarkshyasolution.in/$1",
+      "permanent": true
+    }
+  ]
+}
