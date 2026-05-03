@@ -4,11 +4,13 @@ import styled, { keyframes } from 'styled-components';
 import { 
     ArrowLeft, CheckCircle2, Shield, Zap, Smartphone, Bell, Users, 
     ShieldAlert, AlertTriangle, Scan, Activity, ShieldCheck, Lock, 
-    ChevronRight, Award, Cpu
+    ChevronRight, ChevronLeft, Award, Cpu, ShoppingCart, Play
 } from 'lucide-react';
 import Section from '../components/Section';
 import Button from '../components/Button';
 import api from '../lib/api';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../utils/translations';
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(20px); }
@@ -107,112 +109,325 @@ const ContentGrid = styled.div`
 `;
 
 const CapabilityGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  overflow-x: auto;
   gap: 30px;
-  margin-top: 50px;
-  @media (min-width: 640px) { grid-template-columns: 1fr 1fr; }
+  padding: 20px 0 40px;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+  scroll-behavior: smooth;
+  
+  & > * {
+    flex: 0 0 350px;
+  }
+
+  @media (max-width: 768px) {
+    & > * {
+      flex: 0 0 280px;
+    }
+  }
 `;
 
-const CapabilityCard = styled.div`
-  background: #ffffff;
-  padding: 30px;
-  border-radius: 24px;
-  border: 1px solid rgba(0,0,0,0.05);
-  box-shadow: 0 10px 40px rgba(0,0,0,0.04);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+const CarouselWrapper = styled.div`
   position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
+  padding: 0 10px;
+  
+  .nav-btn {
     position: absolute;
-    top: 0; left: 0; right: 0; height: 4px;
-    background: linear-gradient(90deg, #0b1a33, #C9A84C);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.4s ease;
-  }
-
-  &:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 50px rgba(11, 26, 51, 0.1);
-    &::before { transform: scaleX(1); }
-  }
-
-  .img-wrapper {
-    width: 100%;
-    height: 220px;
-    border-radius: 16px;
-    overflow: hidden;
-    position: relative;
-    
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.6s ease;
-    }
-    
-    &::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(11,26,51,0.6) 0%, transparent 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-  }
-
-  &:hover .img-wrapper img { transform: scale(1.08); }
-  &:hover .img-wrapper::after { opacity: 1; }
-
-  .icon-small {
-    width: 50px;
-    height: 50px;
-    background: #f4f6f8;
-    border-radius: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 35px;
+    height: 35px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #0b1a33;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    color: #333;
     transition: all 0.3s ease;
-    position: absolute;
-    top: 45px;
-    right: 45px;
-    z-index: 2;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+
+    &:hover {
+      background: #f8f8f8;
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    &.prev { left: -15px; }
+    &.next { right: -15px; }
+
+    @media (max-width: 1024px) {
+       display: none;
+    }
+  }
+`;
+
+const CapabilityCard = styled.div`
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #f0f0f0;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
   }
 
-  &:hover .icon-small { background: #C9A84C; color: white; transform: rotate(10deg); }
+  .img-wrapper {
+    height: 200px;
+    background: #f8f9fa;
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
 
-  h4 { color: #0b1a33; font-weight: 800; font-size: 1.2rem; margin-top: 5px; }
-  p { font-size: 0.95rem; color: #555; lineHeight: 1.6; }
+  .content {
+    padding: 20px;
+    text-align: left;
+    h4 { font-size: 1.1rem; font-weight: 800; color: #000; margin-bottom: 10px; text-transform: uppercase; }
+    p { font-size: 0.9rem; color: #666; line-height: 1.5; margin: 0; }
+  }
+`;
+
+const ProductCard = styled.div`
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 20px;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  }
+`;
+
+const ProductImageContainer = styled.div`
+  position: relative;
+  height: 200px;
+  background: #f8f9fa;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+`;
+
+const FeatureBanner = styled.div`
+  background: #B51B2E;
+  color: white;
+  font-weight: 700;
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  text-transform: uppercase;
+  z-index: 2;
+`;
+
+const FeatureGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 10px 0;
+`;
+
+const FeatureTag = styled.span`
+  background: #004085;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const ProductInfo = styled.div`
+  h4 {
+    margin: 10px 0;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #000;
+    text-transform: uppercase;
+  }
+`;
+
+const PriceSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+  .current { font-size: 1.5rem; font-weight: 900; color: #B51B2E; }
+  .old { font-size: 0.9rem; color: #999; text-decoration: line-through; }
+`;
+
+const DiscountText = styled.div`
+  color: #27ae60;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+`;
+
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+  
+  .view-btn {
+    flex: 1;
+    background: #B51B2E;
+    color: white;
+    text-align: center;
+    padding: 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+    &:hover { background: #941525; }
+  }
+  
+  .cart-btn {
+    width: 48px;
+    height: 48px;
+    background: #B51B2E;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    &:hover { background: #941525; }
+  }
 `;
 
 const SectionTitleWrapper = styled.div`
-  text-align: center;
-  margin-bottom: 60px;
+  text-align: left;
+  margin-bottom: 40px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 
   h2 {
-    font-size: 2.8rem;
+    font-size: 2rem;
     font-weight: 900;
-    color: #0b1a33;
-    margin-bottom: 20px;
-    letter-spacing: -1px;
+    color: #000;
+    margin-bottom: 15px;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-transform: uppercase;
     
-    span { color: #C9A84C; }
+    &::before {
+      content: '';
+      width: 5px;
+      height: 32px;
+      background: #B51B2E;
+      border-radius: 1px;
+    }
   }
   
   p {
-    max-width: 700px;
-    margin: 0 auto;
-    color: #666;
-    font-size: 1.15rem;
-    line-height: 1.7;
+    max-width: 900px;
+    color: #444;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+`;
+
+const HowItWorksSection = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 0;
+
+  @media (min-width: 1024px) {
+    grid-template-columns: 1.2fr 0.8fr;
+  }
+
+  .video-box {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 16/9;
+    background: #000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    
+    img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+    
+    .play-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      background: #B51B2E;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(181, 27, 46, 0.4);
+    }
+  }
+
+  .content-box {
+    h3 { font-size: 2.2rem; font-weight: 900; color: #B51B2E; margin-bottom: 20px; text-transform: uppercase; }
+    p { font-size: 1.1rem; line-height: 1.8; color: #333; margin-bottom: 30px; }
+  }
+`;
+
+const ProductGrid = styled.div`
+  display: flex;
+  overflow-x: auto;
+  gap: 25px;
+  padding: 10px 0 40px;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+  scroll-behavior: smooth;
+  
+  & > * {
+    flex: 0 0 320px;
+  }
+
+  @media (max-width: 768px) {
+    & > * {
+      flex: 0 0 280px;
+    }
   }
 `;
 
@@ -300,10 +515,26 @@ const getIcon = (name) => {
 };
 
 const CategoryDetails = () => {
+  const { language } = useLanguage();
+  const t = translations[language].categoryDetails;
   const { id } = useParams();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const apiUrl = window.location.hostname === 'localhost' ? 'http://localhost:5001' : '';
+
+  const scrollRefs = {
+    prevention: React.useRef(null),
+    emergency: React.useRef(null),
+    tracking: React.useRef(null),
+    products: React.useRef(null)
+  };
+
+  const handleScroll = (ref, dir) => {
+    if (ref.current) {
+      const scrollAmount = 400;
+      ref.current.scrollBy({ left: dir === 'next' ? scrollAmount : -scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -330,12 +561,12 @@ const CategoryDetails = () => {
     <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0b1a33', color: 'white' }}>
       <div style={{ textAlign: 'center' }}>
          <Cpu size={50} className="animate-spin" color="#C9A84C" />
-         <p style={{ marginTop: '25px', fontWeight: 800, letterSpacing: '3px', fontSize: '1.2rem' }}>INITIALIZING MODULE</p>
+         <p style={{ marginTop: '25px', fontWeight: 800, letterSpacing: '3px', fontSize: '1.2rem' }}>{t.initializing}</p>
       </div>
     </div>
   );
 
-  if (!data) return <div style={{ padding: '150px 20px', textAlign: 'center', fontSize: '1.5rem', fontWeight: 800, color: '#0b1a33' }}>Module not found in Ecosystem.</div>;
+  if (!data) return <div style={{ padding: '150px 20px', textAlign: 'center', fontSize: '1.5rem', fontWeight: 800, color: '#0b1a33' }}>{t.notFound}</div>;
 
   const renderTitle = (name) => {
     if (!name) return 'Category Details';
@@ -358,7 +589,7 @@ const CategoryDetails = () => {
           {renderTitle(data.name)}
         </Title>
         <DescriptionText>
-          {data.description || 'Advanced security protocols for your peace of mind.'}
+          {language === 'hi' ? (data.description_hi || data.description) : (data.description)}
         </DescriptionText>
       </Header>
 
@@ -366,25 +597,26 @@ const CategoryDetails = () => {
       {data.preventionHeading && (
         <Section bg="transparent">
           <SectionTitleWrapper>
-            <h2>{renderTitle(data.preventionHeading)}</h2>
-            <p>{data.preventionText}</p>
+            <h2>{renderTitle(language === 'hi' ? (data.preventionHeading_hi || data.preventionHeading) : data.preventionHeading)}</h2>
+            <p>{language === 'hi' ? (data.preventionText_hi || data.preventionText) : data.preventionText}</p>
           </SectionTitleWrapper>
-          <CapabilityGrid>
-            {data.preventionCards.map((card, i) => (
-              <CapabilityCard key={i}>
-                <div className="icon-small">
-                   <ShieldCheck size={24} />
-                </div>
-                <div className="img-wrapper">
-                  <img src={card.image ? `${apiUrl}${card.image}` : "/assets/car_qr_tag_mockup_1776107740073.png"} alt={card.title} />
-                </div>
-                <div>
-                  <h4>{card.title}</h4>
-                  <p>{card.text}</p>
-                </div>
-              </CapabilityCard>
-            ))}
-          </CapabilityGrid>
+          <CarouselWrapper>
+            <button className="nav-btn prev" onClick={() => handleScroll(scrollRefs.prevention, 'prev')}><ChevronLeft /></button>
+            <CapabilityGrid ref={scrollRefs.prevention}>
+              {data.preventionCards.map((card, i) => (
+                <CapabilityCard key={i}>
+                  <div className="img-wrapper">
+                    <img src={card.image ? `${apiUrl}${card.image}` : "/assets/car_qr_tag_mockup_1776107740073.png"} alt={card.title} />
+                  </div>
+                  <div className="content">
+                    <h4>{language === 'hi' ? (card.title_hi || card.title) : card.title}</h4>
+                    <p>{language === 'hi' ? (card.text_hi || card.text) : card.text}</p>
+                  </div>
+                </CapabilityCard>
+              ))}
+            </CapabilityGrid>
+            <button className="nav-btn next" onClick={() => handleScroll(scrollRefs.prevention, 'next')}><ChevronRight /></button>
+          </CarouselWrapper>
         </Section>
       )}
 
@@ -392,97 +624,126 @@ const CategoryDetails = () => {
       {data.emergencyHeading && (
         <Section bg="#ffffff">
           <SectionTitleWrapper>
-            <h2>{renderTitle(data.emergencyHeading)}</h2>
-            <p>{data.emergencyText}</p>
+            <h2>{renderTitle(language === 'hi' ? (data.emergencyHeading_hi || data.emergencyHeading) : data.emergencyHeading)}</h2>
+            <p>{language === 'hi' ? (data.emergencyText_hi || data.emergencyText) : data.emergencyText}</p>
           </SectionTitleWrapper>
-          <CapabilityGrid>
-            {data.emergencyCards.map((card, i) => (
-              <CapabilityCard key={i}>
-                <div className="icon-small" style={{ background: '#fff0f0', color: '#e74c3c' }}>
-                   <AlertTriangle size={24} />
-                </div>
-                <div className="img-wrapper">
-                  <img src={card.image ? `${apiUrl}${card.image}` : "/assets/car_qr_tag_mockup_1776107740073.png"} alt={card.title} />
-                </div>
-                <div>
-                  <h4>{card.title}</h4>
-                  <p>{card.text}</p>
-                </div>
-              </CapabilityCard>
-            ))}
-          </CapabilityGrid>
+          <CarouselWrapper>
+            <button className="nav-btn prev" onClick={() => handleScroll(scrollRefs.emergency, 'prev')}><ChevronLeft /></button>
+            <CapabilityGrid ref={scrollRefs.emergency}>
+              {data.emergencyCards.map((card, i) => (
+                <CapabilityCard key={i}>
+                  <div className="img-wrapper">
+                    <img src={card.image ? `${apiUrl}${card.image}` : "/assets/car_qr_tag_mockup_1776107740073.png"} alt={card.title} />
+                  </div>
+                  <div className="content">
+                    <h4>{language === 'hi' ? (card.title_hi || card.title) : card.title}</h4>
+                    <p>{language === 'hi' ? (card.text_hi || card.text) : card.text}</p>
+                  </div>
+                </CapabilityCard>
+              ))}
+            </CapabilityGrid>
+            <button className="nav-btn next" onClick={() => handleScroll(scrollRefs.emergency, 'next')}><ChevronRight /></button>
+          </CarouselWrapper>
         </Section>
       )}
 
       {/* How It Works Section */}
-      {data.howItWorksHeading && (
-        <Section bg="transparent">
-          <ContentGrid>
-             <div style={{ paddingTop: '20px' }}>
-                <h2 style={{ fontSize: '2.8rem', fontWeight: 900, color: '#0b1a33', marginBottom: '25px', letterSpacing: '-1px' }}>
-                  {renderTitle(data.howItWorksHeading)}
-                </h2>
-                <p style={{ color: '#555', fontSize: '1.15rem', lineHeight: '1.8', marginBottom: '40px' }}>{data.howItWorksText}</p>
-                <Button size="large" style={{ borderRadius: '100px', padding: '15px 40px', fontSize: '1.1rem' }}>DISCOVER MORE</Button>
-             </div>
-             <div style={{ position: 'relative', borderRadius: '32px', overflow: 'hidden', boxShadow: '0 40px 80px rgba(0,0,0,0.1)' }}>
-                {data.videoUrl ? (
-                  <iframe width="100%" height="450" src={data.videoUrl.replace('watch?v=', 'embed/')} title="How It Works" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
-                ) : (
-                  <img src="/assets/car_qr_tag_mockup_1776107740073.png" alt="How it works" style={{ width: '100%', height: '450px', objectFit: 'cover' }} />
-                )}
-             </div>
-          </ContentGrid>
-        </Section>
-      )}
-
-      {/* Tracking Section */}
-      {data.trackingHeading && (
-        <Section bg="#0b1a33" color="white" style={{ position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'url(/assets/grid-pattern.svg) center/cover', opacity: 0.05 }}></div>
-          <SectionTitleWrapper style={{ position: 'relative', zIndex: 1 }}>
-            <h2 style={{ color: 'white' }}>{renderTitle(data.trackingHeading)}</h2>
-            <p style={{ color: 'rgba(255,255,255,0.7)' }}>{data.trackingText}</p>
-          </SectionTitleWrapper>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '30px', position: 'relative', zIndex: 1 }}>
-            {data.trackingCards.map((card, i) => (
-              <div key={i} style={{ background: 'rgba(255,255,255,0.03)', padding: '50px 30px', borderRadius: '24px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(10px)', transition: 'all 0.3s ease' }}
-                onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-10px)'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; }}
-              >
-                 <div style={{ color: '#C9A84C', marginBottom: '25px', display: 'flex', justifyCenter: 'center' }}>
-                    <Smartphone size={48} style={{ margin: '0 auto' }} />
-                 </div>
-                 <h4 style={{ fontWeight: 800, fontSize: '1.1rem', textTransform: 'uppercase', letterSpacing: '1px', color: 'white' }}>{card.title}</h4>
-              </div>
-            ))}
-          </div>
-        </Section>
-      )}
-
-      {/* Products Section */}
-      {data.products && data.products.length > 0 && (
+      {(data.howItWorksHeading || data.howItWorksText) && (
         <Section bg="#f8f9fa">
-           <SectionTitleWrapper>
-                <h2>Related <span>Products</span></h2>
-                <p>Explore specialized security hardware for this ecosystem module.</p>
-            </SectionTitleWrapper>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '40px' }}>
-              {data.products.map(product => (
-                <CapabilityCard key={product.id} as={Link} to={`/product/${product.id}`} style={{ textDecoration: 'none', padding: '0', background: 'white' }}>
-                  <div className="img-wrapper" style={{ height: '280px', borderRadius: '24px 24px 0 0' }}>
-                    <img src={product.photos ? `${apiUrl}${JSON.parse(product.photos)[0]}` : "/assets/car_qr_tag_mockup_1776107740073.png"} alt={product.name} />
+          <HowItWorksSection>
+            <div className="video-box">
+              <img src="/assets/car_qr_tag_mockup_1776107740073.png" alt="How it works" />
+              <div className="play-btn">
+                <Play size={40} fill="white" />
+              </div>
+            </div>
+            <div className="content-box">
+              <h3>{language === 'hi' ? (data.howItWorksHeading_hi || data.howItWorksHeading) : data.howItWorksHeading}</h3>
+              <p>{language === 'hi' ? (data.howItWorksText_hi || data.howItWorksText) : data.howItWorksText}</p>
+              <Button as="a" href="#" style={{ background: '#B51B2E', borderColor: '#B51B2E' }}>DISCOVER MORE</Button>
+            </div>
+          </HowItWorksSection>
+        </Section>
+      )}
+
+      {/* Tracking / Smart Card Section */}
+      {data.trackingHeading && (
+        <Section bg="#fdfdfd">
+          <SectionTitleWrapper>
+            <h2>{renderTitle(language === 'hi' ? (data.trackingHeading_hi || data.trackingHeading) : data.trackingHeading)}</h2>
+            <p>{language === 'hi' ? (data.trackingText_hi || data.trackingText) : data.trackingText}</p>
+          </SectionTitleWrapper>
+          <CarouselWrapper>
+            <button className="nav-btn prev" onClick={() => handleScroll(scrollRefs.tracking, 'prev')}><ChevronLeft /></button>
+            <CapabilityGrid ref={scrollRefs.tracking}>
+              {data.trackingCards.map((card, i) => (
+                <CapabilityCard key={i}>
+                  <div className="img-wrapper">
+                    <img src={card.image ? `${apiUrl}${card.image}` : "/assets/car_qr_tag_mockup_1776107740073.png"} alt={card.title} />
                   </div>
-                  <div style={{ padding: '30px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                      <h4 style={{ margin: 0, fontSize: '1.4rem' }}>{product.name}</h4>
-                      <div style={{ background: 'rgba(201, 168, 76, 0.1)', color: '#C9A84C', padding: '8px 15px', borderRadius: '100px', fontWeight: 900, fontSize: '1.1rem' }}>₹{product.mrp}</div>
-                    </div>
-                    <Button style={{ width: '100%', borderRadius: '12px', padding: '15px' }}>VIEW SPECIFICATIONS</Button>
+                  <div className="content">
+                    <h4>{language === 'hi' ? (card.title_hi || card.title) : card.title}</h4>
+                    <p>{language === 'hi' ? (card.text_hi || card.text) : card.text}</p>
                   </div>
                 </CapabilityCard>
               ))}
-            </div>
+            </CapabilityGrid>
+            <button className="nav-btn next" onClick={() => handleScroll(scrollRefs.tracking, 'next')}><ChevronRight /></button>
+          </CarouselWrapper>
+        </Section>
+      )}
+
+       {/* Products Section */}
+      {data.products && data.products.length > 0 && (
+        <Section bg="#fdfdfd">
+           <SectionTitleWrapper>
+                <h2>{t.relatedProducts}</h2>
+                <p>{t.productsDesc}</p>
+            </SectionTitleWrapper>
+            <CarouselWrapper>
+              <button className="nav-btn prev" onClick={() => handleScroll(scrollRefs.products, 'prev')}><ChevronLeft /></button>
+              <ProductGrid ref={scrollRefs.products}>
+                {data.products.map(product => {
+                  const photos = typeof product.photos === 'string' ? JSON.parse(product.photos || "[]") : (product.photos || []);
+                  const dynamicData = typeof product.dynamicData === 'string' ? JSON.parse(product.dynamicData || "[]") : (product.dynamicData || []);
+                  const mainPhoto = photos[0] ? (photos[0].startsWith('http') ? photos[0] : `${apiUrl}${photos[0]}`) : "/assets/car_qr_tag_mockup_1776107740073.png";
+                  
+                  return (
+                    <ProductCard key={product.id}>
+                      <ProductImageContainer>
+                        <img src={mainPhoto} alt={product.name} />
+                        <FeatureBanner>Features</FeatureBanner>
+                      </ProductImageContainer>
+                      
+                      <FeatureGrid>
+                        {dynamicData.slice(0, 4).map((feat, idx) => (
+                          <FeatureTag key={idx} title={feat.value}>{feat.label}</FeatureTag>
+                        ))}
+                      </FeatureGrid>
+
+                      <ProductInfo>
+                        <h4>{language === 'hi' ? (product.name_hi || product.name) : product.name}</h4>
+                      </ProductInfo>
+
+                      <PriceSection>
+                        <span className="current">₹{product.mrp}</span>
+                        <span className="old">₹{Math.round(product.mrp * 1.5)}</span>
+                      </PriceSection>
+
+                      <DiscountText>40% OFF* (Pack of 3)</DiscountText>
+
+                      <ActionButtons>
+                        <Link to={`/product/${product.id}`} className="view-btn">View Details</Link>
+                        <button className="cart-btn" title="Add to Cart">
+                          <ShoppingCart size={20} />
+                        </button>
+                      </ActionButtons>
+                    </ProductCard>
+                  );
+                })}
+              </ProductGrid>
+              <button className="nav-btn next" onClick={() => handleScroll(scrollRefs.products, 'next')}><ChevronRight /></button>
+            </CarouselWrapper>
         </Section>
       )}
 
@@ -491,10 +752,10 @@ const CategoryDetails = () => {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' }}>
                 <div style={{ width: '40px', height: '3px', background: '#C9A84C', borderRadius: '2px' }}></div>
-                <span style={{ fontSize: '0.9rem', fontWeight: 900, color: '#C9A84C', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Precision Security</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 900, color: '#C9A84C', letterSpacing: '0.2em', textTransform: 'uppercase' }}>{t.precisionSecurity}</span>
             </div>
             <h2 style={{ fontSize: '3.2rem', fontWeight: 900, color: '#0b1a33', marginBottom: '40px', letterSpacing: '-1.5px', lineHeight: 1.1 }}>
-              Advanced <span style={{color: '#C9A84C'}}>Protocols</span>
+              {t.advancedProtocols.split(' ')[0]} <span style={{color: '#C9A84C'}}>{t.advancedProtocols.split(' ').slice(1).join(' ')}</span>
             </h2>
             
             <CapabilityGrid style={{ marginTop: 0 }}>
@@ -503,20 +764,22 @@ const CategoryDetails = () => {
                   <div style={{ color: '#C9A84C' }}>
                     <ShieldCheck size={24} />
                   </div>
-                  <h4 style={{ margin: 0, fontWeight: 700, color: '#0b1a33', fontSize: '1rem' }}>{feature}</h4>
+                  <h4 style={{ margin: 0, fontWeight: 700, color: '#0b1a33', fontSize: '1rem' }}>
+                    {language === 'hi' ? (feature.name_hi || feature.name || feature) : (feature.name || feature)}
+                  </h4>
                 </div>
               ))}
             </CapabilityGrid>
 
             {data.features.length === 0 && (
               <p style={{ color: '#777', padding: '30px', background: '#f8f9fa', borderRadius: '16px', borderLeft: '4px solid #C9A84C' }}>
-                Standard Tarkshya security encryption protocols applied. Detailed specifications available on request.
+                {t.standardProtocols}
               </p>
             )}
 
             <WhyChooseCard>
-              <h3><Award size={28} /> Strategic Protection</h3>
-              <p>{data.benefits || 'High-security QR protection designed for critical infrastructure and personal safety. Powered by Jiyo India encryption.'}</p>
+              <h3><Award size={28} /> {t.strategicProtection}</h3>
+              <p>{language === 'hi' ? (data.benefits_hi || data.benefits) : data.benefits}</p>
             </WhyChooseCard>
           </div>
 
@@ -526,8 +789,8 @@ const CategoryDetails = () => {
               <div style={{ position: 'absolute', bottom: '30px', right: '-30px', background: 'white', padding: '20px 30px', borderRadius: '20px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '15px' }}>
                  <div style={{ color: '#27ae60', background: '#eafaf1', padding: '10px', borderRadius: '12px' }}><CheckCircle2 size={28} /></div>
                  <div>
-                    <div style={{ fontSize: '1rem', fontWeight: 900, color: '#0b1a33' }}>Verified Security</div>
-                    <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginTop: '2px' }}>CERTIFIED HARDWARE</div>
+                    <div style={{ fontSize: '1rem', fontWeight: 900, color: '#0b1a33' }}>{t.verifiedSecurity}</div>
+                    <div style={{ fontSize: '0.7rem', color: '#888', fontWeight: 800, marginTop: '2px' }}>{t.certifiedHardware}</div>
                  </div>
               </div>
             </div>
@@ -535,15 +798,15 @@ const CategoryDetails = () => {
             <div className="stats">
               <div className="stat-item">
                 <div className="value">99.9%</div>
-                <div className="label">Scan Rate</div>
+                <div className="label">{t.stats.scanRate}</div>
               </div>
               <div className="stat-item">
                 <div className="value">&lt;2s</div>
-                <div className="label">Alert Speed</div>
+                <div className="label">{t.stats.alertSpeed}</div>
               </div>
               <div className="stat-item">
                 <div className="value">AES-256</div>
-                <div className="label">Encryption</div>
+                <div className="label">{t.stats.encryption}</div>
               </div>
             </div>
           </ImageWrapper>

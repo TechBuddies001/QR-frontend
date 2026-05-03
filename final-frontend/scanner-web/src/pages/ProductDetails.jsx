@@ -9,6 +9,8 @@ import Section from '../components/Section';
 import Button from '../components/Button';
 import api from '../lib/api';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../utils/translations';
 import toast from 'react-hot-toast';
 
 const fadeIn = keyframes`
@@ -301,6 +303,8 @@ const FeatureList = styled.div`
 `;
 
 const ProductDetails = () => {
+  const { language } = useLanguage();
+  const t = translations[language].productDetails;
   const { id } = useParams();
   const { addToCart } = useCart();
   const [activeTab, setActiveTab] = useState('features');
@@ -325,7 +329,7 @@ const ProductDetails = () => {
 
     if (product) {
       addToCart(product);
-      toast.success(`${product.name} added to cart!`, {
+      toast.success(language === 'hi' ? `${language === 'hi' ? (product.name_hi || product.name) : product.name} कार्ट में जोड़ा गया!` : `${product.name} added to cart!`, {
         icon: '🛒',
         style: {
           borderRadius: '100px',
@@ -358,19 +362,23 @@ const ProductDetails = () => {
   }, [id]);
 
   if (loading) return (
-    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0b1a33', color: 'white' }}>
+    <div style={{ height: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0b1a33', color: 'white' }}>
       <div style={{ textAlign: 'center' }}>
          <Activity size={50} className="animate-pulse" color="#C9A84C" />
-         <p style={{ marginTop: '25px', fontWeight: 800, letterSpacing: '3px', fontSize: '1.2rem' }}>FETCHING SPECIFICATIONS</p>
+         <p style={{ marginTop: '25px', fontWeight: 800, letterSpacing: '3px', fontSize: '1.2rem', textTransform: 'uppercase' }}>{t.initializing}</p>
       </div>
     </div>
   );
 
   if (!product) return (
     <div style={{ padding: '150px 20px', textAlign: 'center', fontSize: '1.5rem', fontWeight: 800, color: '#0b1a33' }}>
-      Product not found in Database.
+      {t.notFound}
     </div>
   );
+
+  const getFallbackImage = () => {
+    return 'https://img.icons8.com/fluency/400/security-checked.png';
+  };
 
   const getSpecValue = (label) => {
     const spec = product.dynamicData.find(d => d.label.toLowerCase() === label.toLowerCase());
@@ -382,32 +390,36 @@ const ProductDetails = () => {
       <ProductHeader>
         <Section bg="transparent">
           <Breadcrumbs>
-            <Link to="/">Ecosystem</Link> / <Link to="/products">Hardware</Link> / <span style={{ color: '#C9A84C' }}>{product.name}</span>
+            <Link to="/">Ecosystem</Link> / <Link to="/products">Hardware</Link> / <span style={{ color: '#C9A84C' }}>{language === 'hi' ? (product.name_hi || product.name) : product.name}</span>
           </Breadcrumbs>
           
           <MainGrid>
             <ImageGallery>
               <div className="main-img-wrapper">
-                <img 
-                  src={product.photos[0] ? `${apiUrl}${product.photos[0]}` : "/assets/car_qr_tag_mockup_1776107740073.png"} 
-                  alt={product.name} 
-                  className="main-img" 
-                />
+                {
+                  (() => {
+                    let src = product.photos[0] ? (product.photos[0].startsWith('http') ? product.photos[0] : `${apiUrl}${product.photos[0]}`) : getFallbackImage();
+                    if (src.includes('images.icons8.com')) src = src.replace('images.icons8.com', 'img.icons8.com').replace('/bubbles/', '/fluency/');
+                    return <img src={src} alt={product.name} className="main-img" />;
+                  })()
+                }
               </div>
               <div className="thumbs">
                 {product.photos.filter(img => img).length > 0 ? (
-                  product.photos.filter(img => img).map((img, i) => (
-                    <img key={i} src={`${apiUrl}${img}`} alt="thumb" />
-                  ))
+                  product.photos.filter(img => img).map((img, i) => {
+                    let thumbSrc = img.startsWith('http') ? img : `${apiUrl}${img}`;
+                    if (thumbSrc.includes('images.icons8.com')) thumbSrc = thumbSrc.replace('images.icons8.com', 'img.icons8.com').replace('/bubbles/', '/fluency/');
+                    return <img key={i} src={thumbSrc} alt="thumb" />;
+                  })
                 ) : (
-                  <img src="/assets/car_qr_tag_mockup_1776107740073.png" alt="thumb fallback" />
+                  <img src={getFallbackImage()} alt="thumb fallback" />
                 )}
               </div>
             </ImageGallery>
 
             <ProductInfo>
-              <div className="badge">{product.type === 'SAFETY' ? 'Security Hardware' : 'FMCG Module'}</div>
-              <h1>{product.name}</h1>
+              <div className="badge">{t.badge}</div>
+              <h1>{language === 'hi' ? (product.name_hi || product.name) : product.name}</h1>
               
               <div className="reviews">
                 <div className="stars">
@@ -424,31 +436,31 @@ const ProductDetails = () => {
                 <PriceRow>
                   <span className="current">₹{product.mrp || 0}</span>
                   <span className="old">₹{Math.round((product.mrp || 0) * 1.5)}</span>
-                  <span className="discount">SPECIAL OFFER</span>
+                  <span className="discount">{language === 'hi' ? 'विशेष ऑफर' : 'SPECIAL OFFER'}</span>
                 </PriceRow>
 
                 <SpecGrid>
-                   {product.dynamicData.slice(0, 4).map((spec, i) => (
-                     <div className="spec-item" key={i}>
-                        <ShieldCheck size={24} className="icon" />
-                        <div className="text">
-                          <span className="label">{spec.label}</span>
-                          <span className="value">{spec.value}</span>
-                        </div>
-                     </div>
-                   ))}
-                   {product.dynamicData.length === 0 && (
-                     <>
-                      <div className="spec-item">
-                        <ShieldCheck size={24} className="icon" />
-                        <div className="text"><span className="label">Encryption</span><span className="value">AES-256</span></div>
+                    {product.dynamicData.slice(0, 4).map((spec, i) => (
+                      <div className="spec-item" key={i}>
+                         <ShieldCheck size={24} className="icon" />
+                         <div className="text">
+                           <span className="label">{language === 'hi' ? (spec.label_hi || spec.label) : spec.label}</span>
+                           <span className="value">{language === 'hi' ? (spec.value_hi || spec.value) : spec.value}</span>
+                         </div>
                       </div>
-                      <div className="spec-item">
-                        <Activity size={24} className="icon" />
-                        <div className="text"><span className="label">Performance</span><span className="value">High Speed</span></div>
-                      </div>
-                     </>
-                   )}
+                    ))}
+                    {product.dynamicData.length === 0 && (
+                      <>
+                       <div className="spec-item">
+                         <ShieldCheck size={24} className="icon" />
+                         <div className="text"><span className="label">{t.encryption}</span><span className="value">AES-256</span></div>
+                       </div>
+                       <div className="spec-item">
+                         <Activity size={24} className="icon" />
+                         <div className="text"><span className="label">{t.delivery}</span><span className="value">24h</span></div>
+                       </div>
+                      </>
+                    )}
                 </SpecGrid>
 
                 <Button 
@@ -456,12 +468,12 @@ const ProductDetails = () => {
                   style={{ width: '100%', height: '60px', fontSize: '1.2rem', borderRadius: '16px', boxShadow: '0 20px 40px rgba(201, 168, 76, 0.3)' }} 
                   onClick={handleAddToCart}
                 >
-                  SECURE THIS MODULE <ShoppingCart size={24} style={{ marginLeft: '12px' }} />
+                  {t.addToCart} <ShoppingCart size={24} style={{ marginLeft: '12px' }} />
                 </Button>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255,255,255,0.5)', fontSize: '0.9rem', fontWeight: 600 }}>
-                <Shield size={18} /> Verified Tarkshya Security Hardware. Ships in 24 Hours.
+                <Shield size={18} /> Verified V-KAWACH Security Hardware. Ships in 24 Hours.
               </div>
             </ProductInfo>
           </MainGrid>
@@ -472,15 +484,15 @@ const ProductDetails = () => {
         <Section bg="transparent">
           <TabSection>
             <div className="tabs">
-              <button className={activeTab === 'features' ? 'active' : ''} onClick={() => setActiveTab('features')}>Module Features</button>
-              <button className={activeTab === 'description' ? 'active' : ''} onClick={() => setActiveTab('description')}>Technical Details</button>
+              <button className={activeTab === 'features' ? 'active' : ''} onClick={() => setActiveTab('features')}>{t.keyFeatures}</button>
+              <button className={activeTab === 'description' ? 'active' : ''} onClick={() => setActiveTab('description')}>{t.description}</button>
             </div>
 
             {activeTab === 'description' && (
               <div style={{ background: 'white', padding: '50px', borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.03)' }}>
                 <h3 style={{ fontSize: '1.8rem', color: '#0b1a33', fontWeight: 900, marginBottom: '20px' }}>Ecosystem Integration</h3>
                 <p style={{ lineHeight: 1.8, color: '#555', fontSize: '1.15rem' }}>
-                  {product.description || "This advanced Tarkshya security module integrates seamlessly into your digital ecosystem. Designed with military-grade precision, it provides instant verification and tracking capabilities to ensure maximum safety for your assets and loved ones."}
+                  {product.description || "This advanced V-KAWACH security module integrates seamlessly into your digital ecosystem. Designed with military-grade precision, it provides instant verification and tracking capabilities to ensure maximum safety for your assets and loved ones."}
                 </p>
                 <div style={{ marginTop: '30px', display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
                   <div style={{ background: '#f8f9fa', padding: '15px 25px', borderRadius: '12px', fontWeight: 700, color: '#0b1a33' }}><Award size={18} style={{ display: 'inline', marginRight: '10px', color: '#C9A84C' }}/> ISO Certified</div>
@@ -495,8 +507,8 @@ const ProductDetails = () => {
                    <div className="feature-card" key={i}>
                      <div className="icon-box"><Zap size={24} /></div>
                      <div>
-                       <h4>{spec.label}</h4>
-                       <p>{spec.value}</p>
+                       <h4>{language === 'hi' ? (spec.label_hi || spec.label) : spec.label}</h4>
+                       <p>{language === 'hi' ? (spec.value_hi || spec.value) : spec.value}</p>
                      </div>
                    </div>
                  ))}
