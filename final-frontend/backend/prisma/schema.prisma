@@ -1,0 +1,292 @@
+// Prisma schema for Smart QR Identity & Call Masking System
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("admin")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tags      Tag[]
+  products  Product[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+  tags      Tag[]
+  transactions Transaction[]
+}
+
+model Tag {
+  id               String    @id @default(uuid())
+  tagCode          String    @unique  // e.g. KA01AB1234
+  qrUrl            String?             // Full public URL
+  qrImagePath      String?             // Path to generated QR image
+
+  // Owner info (Legacy/Admin set)
+  ownerName        String
+  ownerPhoto       String?             // Path to uploaded photo
+  ownerPhone       String              // Hidden from public
+  emergencyContact String?
+  customMessage    String?
+  address          String?
+
+  // Tag metadata
+  assetType        String   @default("vehicle")  // vehicle | pet | person | other
+  customAssetType  String?                       // Dynamic value for 'other' asset types
+  assetModel       String?                       // e.g. Honda City, Labradog
+  assetColor       String?                       // e.g. Pearl White, Golden
+  assetNumber      String?                       // e.g. MH12AB1234 (Masked in public view)
+  planType         String   @default("basic")    // basic | premium | standard
+  designType       String   @default("standard") // standard | circle
+  isActive         Boolean  @default(true)
+  isLost           Boolean  @default(false)
+  hideName         Boolean  @default(false)
+  expiresAt        DateTime?
+
+  // Dynamic Content & Photos
+  dynamicData      String?             // JSON string: [ { label: "...", value: "..." } ]
+  photos           String?             // JSON string: [ "/uploads/...", ... ]
+
+  // Relations
+  adminId          String
+  admin            Admin    @relation(fields: [adminId], references: [id])
+  
+  userId           String?   // The actual customer who owns this tag now
+  user             User?     @relation(fields: [userId], references: [id])
+
+  scanLogs         ScanLog[]
+  callLogs         CallLog[]
+  smsLogs          SmsLog[]
+  sponsorId        String?
+  sponsor          Sponsor? @relation(fields: [sponsorId], references: [id])
+
+  categoryId       String?
+  category         Category? @relation(fields: [categoryId], references: [id])
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ScanLog {
+  id          String   @id @default(uuid())
+  tagId       String
+  tag         Tag      @relation(fields: [tagId], references: [id])
+  scannerIp   String?
+  scannerLat  Float?
+  scannerLng  Float?
+  scannerCity String?
+  userAgent   String?
+  smsSent     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model CallLog {
+  id            String   @id @default(uuid())
+  tagId         String
+  tag           Tag      @relation(fields: [tagId], references: [id])
+  scannerPhone  String?  // Temporary – masked
+  callSid       String?  // Exotel/Twilio call ID
+  status        String   @default("initiated") // initiated | connected | failed | missed
+  duration      Int?     // seconds
+  provider      String   @default("exotel")
+  createdAt     DateTime @default(now())
+}
+
+model SmsLog {
+  id          String   @id @default(uuid())
+  tagId       String
+  tag         Tag      @relation(fields: [tagId], references: [id])
+  recipient   String   // masked number
+  message     String
+  status      String   @default("sent") // sent | failed
+  provider    String   @default("exotel")
+  createdAt   DateTime @default(now())
+}
+
+model Plan {
+  id            String   @id @default(uuid())
+  name          String   @unique  // basic | standard | premium
+  displayName   String
+  price         Float
+  validityDays  Int
+  features      String   // JSON string of features array
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+}
+
+model Lead {
+  id          String   @id @default(uuid())
+  name        String
+  email       String?
+  phone       String
+  message     String?
+  subject     String?
+  createdAt   DateTime @default(now())
+}
+
+model Subscription {
+  id          String   @id @default(uuid())
+  tagId       String?
+  ownerName   String
+  ownerPhone  String
+  planName    String
+  amount      Float
+  status      String   @default("active") // active | expired | cancelled
+  startsAt    DateTime @default(now())
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+}
+
+model Sponsor {
+  id          String   @id @default(uuid())
+  name        String
+  logo        String?
+  website     String?
+  description String?
+  isActive    Boolean  @default(true)
+  tags        Tag[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  icon        String?
+  color       String?   @default("#C9A84C")
+  isActive    Boolean  @default(true)
+  
+  // Advanced Dynamic Content
+  heroImage         String?   // Large banner image path
+  preventionHeading String?
+  preventionText    String?
+  preventionCards   String?   // JSON: [{title, text, image}]
+  
+  emergencyHeading  String?
+  emergencyText     String?
+  emergencyCards    String?   // JSON: [{title, text, image}]
+  
+  howItWorksHeading String?
+  howItWorksText    String?
+  videoUrl          String?   // YouTube or hosted video
+  
+  trackingHeading   String?
+  trackingText      String?
+  trackingCards     String?   // JSON: [{title, icon}]
+  
+  features    String?   // JSON string: ["Feature 1", "Feature 2"]
+  benefits    String?   // Multi-line string
+  
+  products    Product[]
+  tags        Tag[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  userId        String?
+  user          User?     @relation(fields: [userId], references: [id])
+  amount        Float
+  status        String   @default("SUCCESS") // SUCCESS | PENDING | FAILED
+  type          String   @default("Subscription") // Subscription | Product
+  planName      String?
+  productId     String?
+  paymentMethod String   @default("Online")
+  createdAt     DateTime @default(now())
+}
+
+model Product {
+  id               String    @id @default(uuid())
+  productCode      String    @unique  // e.g. FMCG-123456
+  name             String
+  brand            String?
+  batchNumber      String?
+  mfgDate          DateTime?
+  expDate          DateTime?
+  mrp              Float?
+  qrUrl            String?
+  qrImagePath      String?
+  type             String    @default("FMCG") // FMCG or SAFETY
+  
+  categoryId       String?
+  category         Category? @relation(fields: [categoryId], references: [id])
+
+  // Dynamic Content & Photos
+  dynamicData      String?             // JSON string: [ { label: "...", value: "..." } ]
+  photos           String?             // JSON string
+  
+  isActive         Boolean  @default(true)
+  isCounterfeit    Boolean  @default(false)
+  
+  adminId          String
+  admin            Admin    @relation(fields: [adminId], references: [id])
+  
+  scanLogs         ProductScanLog[]
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ProductScanLog {
+  id          String   @id @default(uuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  scannerIp   String?
+  scannerCity String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+}
+model Order {
+  id              String      @id @default(uuid())
+  orderNumber     String      @unique
+  totalAmount     Float
+  status          String      @default("PENDING") // PENDING | PROCESSING | SHIPPED | DELIVERED | CANCELLED
+  paymentStatus   String      @default("UNPAID")  // UNPAID | PAID | REFUNDED
+  customerName    String
+  customerEmail   String
+  customerPhone   String
+  shippingAddress String
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model OrderItem {
+  id          String  @id @default(uuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  productName String
+  quantity    Int
+  price       Float
+  totalPrice  Float
+}

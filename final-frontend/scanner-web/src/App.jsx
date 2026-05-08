@@ -22,6 +22,7 @@ import ProductDetails from './pages/ProductDetails';
 import ScrollToTop from './components/ScrollToTop';
 
 import { CartProvider } from './context/CartContext';
+import { LanguageProvider } from './context/LanguageContext';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
@@ -30,30 +31,32 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyles />
-      <CartProvider>
-        <Router>
-          <ScrollToTop />
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Home />} />
-              <Route path="smart-qr" element={<SmartQR />} />
-              <Route path="cloud-monitoring" element={<CloudMonitoring />} />
-              <Route path="gps-tracking" element={<GPSTracking />} />
-              <Route path="social-initiative" element={<SocialInitiative />} />
-              <Route path="category/:id" element={<CategoryDetails />} />
-              <Route path="product/:id" element={<ProductDetails />} />
-              <Route path="cart" element={<Cart />} />
-              <Route path="checkout" element={<Checkout />} />
-              <Route path="order-success/:orderNumber" element={<OrderSuccess />} />
-              <Route path="login" element={<Login />} />
-              <Route path="signup" element={<Signup />} />
-            </Route>
-            <Route path="/dashboard" element={<UserDashboard />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/scan/:id" element={<PublicProfile />} />
-          </Routes>
-        </Router>
-      </CartProvider>
+      <LanguageProvider>
+        <CartProvider>
+          <Router>
+            <ScrollToTop />
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="smart-qr" element={<SmartQR />} />
+                <Route path="cloud-monitoring" element={<CloudMonitoring />} />
+                <Route path="gps-tracking" element={<GPSTracking />} />
+                <Route path="social-initiative" element={<SocialInitiative />} />
+                <Route path="category/:id" element={<CategoryDetails />} />
+                <Route path="product/:id" element={<ProductDetails />} />
+                <Route path="cart" element={<Cart />} />
+                <Route path="checkout" element={<Checkout />} />
+                <Route path="order-success/:orderNumber" element={<OrderSuccess />} />
+                <Route path="login" element={<Login />} />
+                <Route path="signup" element={<Signup />} />
+              </Route>
+              <Route path="/dashboard" element={<UserDashboard />} />
+              <Route path="/admin/dashboard" element={<AdminDashboard />} />
+              <Route path="/scan/:id" element={<PublicProfile />} />
+            </Routes>
+          </Router>
+        </CartProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 }

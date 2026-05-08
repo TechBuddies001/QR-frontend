@@ -589,47 +589,25 @@ const TestimonialsSection = styled.div`
     &:hover { background: #0b1a33; color: #C9A84C; border-color: #0b1a33; }
   }
 
-  .carousel-viewport {
-    overflow: hidden;
-    width: 100%;
-  }
-
   .cards {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 24px;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    & > * {
-      flex: 0 0 calc(33.333% - 16px);
-      min-width: 0;
-    }
-
-    @media (max-width: 1024px) {
-      & > * {
-        flex: 0 0 calc(50% - 12px);
-      }
-    }
-
-    @media (max-width: 768px) {
-      & > * {
-        flex: 0 0 100%;
-      }
-    }
+    @media (max-width: 1024px) { grid-template-columns: 1fr; }
   }
 
   .dots {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     margin-top: 40px;
     span {
-      width: 10px;
-      height: 10px;
+      width: 10px; height: 10px;
       border-radius: 50%;
-      background: #e2e8f0;
+      background: #ddd;
       cursor: pointer;
-      transition: all 0.3s ease;
-      &.active { background: #C9A84C; transform: scale(1.2); }
+      transition: all 0.3s;
+      &.active { background: #C9A84C; width: 28px; border-radius: 5px; }
     }
   }
 `;
@@ -837,109 +815,101 @@ const CertificationSection = styled.div`
   }
 `;
 
-const ComparisonContainer = styled.div`
-  background: #0b1a33;
-  border-radius: 40px;
-  padding: 60px 40px;
+const PricingGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
   max-width: 1400px;
-  margin: 0 auto 80px;
-  color: white;
+  margin: 50px auto;
+  padding: 0 20px;
+`;
+
+const PricingCard = styled.div`
+  background: white;
+  border-radius: 30px;
+  padding: 40px;
+  border: 1px solid #eee;
+  text-align: center;
+  transition: all 0.4s ease;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.3);
-
-  @media (max-width: 1024px) {
-    padding: 40px 20px;
-    border-radius: 20px;
-    margin: 0 20px 60px;
-  }
-`;
-
-const ComparisonGrid = styled.div`
-  display: grid;
-  grid-template-columns: 300px 1fr 1fr 1fr;
-  gap: 0;
-  position: relative;
-
-  @media (max-width: 1024px) {
-    grid-template-columns: 180px 1fr 1fr 1fr;
-  }
-  @media (max-width: 768px) {
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-  }
-`;
-
-const ComparisonColumn = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  text-align: center;
-  position: relative;
-  
-  &.feature-labels {
-    text-align: left;
-    padding-right: 40px;
-    h3 { font-size: 1.8rem; color: #C9A84C; margin-bottom: 30px; font-weight: 800; }
-    
-    @media (max-width: 768px) {
-      padding-right: 0;
-      h3 { text-align: center; }
-    }
+
+  &:hover {
+    transform: translateY(-15px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.1);
+    border-color: #C9A84C;
   }
 
   &.featured {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 30px;
-    border: 1px solid rgba(201, 168, 76, 0.2);
-    
-    .popular-badge {
+    border-color: #C9A84C;
+    &::before {
+      content: 'MOST POPULAR';
       position: absolute;
-      top: -15px;
-      left: 50%;
-      transform: translateX(-50%);
+      top: 20px;
+      right: -35px;
       background: #C9A84C;
       color: #0b1a33;
-      padding: 5px 20px;
-      border-radius: 100px;
-      font-size: 0.75rem;
+      padding: 5px 40px;
+      font-size: 0.7rem;
       font-weight: 800;
-      text-transform: uppercase;
+      transform: rotate(45deg);
     }
   }
 
-  .plan-header {
-    margin-bottom: 40px;
-    .tier { font-size: 0.8rem; font-weight: 800; color: #999; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 2px; }
-    .price { 
-      font-size: 2.8rem; font-weight: 900; color: white; 
-      span { font-size: 0.9rem; color: #666; font-weight: 600; }
-    }
+  .tier {
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #C9A84C;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
   }
 
-  .feature-cell {
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 0.95rem;
-    color: #999;
-    
-    &.label {
-      justify-content: flex-start;
-      color: #ccc;
-      font-weight: 600;
-    }
-    
-    svg.check { color: #C9A84C; }
-    span.dash { color: #333; font-weight: 900; }
+  h3 {
+    font-size: 1.5rem;
+    color: #0b1a33;
+    margin-bottom: 10px;
+    font-weight: 900;
   }
 
-  .cta-box {
-    margin-top: 40px;
-    button { width: 100%; border-radius: 12px; font-weight: 800; padding: 15px; }
+  .price {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #0b1a33;
+    margin-bottom: 20px;
+    span { font-size: 0.9rem; color: #999; font-weight: 500; }
+  }
+
+  .validity {
+    background: #f8f9fa;
+    padding: 5px 15px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #666;
+    margin: 0 auto 30px;
+    display: inline-block;
+  }
+
+  .features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 30px;
+    flex-grow: 1;
+    text-align: left;
+    li {
+      padding: 10px 0;
+      color: #555;
+      font-size: 0.95rem;
+      border-bottom: 1px solid #f8f9fa;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      svg { color: #C9A84C; flex-shrink: 0; }
+      &:last-child { border-bottom: none; }
+    }
   }
 `;
 
@@ -1093,7 +1063,6 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [plans, setPlans] = useState([]);
   const [activePlanTab, setActivePlanTab] = useState('LITE');
-  const [activeProductTab, setActiveProductTab] = useState('VEHICLE');
   const [securityFeatures, setSecurityFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [apiUrl, setApiUrl] = useState('');
@@ -1231,69 +1200,47 @@ const Home = () => {
           <p>{t.sections.safetyIds.subtext}</p>
           <div className="line" />
         </SectionTitle>
-        <TabContainer>
-          {[
-            { id: 'VEHICLE', label: 'Vehicle', icon: <Icons.Car size={18} /> },
-            { id: 'PERSONAL', label: 'Personal', icon: <Icons.User size={18} /> },
-            { id: 'PETS', label: 'Pets', icon: <Icons.Dog size={18} /> }
-          ].map((tab) => (
-            <TabButton
-              key={tab.id}
-              active={activeProductTab === tab.id}
-              onClick={() => setActiveProductTab(tab.id)}
-              style={{ minWidth: '120px', padding: '10px 20px', fontSize: '0.9rem' }}
-            >
-              {tab.icon} {tab.label}
-            </TabButton>
-          ))}
-        </TabContainer>
-
         <ProductGrid>
-          {products
-            .filter(prod => {
-              const name = (prod.name || '').toLowerCase();
-              if (activeProductTab === 'VEHICLE') return name.includes('vehicle') || name.includes('car') || name.includes('bike') || name.includes('cycle') || name.includes('parking');
-              if (activeProductTab === 'PERSONAL') return name.includes('kid') || name.includes('child') || name.includes('woman') || name.includes('laptop') || name.includes('bag') || name.includes('luggage') || name.includes('gadget') || name.includes('office') || name.includes('corporate') || name.includes('identity');
-              if (activeProductTab === 'PETS') return name.includes('pet') || name.includes('dog') || name.includes('cat') || name.includes('animal');
-              return true;
-            })
-            .slice(0, 6)
-            .map((prod) => {
-              const photos = typeof prod.photos === 'string' ? JSON.parse(prod.photos || "[]") : (prod.photos || []);
-              const dynamicData = typeof prod.dynamicData === 'string' ? JSON.parse(prod.dynamicData || "[]") : (prod.dynamicData || []);
-              const features = dynamicData.slice(0, 4);
-              let imgSrc = photos[0] ? (photos[0].startsWith('http') ? photos[0] : `${apiUrl}${photos[0]}`) : "https://img.icons8.com/fluency/400/security-checked.png";
-              if (imgSrc.includes('images.icons8.com')) {
-                imgSrc = imgSrc.replace('images.icons8.com', 'img.icons8.com').replace('/bubbles/', '/fluency/');
-              }
-              return (
-                <ModernProductCard key={prod.id}>
-                  {prod.isCounterfeit && <div className="badge" style={{ background: '#e74c3c' }}>RECALLED</div>}
-                  <Link to={`/product/${prod.id}`} className="img-box">
-                    <img src={imgSrc} alt={prod.name} />
-                  </Link>
-                  <div className="content">
-                    <h3>{prod.name}</h3>
-                    <div className="price-row">
-                      <div className="price">₹{prod.mrp || 0} <span>₹{Math.round((prod.mrp || 0) * 1.5)}</span></div>
-                      <div className="discount">33% OFF</div>
-                    </div>
+          {products.map((prod) => {
+            const photos = typeof prod.photos === 'string' ? JSON.parse(prod.photos || "[]") : (prod.photos || []);
+            const dynamicData = typeof prod.dynamicData === 'string' ? JSON.parse(prod.dynamicData || "[]") : (prod.dynamicData || []);
+            const features = dynamicData.slice(0, 4);
+            let imgSrc = photos[0] ? (photos[0].startsWith('http') ? photos[0] : `${apiUrl}${photos[0]}`) : "https://img.icons8.com/fluency/400/security-checked.png";
+            if (imgSrc.includes('images.icons8.com')) {
+              imgSrc = imgSrc.replace('images.icons8.com', 'img.icons8.com').replace('/bubbles/', '/fluency/');
+            }
+            return (
+              <ModernProductCard key={prod.id}>
+                {prod.isCounterfeit && <div className="badge" style={{ background: '#e74c3c' }}>RECALLED</div>}
+                <Link to={`/product/${prod.id}`} className="img-box">
+                  <img src={imgSrc} alt={prod.name} />
+                </Link>
+                <div className="content">
+                  <h3>{prod.name}</h3>
+                  <div className="features">
+                    {features.map((f, i) => <span key={i}>{f.label.toUpperCase()}</span>)}
+                    {features.length === 0 && (
+                      <>
+                        <span>SMART QR</span>
+                        <span>PRIVACY</span>
+                      </>
+                    )}
                   </div>
-                  <div className="footer">
-                    <ActionButton to={`/product/${prod.id}`} style={{ padding: '10px 15px', fontSize: '0.8rem' }}>VIEW DETAILS</ActionButton>
-                    <Button variant="secondary" style={{ padding: '10px 15px' }} onClick={(e) => handleAddToCart(e, prod)}>
-                      <ShoppingCart size={18} />
-                    </Button>
+                  <div className="price-row">
+                    <div className="price">₹{prod.mrp || 0} <span>₹{Math.round((prod.mrp || 0) * 1.5)}</span></div>
+                    <div className="discount">33% OFF</div>
                   </div>
-                </ModernProductCard>
-              );
-            })}
+                </div>
+                <div className="footer">
+                  <ActionButton to={`/product/${prod.id}`} style={{ padding: '10px 15px' }}>VIEW DETAILS</ActionButton>
+                  <Button variant="secondary" style={{ padding: '10px 15px' }} onClick={(e) => handleAddToCart(e, prod)}>
+                    <ShoppingCart size={18} />
+                  </Button>
+                </div>
+              </ModernProductCard>
+            );
+          })}
         </ProductGrid>
-        <div style={{ textAlign: 'center', marginTop: '40px' }}>
-          <ActionButton to="/smart-qr" variant="outline" style={{ padding: '12px 30px', fontSize: '0.9rem' }}>
-            VIEW ALL PRODUCTS <Icons.ArrowRight size={18} style={{ marginLeft: '8px' }} />
-          </ActionButton>
-        </div>
       </Section>
 
       <Section bg="light">
@@ -1341,89 +1288,53 @@ const Home = () => {
           <div className="line" />
         </SectionTitle>
 
-        <ComparisonContainer>
-          <TabContainer style={{ marginBottom: '60px' }}>
-            {['BIKE SECURITY', 'CAR SECURITY'].map((cat) => (
+        <PricingGrid>
+          <TabContainer style={{ gridColumn: '1/-1', marginBottom: '40px' }}>
+            {['LITE', 'PRO', 'ELITE'].map((tier) => (
               <TabButton
-                key={cat}
-                active={activePlanTab === (cat === 'BIKE SECURITY' ? 'LITE' : 'ELITE')}
-                onClick={() => setActivePlanTab(cat === 'BIKE SECURITY' ? 'LITE' : 'ELITE')}
-                style={{ 
-                  background: activePlanTab === (cat === 'BIKE SECURITY' ? 'LITE' : 'ELITE') ? '#C9A84C' : 'transparent',
-                  color: activePlanTab === (cat === 'BIKE SECURITY' ? 'LITE' : 'ELITE') ? '#0b1a33' : 'white',
-                  borderColor: activePlanTab === (cat === 'BIKE SECURITY' ? 'LITE' : 'ELITE') ? '#C9A84C' : 'rgba(255,255,255,0.1)',
-                  minWidth: '200px'
-                }}
+                key={tier}
+                active={activePlanTab === tier}
+                onClick={() => setActivePlanTab(tier)}
               >
-                {cat}
+                {tier}
               </TabButton>
             ))}
           </TabContainer>
 
-          <ComparisonGrid>
-            <ComparisonColumn className="feature-labels">
-              <h3>Compare Tiers</h3>
-              {[
-                'Basic QR Scan',
-                'Direct Call (No Masking)',
-                'WhatsApp Alert (No Masking)',
-                'Privacy Masking',
-                'Call Masking (Protected)',
-                'WhatsApp Masking (Protected)',
-                'Live Location Sharing'
-              ].map((f, i) => (
-                <div key={i} className="feature-cell label">{f}</div>
-              ))}
-            </ComparisonColumn>
+          {plans.filter(p => (p.tier || '').toUpperCase() === activePlanTab).map((plan) => (
+            <PricingCard key={plan.id} className={plan.tier?.toUpperCase() === 'PRO' ? 'featured' : ''}>
+              <div className="tier">{plan.tier}</div>
+              <h3>{plan.displayName}</h3>
+              <div className="price">₹{plan.price} <span>/ year</span></div>
+              <div className="validity">{plan.validityDays} Days Validity</div>
+              <ul className="features">
+                {plan.features.map((feature, i) => {
+                  let displayText = feature;
+                  const lower = feature.toLowerCase();
+                  if (lower.includes('scan') && !lower.includes('basic')) displayText = 'Basic QR Scan';
+                  else if (lower.includes('call') || lower.includes('connect')) displayText = 'Direct Owner Connect';
+                  else if (lower.includes('whatsapp') || lower.includes('alert')) displayText = 'Instant WhatsApp Alert';
+                  else if (lower.includes('masking') || lower.includes('privacy')) displayText = 'Privacy Call Masking';
+                  else if (lower.includes('location') || lower.includes('gps')) displayText = 'Live Location Sharing';
+                  else displayText = feature.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
-            {['LITE', 'PRO', 'ELITE'].map((tierName) => {
-              const plan = plans.find(p => p.tier?.toUpperCase() === tierName);
-              if (!plan) return <ComparisonColumn key={tierName} />;
-              
-              const planFeatures = (plan.features || []).map(f => f.toLowerCase());
-              
-              return (
-                <ComparisonColumn key={tierName} className={tierName === 'PRO' ? 'featured' : ''}>
-                  {tierName === 'PRO' && <div className="popular-badge">Popular</div>}
-                  <div className="plan-header">
-                    <div className="tier">{tierName}</div>
-                    <div className="price">₹{plan.price} <span>/yr</span></div>
-                  </div>
-                  
-                  {[
-                    'scan',
-                    'direct',
-                    'whatsapp alert',
-                    'privacy',
-                    'call masking',
-                    'whatsapp masking',
-                    'location'
-                  ].map((featKey, i) => {
-                    const hasFeature = planFeatures.some(f => f.includes(featKey));
-                    return (
-                      <div key={i} className="feature-cell">
-                        {hasFeature ? <Icons.Check size={20} className="check" /> : <span className="dash">—</span>}
-                      </div>
-                    );
-                  })}
-
-                  <div className="cta-box">
-                    <ActionButton 
-                      to="/smart-qr" 
-                      style={{ 
-                        background: tierName === 'PRO' ? '#C9A84C' : 'transparent',
-                        color: tierName === 'PRO' ? '#0b1a33' : '#C9A84C',
-                        border: '2px solid #C9A84C'
-                      }}
-                    >
-                      Get {tierName.charAt(0) + tierName.slice(1).toLowerCase()}
-                    </ActionButton>
-                  </div>
-                </ComparisonColumn>
-              );
-            })}
-          </ComparisonGrid>
-        </ComparisonContainer>
+                  return (
+                    <li key={i}>
+                      <CheckCircle2 size={18} />
+                      {displayText}
+                    </li>
+                  );
+                })}
+              </ul>
+              <ActionButton to="/smart-qr">GET STARTED</ActionButton>
+            </PricingCard>
+          ))}
+          {plans.filter(p => (p.tier || '').toUpperCase() === activePlanTab).length === 0 && (
+            <p style={{ gridColumn: '1/-1', textAlign: 'center', color: '#999', padding: '40px' }}>
+              No plans available for this category yet.
+            </p>
+          )}
+        </PricingGrid>
       </Section>
 
       {/* ── TESTIMONIALS ── */}
@@ -1433,48 +1344,37 @@ const Home = () => {
           <h2><span>What our</span>Customers Say</h2>
         </div>
         <div className="carousel-wrapper">
-          <button className="nav-btn" onClick={() => setTestimonialSlide(s => (s - 1 + 8) % 8)}>
+          <button className="nav-btn" onClick={() => setTestimonialSlide(s => (s - 1 + 3) % 3)}>
             <Icons.ChevronLeft size={20} />
           </button>
-          <div className="carousel-viewport">
-            <div className="cards" style={{ transform: `translateX(calc(-${testimonialSlide * (100 / (window.innerWidth > 1024 ? 3 : window.innerWidth > 768 ? 2 : 1))}%))` }}>
-              {[
-                { name: 'Swati Singh', loc: 'Bihar', featured: false,
-                  text: '"V-KAWACH\'s Pet Safety QR helped me find my lost dog. Someone scanned the QR and <b>connected with me directly</b> — absolutely stress-free!"' },
-                { name: 'Rajat Patel', loc: 'Gujarat', featured: true,
-                  text: '"V-KAWACH Smart QR Tag has enhanced our vehicle\'s security. In an emergency, anyone can scan the QR and <b>instantly connect with us</b>."' },
-                { name: 'Surya Prakash', loc: 'Jaipur', featured: false,
-                  text: '"A fire broke out in my car in a crowded market — the Police scanned the V-KAWACH QR and contacted me immediately. This tag <b>saved us from a major loss</b>."' },
-                { name: 'Aman Verma', loc: 'Delhi', featured: false,
-                  text: '"Wrong parking was a common issue in Delhi\'s crowd. Now anyone scans the QR and informs me, and I move my car. A <b>very useful product</b>!"' },
-                { name: 'Priya Sharma', loc: 'Mumbai', featured: true,
-                  text: '"My daughter\'s school bag has a V-KAWACH tag. As a mother, I have <b>peace of mind</b> that anyone can reach me instantly in case of need."' },
-                { name: 'Vikram Singh', loc: 'Chandigarh', featured: false,
-                  text: '"I left my wallet in a cafe. A kind person scanned the QR card inside and called me. <b>Amazing technology</b>!"' },
-                { name: 'Neha Gupta', loc: 'Bangalore', featured: false,
-                  text: '"I left my laptop in an auto. The driver contacted me through the QR, and I got my valuable data and laptop back safely. <b>Thank you V-KAWACH!</b>"' },
-                { name: 'Amit Redhu', loc: 'Haryana', featured: true,
-                  text: '"This is very useful for my elderly father. He always carries an <b>emergency QR card</b>, which has reduced our worries about his safety."' }
-              ].map((review, i) => (
-                <TestimonialCard key={i} className={review.featured ? 'featured' : ''} style={{ boxShadow: '0 15px 35px rgba(0,0,0,0.1)' }}>
-                  <Icons.Quote size={28} className="quote" />
-                  <p dangerouslySetInnerHTML={{ __html: review.text }} />
-                  <div className="author">
-                    <div className="info">
-                      <div className="name">{review.name}</div>
-                      <div className="loc">{review.loc}</div>
-                    </div>
+          <div className="cards">
+            {[
+              { name: 'Swati Singh', loc: 'Bihar', featured: false,
+                text: '"V-KAWACH के Pet Safety QR की वजह से मेरा खोया हुआ कुत्ता वापस मिला। किसी ने QR scan किया और सीधे मुझसे connect किया — बिल्कुल stress-free!"' },
+              { name: 'Rajat Patel', loc: 'Gujarat', featured: true,
+                text: '"V-KAWACH Smart QR Tag ने हमारी गाड़ी की सुरक्षा को बढ़ा दिया है। Emergency में कोई भी QR scan करके instantly हमसे connect कर सकता है।"' },
+              { name: 'Surya Prakash', loc: 'Jaipur', featured: false,
+                text: '"भीड़ वाले मार्केट में गाड़ी में आग लग गई — Police ने V-KAWACH QR scan करके तुरंत मुझसे contact किया। इस tag ने बड़ा नुकसान बचाया।"' },
+            ].map((review, i) => (
+              <TestimonialCard key={i} className={review.featured ? 'featured' : ''}>
+                <Icons.Quote size={28} className="quote" />
+                <p>{review.text}</p>
+                <div className="author">
+                  <div className="avatar">{review.name[0]}</div>
+                  <div className="info">
+                    <div className="name">{review.name}</div>
+                    <div className="loc">{review.loc}</div>
                   </div>
-                </TestimonialCard>
-              ))}
-            </div>
+                </div>
+              </TestimonialCard>
+            ))}
           </div>
-          <button className="nav-btn" onClick={() => setTestimonialSlide(s => (s + 1) % 8)}>
+          <button className="nav-btn" onClick={() => setTestimonialSlide(s => (s + 1) % 3)}>
             <Icons.ChevronRight size={20} />
           </button>
         </div>
         <div className="dots">
-          {[0,1,2,3,4,5,6,7].map(i => (
+          {[0,1,2].map(i => (
             <span key={i} className={testimonialSlide === i ? 'active' : ''} onClick={() => setTestimonialSlide(i)} />
           ))}
         </div>
@@ -1488,22 +1388,22 @@ const Home = () => {
             <p>V-KAWACH के बारे में सामान्य प्रश्नों के उत्तर पाएं</p>
           </div>
           {[
-            { q: 'V-KAWACH Safety QR क्या है?',
+            { q: '1. V-KAWACH Safety QR क्या है?',
               a: 'V-KAWACH Safety QR एक अगली पीढ़ी की डिजिटल सुरक्षा प्रणाली है जिसमें एक QR Tag आपके वाहन, लैपटॉप, बच्चे या पालतू जानवर पर लगाया जाता है। Emergency में कोई भी इसे scan करके आपसे तुरंत और anonymously connect कर सकता है।' },
-            { q: 'V-KAWACH QR कैसे काम करता है?',
+            { q: '2. V-KAWACH QR कैसे काम करता है?',
               a: 'QR scan होने पर एक secure page खुलता है जहाँ scanner अपना नंबर enter करता है। V-KAWACH का call masking system दोनों के नंबर छुपाकर एक safe call connect करता है — आपकी privacy 100% सुरक्षित रहती है।' },
-            { q: 'क्या बिना internet के QR scan होगा?',
+            { q: '3. क्या बिना internet के QR scan होगा?',
               a: 'QR scan के लिए scanner के फोन पर internet होना जरूरी है। लेकिन Emergency call का option हमेशा available रहता है जो बिना internet के भी काम करता है।' },
-            { q: 'क्या मेरा मोबाइल नंबर सुरक्षित (Safe) रहेगा?',
+            { q: '4. क्या मेरा personal number safe है?',
               a: 'बिल्कुल! V-KAWACH में आपका नंबर कभी किसी को दिखता नहीं है। हमारी Privacy-First Call Masking Technology दोनों parties के नंबर को पूरी तरह छुपा देती है।' },
-            { q: 'V-KAWACH QR कहाँ-कहाँ use हो सकता है?',
+            { q: '5. V-KAWACH QR कहाँ-कहाँ use हो सकता है?',
               a: 'गाड़ी (कार/बाइक), लैपटॉप, बच्चों का बैग, पालतू जानवर का collar, luggage, medical emergency card, corporate ID badge — कहीं भी जहाँ emergency में contact की ज़रूरत हो।' },
           ].map((item, i) => (
             <FAQItem key={i} open={openFaq === i}>
               <div className="faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
                 <div className="q-left">
                   <div className="bar" />
-                  <span style={{ fontWeight: '800' }}>{item.q}</span>
+                  <span>{item.q}</span>
                 </div>
                 <Icons.ChevronDown size={20} />
               </div>
