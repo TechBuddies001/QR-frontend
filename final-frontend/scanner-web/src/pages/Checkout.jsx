@@ -197,29 +197,99 @@ const Checkout = () => {
     }
   }, [navigate]);
 
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     if (cart.length === 0) return;
     
     setLoading(true);
     try {
-      const orderData = {
-        customerName: formData.name,
-        customerEmail: formData.email,
-        customerPhone: formData.phone,
-        shippingAddress: `${formData.address}, ${formData.city} - ${formData.pincode}`,
-        items: cart,
-        totalAmount: cartTotal
+      const isLoaded = await loadRazorpay();
+      if (!isLoaded) {
+        toast.error('Razorpay SDK failed to load. Are you online?');
+        setLoading(false);
+        return;
+      }
+
+      // 1. Create Razorpay Order in Backend
+      const orderRes = await api.post('/payments/create-order', {
+        amount: cartTotal,
+        receipt: `receipt_${Date.now()}`
+      });
+
+      if (!orderRes.data.success) {
+        throw new Error(orderRes.data.error || 'Order creation failed');
+      }
+
+      const { order } = orderRes.data;
+
+      // 2. Open Razorpay Checkout Modal
+      const options = {
+        key: 'rzp_test_Sld6vwxfI5Afv3', // Test Key ID
+        amount: order.amount,
+        currency: order.currency,
+        name: 'V-KAWACH Safety IDs',
+        description: 'Secure Payment for Smart Safety IDs',
+        image: '/assets/new_logo.png',
+        order_id: order.id,
+        handler: async (response) => {
+          // 3. Verify Payment and Create Final Order
+          try {
+            const verifyRes = await api.post('/payments/verify', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              customerData: {
+                ...formData,
+                shippingAddress: `${formData.address}, ${formData.city} - ${formData.pincode}`
+              },
+              cart: cart,
+              totalAmount: cartTotal
+            });
+
+            if (verifyRes.data.success) {
+              toast.success('Payment Successful!');
+              clearCart();
+              navigate(`/order-success/${verifyRes.data.order.orderNumber}`);
+            } else {
+              toast.error('Payment verification failed. Please contact support.');
+            }
+          } catch (vErr) {
+            console.error('Verification Error:', vErr);
+            toast.error('Payment verification error. Please check your transaction.');
+          }
+        },
+        prefill: {
+          name: formData.name,
+          email: formData.email,
+          contact: formData.phone
+        },
+        notes: {
+          address: formData.address
+        },
+        theme: {
+          color: '#0b1a33'
+        }
       };
 
-      const res = await api.post('/orders', orderData);
-      if (res.data.success) {
-        clearCart();
-        navigate(`/order-success/${res.data.order.orderNumber}`);
-      }
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response) {
+        toast.error('Payment Failed: ' + response.error.description);
+      });
+      rzp.open();
+
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.error || 'Failed to place order');
+      toast.error(err.message || 'Failed to initiate payment');
     } finally {
       setLoading(false);
     }
@@ -296,8 +366,8 @@ const Checkout = () => {
             </TotalBox>
 
             <PaymentMethod>
-              <div className="title"><CreditCard size={20} /> Verified COD</div>
-              <p>Payment will be collected upon successful delivery of your Smart Safety IDs. No upfront payment required.</p>
+              <div className="title"><ShieldCheck size={20} /> Secure Online Payment</div>
+              <p>Your transaction is protected with industry-standard encryption. Pay securely via Razorpay (UPI, Cards, NetBanking).</p>
             </PaymentMethod>
 
             <Button 

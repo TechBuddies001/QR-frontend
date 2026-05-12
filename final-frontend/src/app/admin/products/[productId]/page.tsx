@@ -220,7 +220,47 @@ export default function ProductDetailPage() {
                         </div>
                      </div>
 
-                     <div className="flex items-center gap-4 pt-4">
+                     <div className="pt-6 border-t border-slate-100">
+                        <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Product Images (Upload Multiple)</h4>
+                        <input 
+                          type="file" 
+                          multiple 
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files) {
+                              const newFiles = Array.from(e.target.files);
+                              setSelectedPhotos(prev => [...prev, ...newFiles]);
+                            }
+                          }}
+                          className="block w-full text-sm text-slate-500
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-xl file:border-0
+                            file:text-[10px] file:font-black file:uppercase file:tracking-widest
+                            file:bg-slate-100 file:text-slate-700
+                            hover:file:bg-slate-200 transition-all cursor-pointer"
+                        />
+                        {selectedPhotos.length > 0 && (
+                          <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+                            {selectedPhotos.map((file, i) => (
+                              <div key={i} className="relative size-16 rounded-lg overflow-hidden border border-slate-200 flex-shrink-0 group">
+                                <img src={URL.createObjectURL(file)} className="w-full h-full object-cover" />
+                                <button 
+                                  type="button" 
+                                  onClick={() => setSelectedPhotos(prev => prev.filter((_, idx) => idx !== i))}
+                                  className="absolute inset-0 bg-black/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xs"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest">
+                          Uploading new images will replace existing ones.
+                        </p>
+                     </div>
+
+                     <div className="flex items-center gap-4 pt-4 border-t border-slate-100">
                         <button type="submit" className="flex-1 bg-emerald-600 py-4 rounded-xl text-white font-black text-sm uppercase tracking-widest shadow-xl shadow-emerald-600/20 active:scale-[0.98] transition-all">Save Changes</button>
                         <button type="button" onClick={() => setIsEditing(false)} className="px-8 py-4 bg-slate-100 rounded-xl text-slate-600 font-black text-sm uppercase tracking-widest">Discard</button>
                      </div>

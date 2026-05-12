@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 const SectionWrapper = styled.section`
@@ -82,13 +82,65 @@ const ImageContainer = styled.div`
   align-items: center;
   background: #f9f9f9;
   min-height: 200px;
+  position: relative;
+  overflow: hidden;
   
   img {
     max-width: 100%;
-    max-height: 150px;
+    max-height: 180px;
     object-fit: contain;
+    transition: opacity 0.5s ease-in-out;
   }
 `;
+
+const CarouselDots = styled.div`
+  position: absolute;
+  bottom: 10px;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  width: 100%;
+`;
+
+const Dot = styled.div`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: ${({ active, theme }) => active ? theme.colors.navy : '#ccc'};
+  cursor: pointer;
+  transition: background-color 0.3s;
+`;
+
+const ProductCarousel = ({ images, title }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (!images || images.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [images]);
+
+  if (!images || images.length === 0) return null;
+
+  return (
+    <ImageContainer>
+      <img src={images[currentIndex]} alt={`${title} - ${currentIndex + 1}`} />
+      {images.length > 1 && (
+        <CarouselDots>
+          {images.map((_, idx) => (
+            <Dot 
+              key={idx} 
+              active={idx === currentIndex} 
+              onClick={() => setCurrentIndex(idx)} 
+            />
+          ))}
+        </CarouselDots>
+      )}
+    </ImageContainer>
+  );
+};
 
 const FeaturesBanner = styled.div`
   background-color: ${({ theme }) => theme.colors.gold};
@@ -141,28 +193,41 @@ const ActionButton = styled.button`
 
 const products = [
   {
-    image: "/assets/car_qr_tag_mockup_1776107740073.png",
+    images: [
+      "/assets/car_qr_tag_mockup_1776107740073.png",
+      "/assets/vehicle_sticker_1.jpg",
+      "/assets/vehicle_sticker_2.jpg"
+    ],
     title: "CAR SAFETY QR",
     btn1: "FAMILY ALERT",
     btn2: "FIND LOCATION"
   },
   {
-    image: "/assets/car_qr_tag_mockup_1776107740073.png",
+    images: [
+      "/assets/car_qr_tag_mockup_1776107740073.png",
+      "/assets/vehicle_sticker_1.jpg",
+      "/assets/vehicle_sticker_2.jpg"
+    ],
     title: "CAR PREMIUM QR",
     btn1: "FIND LOCATION",
     btn2: "ROUTE TRACKING"
   },
   {
-    image: "/assets/pet_qr_tag_mockup_1776107762376.png",
+    images: [
+      "/assets/pet_qr_tag_mockup_1776107762376.png"
+    ],
     title: "BIKE SAFETY QR",
     btn1: "FAMILY ALERT",
     btn2: "FIND LOCATION"
   },
   {
-    image: "/assets/pet_qr_tag_mockup_1776107762376.png",
-    title: "BIKE PREMIUM QR",
-    btn1: "FAMILY ALERT",
-    btn2: "FIND LOCATION"
+    images: [
+      "/assets/student_id_1.jpg",
+      "/assets/student_id_2.jpg"
+    ],
+    title: "STUDENT SAFETY ID",
+    btn1: "EMERGENCY SCAN",
+    btn2: "BUY NOW"
   }
 ];
 
@@ -179,9 +244,7 @@ const OurProducts = () => {
         <Grid>
           {products.map((prod, index) => (
             <ProductCard key={index}>
-              <ImageContainer>
-                <img src={prod.image} alt={prod.title} />
-              </ImageContainer>
+              <ProductCarousel images={prod.images} title={prod.title} />
               <FeaturesBanner>Features {'>'}{'>'}{'>'}</FeaturesBanner>
               <Content>
                 <ProductTitle>{prod.title}</ProductTitle>

@@ -54,9 +54,10 @@ const float = keyframes`
 const HeroSection = styled.section`
   min-height: 65vh;
   background-color: #0b1a33;
-  background-image: 
-    radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
-  background-size: 40px 40px;
+  background-image: ${props => props.bgImage ? `linear-gradient(to right, rgba(11, 26, 51, 0.95) 0%, rgba(11, 26, 51, 0.6) 100%), url(${props.bgImage})` : 'none'};
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   color: white;
   display: flex;
   align-items: center;
@@ -64,8 +65,9 @@ const HeroSection = styled.section`
   position: relative;
   overflow: hidden;
   padding-top: 100px;
-  padding-bottom: 40px;
+  padding-bottom: 60px;
   z-index: 1;
+  transition: background-image 0.8s ease-in-out;
 
   &::before {
     content: '';
@@ -74,7 +76,7 @@ const HeroSection = styled.section`
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 70% 50%, rgba(201, 168, 76, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle at 70% 50%, rgba(201, 168, 76, 0.05) 0%, transparent 70%);
     pointer-events: none;
   }
 `;
@@ -83,16 +85,12 @@ const HeroContainer = styled.div`
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 40px;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 40px;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   position: relative;
   z-index: 2;
-
-  @media (min-width: 1024px) {
-    grid-template-columns: 1.4fr 0.6fr;
-  }
+  width: 100%;
 `;
 
 const Tagline = styled.h1`
@@ -140,12 +138,32 @@ const HeroImage = styled.div`
   position: relative;
   max-width: 70%;
   margin: 0 auto;
+  transition: all 0.5s ease-in-out;
   @media (min-width: 1024px) { margin: 0 0 0 auto; }
   img {
     width: 100%;
     border-radius: 30px;
     box-shadow: 0 50px 100px rgba(0,0,0,0.5);
     border: 1px solid rgba(255,255,255,0.1);
+  }
+`;
+
+const BannerDots = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-top: 30px;
+  span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    &.active {
+      background: #C9A84C;
+      width: 30px;
+      border-radius: 5px;
+    }
   }
 `;
 
@@ -408,7 +426,26 @@ const ModernProductCard = styled.div`
     align-items: center;
     justify-content: center;
     position: relative;
-    img { max-width: 80%; max-height: 80%; object-fit: contain; }
+    overflow: hidden;
+    img { max-width: 80%; max-height: 80%; object-fit: contain; transition: opacity 0.5s ease; position: absolute; }
+  }
+  
+  .carousel-dots {
+    position: absolute;
+    bottom: 15px;
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    width: 100%;
+    z-index: 5;
+    span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.2);
+      cursor: pointer;
+      &.active { background: #C9A84C; }
+    }
   }
   .content {
     padding: 25px;
@@ -1092,10 +1129,99 @@ const Home = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [plans, setPlans] = useState([]);
-  const [activePlanTab, setActivePlanTab] = useState('LITE');
-  const [activeProductTab, setActiveProductTab] = useState('VEHICLE');
   const [securityFeatures, setSecurityFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [activePlanTab, setActivePlanTab] = useState('LITE');
+  const [activeProductTab, setActiveProductTab] = useState('VEHICLE');
+  const [heroBanners, setHeroBanners] = useState([]);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handlePlanCheckout = async (plan) => {
+    try {
+      const isLoaded = await loadRazorpay();
+      if (!isLoaded) {
+        toast.error('Razorpay SDK failed to load. Are you online?');
+        return;
+      }
+
+      // 1. Create Razorpay Order in Backend
+      const orderRes = await api.post('/payments/create-order', {
+        amount: plan.price,
+        receipt: `plan_${plan.tier}_${Date.now()}`
+      });
+
+      if (!orderRes.data.success) {
+        throw new Error(orderRes.data.error || 'Order creation failed');
+      }
+
+      const { order } = orderRes.data;
+
+      // 2. Open Razorpay Checkout Modal
+      const options = {
+        key: 'rzp_test_Sld6vwxfI5Afv3', // Test Key ID
+        amount: order.amount,
+        currency: order.currency,
+        name: 'V-KAWACH Safety Plans',
+        description: `Activation for ${plan.tier} Tier`,
+        image: '/assets/new_logo.png',
+        order_id: order.id,
+        handler: async (response) => {
+          // 3. Verify Payment
+          try {
+            const verifyRes = await api.post('/payments/verify', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              customerData: {
+                name: 'Plan Customer',
+                email: 'customer@v-kawach.in',
+                phone: '0000000000',
+                shippingAddress: 'Digital Activation'
+              },
+              cart: [{
+                productId: plan.id,
+                name: `${plan.tier} Subscription Plan`,
+                quantity: 1,
+                price: plan.price
+              }],
+              totalAmount: plan.price
+            });
+
+            if (verifyRes.data.success) {
+              toast.success(`${plan.tier} Plan Activated Successfully!`);
+              navigate('/dashboard');
+            } else {
+              toast.error('Payment verification failed.');
+            }
+          } catch (vErr) {
+            console.error('Verification Error:', vErr);
+            toast.error('Payment verification error.');
+          }
+        },
+        theme: {
+          color: '#0b1a33'
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || 'Failed to initiate payment');
+    }
+  };
   const [apiUrl, setApiUrl] = useState('');
 
   const categoriesRef = useRef(null);
@@ -1141,6 +1267,59 @@ const Home = () => {
   };
 
   useEffect(() => {
+    if (heroBanners.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentBannerIndex(prev => (prev + 1) % heroBanners.length);
+      }, 6000);
+      return () => clearInterval(interval);
+    }
+  }, [heroBanners]);
+
+  const ProductImageSlider = ({ photos, productName, apiUrl }) => {
+    const [currentImageIdx, setCurrentImageIdx] = useState(0);
+
+    useEffect(() => {
+      if (!photos || photos.length <= 1) return;
+      const interval = setInterval(() => {
+        setCurrentImageIdx((prev) => (prev + 1) % photos.length);
+      }, 3000);
+      return () => clearInterval(interval);
+    }, [photos]);
+
+    if (!photos || photos.length === 0) {
+      return <img src="https://img.icons8.com/fluency/400/security-checked.png" alt={productName} style={{opacity: 1}}/>;
+    }
+
+    return (
+      <>
+        {photos.map((photo, idx) => {
+          let imgSrc = photo.startsWith('http') ? photo : `${apiUrl}${photo}`;
+          if (imgSrc.includes('images.icons8.com')) imgSrc = imgSrc.replace('images.icons8.com', 'img.icons8.com').replace('/bubbles/', '/fluency/');
+          return (
+            <img 
+              key={idx} 
+              src={imgSrc} 
+              alt={`${productName} - ${idx}`} 
+              style={{ opacity: idx === currentImageIdx ? 1 : 0, zIndex: idx === currentImageIdx ? 2 : 1 }} 
+            />
+          );
+        })}
+        {photos.length > 1 && (
+          <div className="carousel-dots" onClick={(e) => e.preventDefault()}>
+            {photos.map((_, idx) => (
+              <span 
+                key={idx} 
+                className={idx === currentImageIdx ? 'active' : ''} 
+                onClick={(e) => { e.preventDefault(); setCurrentImageIdx(idx); }}
+              />
+            ))}
+          </div>
+        )}
+      </>
+    );
+  };
+
+  useEffect(() => {
     setApiUrl(window.location.hostname === 'localhost' ? 'http://localhost:5001' : '');
     const fetchData = async () => {
       try {
@@ -1161,9 +1340,22 @@ const Home = () => {
         }
         if (results[2].status === 'fulfilled') {
           try {
-            const parsed = JSON.parse(results[2].value.data?.settings?.homeSecurityFeatures || "[]");
-            if (parsed.length > 0) setSecurityFeatures(parsed);
-          } catch (e) { }
+            const settingsData = results[2].value.data?.settings;
+            console.log('Public settings fetched:', settingsData);
+            
+            if (settingsData?.homeSecurityFeatures) {
+              const parsedFeatures = JSON.parse(settingsData.homeSecurityFeatures);
+              setSecurityFeatures(parsedFeatures);
+            }
+            
+            if (settingsData?.heroBannersList) {
+              const parsedBanners = JSON.parse(settingsData.heroBannersList);
+              console.log('Parsed banners:', parsedBanners);
+              setHeroBanners(parsedBanners);
+            }
+          } catch (e) {
+            console.error('Failed to parse settings:', e);
+          }
         }
         if (results[3].status === 'fulfilled') {
           setPlans(results[3].value.data?.plans || []);
@@ -1177,27 +1369,61 @@ const Home = () => {
     fetchData();
   }, []);
 
+  const currentBgImage = heroBanners[currentBannerIndex]?.imageUrl ? 
+    (heroBanners[currentBannerIndex].imageUrl.startsWith('http') ? heroBanners[currentBannerIndex].imageUrl : `${apiUrl}${heroBanners[currentBannerIndex].imageUrl}`) 
+    : null;
+
   return (
     <>
-      <HeroSection>
+      <HeroSection key={currentBannerIndex} bgImage={currentBgImage}>
         <HeroContainer>
-          <div>
+          <div style={{ animation: 'fadeIn 0.8s ease-out', maxWidth: '800px' }}>
             <Tagline>
-              <span className="dim">{t.hero.taglineDim}</span>
-              <span className="highlight">{t.hero.taglineHighlight}</span>
+              <span className="dim">{heroBanners[currentBannerIndex]?.taglineDim || t.hero.taglineDim}</span>
+              <span className="highlight">{heroBanners[currentBannerIndex]?.taglineHighlight || t.hero.taglineHighlight}</span>
             </Tagline>
-            <Subtext>
-              {t.hero.subtext}
+            <Subtext style={{ fontSize: '1.2rem', opacity: '0.9', marginBottom: '40px' }}>
+              {heroBanners[currentBannerIndex]?.subtext || t.hero.subtext}
             </Subtext>
             <div style={{ display: 'flex', gap: '15px' }}>
-              <ActionButton to="/smart-qr">{t.hero.getStarted}</ActionButton>
-              <ActionButton to="/watch-demo" variant="outline">{t.hero.watchDemo}</ActionButton>
+              <ActionButton to="/smart-qr">{heroBanners[currentBannerIndex]?.button1Text || t.hero.getStarted}</ActionButton>
+              <ActionButton to="/watch-demo" variant="outline">{heroBanners[currentBannerIndex]?.button2Text || t.hero.watchDemo}</ActionButton>
             </div>
+            
+            {heroBanners.length > 1 && (
+              <BannerDots>
+                {heroBanners.map((_, idx) => (
+                  <span 
+                    key={idx} 
+                    className={currentBannerIndex === idx ? 'active' : ''} 
+                    onClick={() => setCurrentBannerIndex(idx)}
+                  />
+                ))}
+              </BannerDots>
+            )}
           </div>
-          <HeroImage>
-            <img src="https://img.icons8.com/fluency/800/shield.png" alt="Tarkshya Smart Tag" style={{ background: 'rgba(255,255,255,0.05)', padding: '40px' }} />
-          </HeroImage>
+          {/* We hide the small preview image as it's now the full background */}
+          {!currentBgImage && (
+            <HeroImage style={{ animation: 'slideInRight 0.8s ease-out' }}>
+              <img 
+                src="/assets/v-kawach-packaging.jpg" 
+                alt="Banner" 
+                style={{ borderRadius: '30px', boxShadow: '0 30px 60px rgba(0,0,0,0.3)' }} 
+              />
+            </HeroImage>
+          )}
         </HeroContainer>
+        
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+          }
+        `}</style>
       </HeroSection>
 
       <Section bg="light">
@@ -1209,20 +1435,33 @@ const Home = () => {
         <ScrollWrapper>
           <ScrollButton className="left" onClick={() => scroll(categoriesRef, 'left')}><ChevronLeft /></ScrollButton>
           <CategoryGrid ref={categoriesRef}>
-            {categories.map((cat) => (
-              <CategoryCard key={cat.id} to={`/category/${cat.id}`}>
-                <div className="icon-box">
-                  {getCategoryIcon(cat.name)}
-                </div>
-                <h3>{cat.name}</h3>
-              </CategoryCard>
-            ))}
+            {categories.map((cat) => {
+              return (
+                <CategoryCard key={cat.id} to={`/category/${cat.id}`}>
+                  <div className="icon-box" style={{ padding: '20px', overflow: 'hidden' }}>
+                    {getCategoryIcon(cat.name)}
+                  </div>
+                  <h3>{cat.name}</h3>
+                </CategoryCard>
+              );
+            })}
             {categories.length === 0 && !loading && (
               <p style={{ textAlign: 'center', gridColumn: '1/-1', color: '#999', padding: '40px' }}>No categories found. Manage them in Admin Panel.</p>
             )}
           </CategoryGrid>
           <ScrollButton className="right" onClick={() => scroll(categoriesRef, 'right')}><ChevronRight /></ScrollButton>
         </ScrollWrapper>
+      </Section>
+
+      <Section bg="white">
+        <SectionTitle>
+          <h2>How It Works <span>3 Easy Steps</span></h2>
+          <p>Protecting what matters most is now simpler than ever</p>
+          <div className="line" />
+        </SectionTitle>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
+          <img src="/assets/v-kawach-steps.jpg" alt="V-Kawach 3 Easy Steps" style={{ width: '100%', borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} />
+        </div>
       </Section>
 
       <Section bg="white">
@@ -1252,9 +1491,9 @@ const Home = () => {
           {products
             .filter(prod => {
               const name = (prod.name || '').toLowerCase();
-              if (activeProductTab === 'VEHICLE') return name.includes('vehicle') || name.includes('car') || name.includes('bike') || name.includes('cycle') || name.includes('parking');
-              if (activeProductTab === 'PERSONAL') return name.includes('kid') || name.includes('child') || name.includes('woman') || name.includes('laptop') || name.includes('bag') || name.includes('luggage') || name.includes('gadget') || name.includes('office') || name.includes('corporate') || name.includes('identity');
-              if (activeProductTab === 'PETS') return name.includes('pet') || name.includes('dog') || name.includes('cat') || name.includes('animal');
+              if (activeProductTab === 'VEHICLE') return /\b(vehicle|car|cars|bike|bikes|cycle|parking)\b/i.test(name);
+              if (activeProductTab === 'PERSONAL') return /\b(kid|child|woman|laptop|bag|luggage|luggge|gadget|office|corporate|identity|card)\b/i.test(name) && !/\b(car|bike)\b/i.test(name);
+              if (activeProductTab === 'PETS') return /\b(pet|dog|cat|animal)\b/i.test(name);
               return true;
             })
             .slice(0, 6)
@@ -1270,7 +1509,7 @@ const Home = () => {
                 <ModernProductCard key={prod.id}>
                   {prod.isCounterfeit && <div className="badge" style={{ background: '#e74c3c' }}>RECALLED</div>}
                   <Link to={`/product/${prod.id}`} className="img-box">
-                    <img src={imgSrc} alt={prod.name} />
+                    <ProductImageSlider photos={photos} productName={prod.name} apiUrl={apiUrl} />
                   </Link>
                   <div className="content">
                     <h3>{prod.name}</h3>
@@ -1408,8 +1647,8 @@ const Home = () => {
                   })}
 
                   <div className="cta-box">
-                    <ActionButton 
-                      to="/smart-qr" 
+                    <Button 
+                      onClick={() => handlePlanCheckout(plan)}
                       style={{ 
                         background: tierName === 'PRO' ? '#C9A84C' : 'transparent',
                         color: tierName === 'PRO' ? '#0b1a33' : '#C9A84C',
@@ -1417,13 +1656,44 @@ const Home = () => {
                       }}
                     >
                       Get {tierName.charAt(0) + tierName.slice(1).toLowerCase()}
-                    </ActionButton>
+                    </Button>
                   </div>
                 </ComparisonColumn>
               );
             })}
           </ComparisonGrid>
         </ComparisonContainer>
+      </Section>
+
+      <Section bg="white">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center', maxWidth: '1400px', margin: '0 auto' }}>
+          <div>
+            <SectionTitle style={{ textAlign: 'left', margin: 0 }}>
+              <h2 style={{ fontSize: '3rem' }}>Travel with <span>Absolute Peace</span></h2>
+              <p style={{ margin: '25px 0' }}>Never worry about lost luggage again. Our Smart QR tags ensure that your bags are always connected to you, anywhere in the world.</p>
+              <div className="line" style={{ margin: '0 0 30px 0' }} />
+            </SectionTitle>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' }}>
+              <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
+                <Icons.Globe size={24} color="#C9A84C" />
+                <h4 style={{ margin: '10px 0 5px' }}>Global Reach</h4>
+                <p style={{ fontSize: '0.85rem', color: '#666' }}>Works worldwide with zero roaming charges for the finder.</p>
+              </div>
+              <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
+                <Icons.ShieldCheck size={24} color="#C9A84C" />
+                <h4 style={{ margin: '10px 0 5px' }}>ID Privacy</h4>
+                <p style={{ fontSize: '0.85rem', color: '#666' }}>Your personal contact details are never exposed to the public.</p>
+              </div>
+            </div>
+            <Button as={Link} to="/smart-qr" variant="primary" style={{ padding: '15px 40px' }}>EXPLORE TAGS</Button>
+          </div>
+          <div style={{ position: 'relative' }}>
+            <img src="/assets/luggage-sticker-red.jpg" alt="Luggage Tags" style={{ width: '100%', borderRadius: '40px', boxShadow: '0 40px 80px rgba(0,0,0,0.1)' }} />
+            <div style={{ position: 'absolute', bottom: '-30px', right: '-30px', width: '250px', border: '8px solid white', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+              <img src="/assets/luggage-sticker-green.jpg" alt="Luggage Tags" style={{ width: '100%' }} />
+            </div>
+          </div>
+        </div>
       </Section>
 
       {/* ── TESTIMONIALS ── */}
@@ -1479,6 +1749,7 @@ const Home = () => {
           ))}
         </div>
       </TestimonialsSection>
+      
 
       {/* ── FAQ ── */}
       <FAQSection>
@@ -1520,12 +1791,16 @@ const Home = () => {
 
           <div className="stats">
             <div className="stat-item">
-              <h3>100%</h3>
-              <span>{t.about.stats.scansProtected}</span>
-            </div>
-            <div className="stat-item">
               <h3>24/7</h3>
               <span>{t.about.stats.monitoring}</span>
+            </div>
+            <div className="stat-item">
+              <h3>Vision</h3>
+              <span>Impact 10,000+ Lives</span>
+            </div>
+            <div className="stat-item">
+              <h3>Looking for</h3>
+              <span>Partners</span>
             </div>
           </div>
         </AboutContent>

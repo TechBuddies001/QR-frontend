@@ -49,6 +49,19 @@ const generateQRCode = async (tagCode, designType = 'standard', sponsor = null, 
     return await generateCircleQRCode(tagCode, publicUrl, filePath, fileName, sponsor, assetType, customAssetType, config);
   } else if (designType === 'landscape') {
     return await generateLandscapeQRCode(tagCode, publicUrl, filePath, fileName, sponsor, assetType, customAssetType, config);
+  } else if (designType === 'raw') {
+    const qrBuffer = await QRCode.toBuffer(publicUrl, { 
+      errorCorrectionLevel: 'H', 
+      margin: 1, 
+      width: 1024,
+      color: { dark: '#000000', light: '#ffffff' }
+    });
+    fs.writeFileSync(filePath, qrBuffer);
+    return {
+      filePath,
+      fileName,
+      qrImageUrl: `/uploads/qrcodes/${fileName}`,
+    };
   }
 
   // DEFAULT: Standard Vertical Design

@@ -391,7 +391,7 @@ router.post('/leads', async (req, res) => {
 // GET /api/public/settings - Public safe settings
 router.get('/settings', async (req, res) => {
   try {
-    const keys = ['homeSecurityFeatures', 'appName'];
+    const keys = ['homeSecurityFeatures', 'appName', 'heroBannersList'];
     const settings = await prisma.setting.findMany({ where: { key: { in: keys } } });
     const result = {};
     settings.forEach(s => { result[s.key] = s.value; });

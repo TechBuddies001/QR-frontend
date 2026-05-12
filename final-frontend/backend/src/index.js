@@ -31,6 +31,7 @@ const planRoutes = require('./routes/plans');
 const sponsorRoutes = require('./routes/sponsors');
 const subscriptionRoutes = require('./routes/subscriptions');
 const settingsRoutes = require('./routes/settings');
+const paymentRoutes = require('./routes/payments');
 const userDashboardRoutes = require('./routes/userDashboard');
 const productRoutes = require('./routes/products');
 const scanRoutes = require('./routes/scans');
@@ -45,6 +46,16 @@ const PORT = process.env.PORT || 5000;
 // Security middleware
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors()); // Allow all for local testing
+
+// Global Redirect for old Railway URLs (Ensures printed QR codes still work)
+app.use((req, res, next) => {
+  const host = req.get('host');
+  if (host && host.includes('railway.app')) {
+    return res.redirect(301, `https://tarkshyasolution.in${req.originalUrl}`);
+  }
+  next();
+});
+
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
@@ -137,6 +148,7 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/scan-history', scanRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', adminUserRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use('/api/admin/sales', salesRoutes);
 app.use('/api/orders', orderRoutes);
 

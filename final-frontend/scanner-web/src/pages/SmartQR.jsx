@@ -95,6 +95,9 @@ const SmartQR = () => {
 
             <Section>
                 <h2 style={{ textAlign: 'center', marginBottom: '40px' }}>How It Works</h2>
+                <div style={{ maxWidth: '800px', margin: '0 auto 60px', textAlign: 'center' }}>
+                  <img src="/assets/v-kawach-steps.jpg" alt="How it works" style={{ width: '100%', borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }} />
+                </div>
                 <StepsGrid>
                     <Step>
                         <div className="icon"><Smartphone size={32} /></div>
@@ -112,6 +115,22 @@ const SmartQR = () => {
                         <p>They can call you immediately. Your number stays private via our call masking technology.</p>
                     </Step>
                 </StepsGrid>
+            </Section>
+
+            <Section bg="white">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px', alignItems: 'center', maxWidth: '1200px', margin: '0 auto' }}>
+                  <div style={{ borderRadius: '32px', overflow: 'hidden', boxShadow: '0 30px 60px rgba(0,0,0,0.15)' }}>
+                    <img src="/assets/v-kawach-sticker-interior.jpg" alt="V-Kawach Premium Sticker" style={{ width: '100%', display: 'block' }} />
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#0b1a33', marginBottom: '20px' }}>Premium 3D <span style={{ color: '#C9A84C' }}>Dome Stickers</span></h2>
+                    <p style={{ fontSize: '1.1rem', color: '#666', lineHeight: '1.8', marginBottom: '30px' }}>
+                      Our industrial-grade 3D dome stickers are not just functional—they are designed to complement your vehicle's interior. 
+                      Built with high-quality resin, they are weatherproof, scratch-resistant, and feature a crystal-clear 3D depth.
+                    </p>
+                    <Button as="a" href="https://wa.me/918881384777?text=Hi%20Tarkshya%2C%20I%20would%20like%20to%20order%20the%20Premium%203D%20Dome%20Sticker." target="_blank" rel="noopener noreferrer">Order 3D Sticker</Button>
+                  </div>
+                </div>
             </Section>
 
             <Section bg="light">

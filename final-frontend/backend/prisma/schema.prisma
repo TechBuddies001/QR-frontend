@@ -250,6 +250,9 @@ model Product {
   adminId          String
   admin            Admin    @relation(fields: [adminId], references: [id])
   
+  banner           String?             // Large banner image path
+  logo             String?             // Brand logo image path
+  
   scanLogs         ProductScanLog[]
   
   createdAt        DateTime @default(now())

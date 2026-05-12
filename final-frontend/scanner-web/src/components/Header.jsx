@@ -59,8 +59,9 @@ const Nav = styled.nav`
 const NavLink = styled(Link)`
   color: #333333;
   font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   position: relative;
   text-decoration: none;
   transition: all 0.3s ease;

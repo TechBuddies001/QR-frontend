@@ -9,6 +9,7 @@ import {
   PenTool, Copy
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { resolveImageUrl } from "@/lib/utils";
 
 interface Sponsor {
   id: string;
@@ -22,7 +23,7 @@ interface Sponsor {
   };
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// API URL is handled by resolveImageUrl utility
 
 export default function SponsorsPage() {
   const [loading, setLoading] = useState(true);
@@ -65,7 +66,7 @@ export default function SponsorsPage() {
         description: sponsor.description || "",
         isActive: sponsor.isActive
       });
-      setLogoPreview(sponsor.logo ? `${API_URL}${sponsor.logo}` : null);
+      setLogoPreview(sponsor.logo ? resolveImageUrl(sponsor.logo) : null);
     } else {
       setEditingSponsor(null);
       setFormData({
@@ -166,7 +167,7 @@ export default function SponsorsPage() {
                  <div className="h-40 bg-slate-50 dark:bg-slate-800/50 relative flex items-center justify-center p-8">
                     {sponsor.logo ? (
                        <img 
-                         src={`${API_URL}${sponsor.logo}`} 
+                         src={resolveImageUrl(sponsor.logo)} 
                          alt={sponsor.name}
                          className="max-h-full max-w-full object-contain filter drop-shadow-lg"
                        />

@@ -65,71 +65,129 @@ export default function ProductVerificationPage() {
   const dynamicData = JSON.parse(product.dynamicData || "[]");
   const photos = JSON.parse(product.photos || "[]");
 
+  const bannerUrl = product.banner ? (product.banner.startsWith('http') ? product.banner : `${API_URL.replace(/\/api$/, '')}${product.banner}`) : null;
+  const logoUrl = product.logo ? (product.logo.startsWith('http') ? product.logo : `${API_URL.replace(/\/api$/, '')}${product.logo}`) : null;
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans pb-20">
-      {/* Brand Header */}
-      <div className="bg-emerald-600 p-6 pt-10 text-white text-center rounded-b-[3rem] shadow-xl relative overflow-hidden">
-         <div className="absolute top-0 right-0 p-10 opacity-10">
-            <ShieldCheck size={200} />
+      {/* Brand Header / Banner */}
+      <div className={`relative ${bannerUrl ? 'h-64' : 'h-48 bg-emerald-600'} flex items-center justify-center overflow-hidden rounded-b-[3.5rem] shadow-2xl transition-all duration-700`}>
+         {bannerUrl ? (
+            <>
+               <img src={bannerUrl} className="absolute inset-0 w-full h-full object-cover" alt="Banner" />
+               <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+            </>
+         ) : (
+            <div className="absolute top-0 right-0 p-10 opacity-10">
+               <ShieldCheck size={200} />
+            </div>
+         )}
+         
+         <div className="relative z-10 text-center px-6">
+            {logoUrl ? (
+               <div className="size-24 bg-white p-2 rounded-2xl shadow-xl mx-auto mb-4 animate-in zoom-in-50 duration-500">
+                  <img src={logoUrl} className="w-full h-full object-contain" alt="Logo" />
+               </div>
+            ) : (
+               <ShieldCheck className="mx-auto size-12 mb-4 text-white" />
+            )}
+            <h1 className="text-3xl font-black text-white uppercase tracking-tighter drop-shadow-lg">{product.brand || "V-KAWACH"}</h1>
+            <p className="text-[10px] font-black text-white/80 tracking-[0.2em] mt-1 uppercase drop-shadow-md">Verified Genuine Product</p>
          </div>
-         <ShieldCheck className="mx-auto size-12 mb-4" />
-         <h1 className="text-2xl font-black uppercase tracking-widest leading-none">V-KAWACH</h1>
-         <p className="text-[10px] font-black tracking-[0.2em] opacity-80 mt-1 uppercase">Official Product Validation Hub</p>
       </div>
 
-      <div className="max-w-xl mx-auto px-6 -mt-8">
+      <div className="max-w-xl mx-auto px-6 -mt-10 relative z-20">
          {/* Success Badge */}
-         <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 border-4 border-emerald-50 relative overflow-hidden text-center mb-8">
-            <div className="absolute top-4 right-4 group">
+         <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 border-b-8 border-emerald-500 relative overflow-hidden text-center mb-8">
+            <div className="absolute top-4 right-4">
                <div className="size-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-600 animate-pulse">
                   <CheckCircle2 size={24} />
                </div>
             </div>
             
-            <div className="size-24 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 text-white shadow-xl shadow-emerald-600/30">
-               <Package size={42} />
+            <div className="size-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600 shadow-inner">
+               <ShieldCheck size={32} />
             </div>
             
-            <h2 className="text-3xl font-black text-slate-800 tracking-tighter mb-1 uppercase">GENUINE PRODUCT</h2>
-            <p className="text-emerald-600 font-black text-xs tracking-widest uppercase mb-6">Verified Authenticity</p>
-            
-            <div className="inline-block py-2 px-6 bg-slate-50 rounded-full border border-slate-100 mb-2">
-               <span className="font-mono text-sm font-black text-slate-500">#{product.productCode}</span>
+            <h2 className="text-2xl font-black text-slate-800 tracking-tighter mb-1 uppercase">AUTHENTICITY VERIFIED</h2>
+            <div className="flex items-center justify-center gap-2 mb-6">
+               <div className="h-[2px] w-8 bg-emerald-500" />
+               <p className="text-emerald-600 font-black text-[10px] tracking-[0.3em] uppercase">Blockchain Secure</p>
+               <div className="h-[2px] w-8 bg-emerald-500" />
             </div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reference Secure Key</p>
+            
+            <div className="flex flex-col gap-1 items-center">
+               <span className="font-mono text-lg font-black text-slate-700">#{product.productCode}</span>
+               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Global Unique Identity</p>
+            </div>
          </div>
 
-         {/* Product Details */}
-         <div className="bg-white rounded-[2rem] shadow-lg p-8 mb-6 space-y-8">
-            <div className="flex items-start gap-4">
-               <div className="size-12 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600 shrink-0">
-                  <Package />
+         {/* Product/Tag Details */}
+         <div className="bg-white rounded-[2.5rem] shadow-xl p-8 mb-6 border border-slate-100">
+            <div className="flex items-center gap-5 mb-8">
+               <div className="size-16 bg-slate-50 border-2 border-slate-100 rounded-2xl flex items-center justify-center text-slate-400 shrink-0">
+                  {logoUrl ? <img src={logoUrl} className="size-10 object-contain" alt="Logo Icon" /> : <Package size={32} />}
                </div>
-               <div>
-                  <h3 className="text-xl font-black text-slate-800 leading-tight">{product.name}</h3>
-                  <p className="text-sm font-bold text-slate-400 uppercase tracking-tight">{product.brand || "Authentic Product"}</p>
+               <div className="flex-1 min-w-0">
+                  <h3 className="text-2xl font-black text-slate-900 leading-none truncate">{product.name}</h3>
+                  <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-2">{product.brand || "Authentic Series"}</p>
                </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Batch ID</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                    {product.type === 'SAFETY_TAG' ? 'Security Plan' : 'Batch ID'}
+                  </p>
                   <p className="text-sm font-black text-slate-800">{product.batchNumber || 'OFFICIAL-B1'}</p>
                </div>
                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">MRP Price</p>
-                  <p className="text-sm font-black text-slate-800">₹{product.mrp?.toFixed(2)}</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                    {product.type === 'SAFETY_TAG' ? 'Identity ID' : 'MRP Price'}
+                  </p>
+                  <p className="text-sm font-black text-slate-800">
+                    {product.type === 'SAFETY_TAG' ? product.productCode : `₹${product.mrp?.toFixed(2)}`}
+                  </p>
                </div>
                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Mfg Date</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                    {product.type === 'SAFETY_TAG' ? 'Activated On' : 'Mfg Date'}
+                  </p>
                   <p className="text-sm font-black text-slate-800">{product.mfgDate ? new Date(product.mfgDate).toLocaleDateString() : 'N/A'}</p>
                </div>
                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Expiry Date</p>
-                  <p className="text-sm font-black text-slate-800">{product.expDate ? new Date(product.expDate).toLocaleDateString() : 'N/A'}</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                    {product.type === 'SAFETY_TAG' ? 'Valid Until' : 'Expiry Date'}
+                  </p>
+                  <p className="text-sm font-black text-slate-800">{product.expDate ? new Date(product.expDate).toLocaleDateString() : 'Lifetime'}</p>
                </div>
             </div>
          </div>
+
+         {/* Contact Actions for Safety Tags */}
+         {product.type === 'SAFETY_TAG' && (
+            <div className="grid grid-cols-2 gap-4 mb-6">
+               <a 
+                 href={`tel:${product.ownerPhone}`}
+                 className="flex flex-col items-center justify-center gap-3 p-6 bg-slate-900 text-white rounded-[2rem] hover:bg-slate-800 transition-all shadow-xl active:scale-95"
+               >
+                  <div className="size-12 bg-white/10 rounded-2xl flex items-center justify-center">
+                    <Scan className="size-6 rotate-45" /> {/* Using Scan icon as placeholder for Call if lucide Phone not here */}
+                    <ShieldCheck size={24} />
+                  </div>
+                  <span className="text-xs font-black uppercase tracking-widest">Call Owner</span>
+               </a>
+               <a 
+                 href={`https://wa.me/91${product.ownerPhone}?text=Hello, I have scanned your ${product.name} with code ${product.productCode}.`}
+                 className="flex flex-col items-center justify-center gap-3 p-6 bg-emerald-600 text-white rounded-[2rem] hover:bg-emerald-700 transition-all shadow-xl active:scale-95"
+               >
+                  <div className="size-12 bg-white/10 rounded-2xl flex items-center justify-center">
+                    <CheckCircle2 size={24} />
+                  </div>
+                  <span className="text-xs font-black uppercase tracking-widest">WhatsApp</span>
+               </a>
+            </div>
+         )}
 
          {/* Verification Metadata */}
          {dynamicData.length > 0 && (

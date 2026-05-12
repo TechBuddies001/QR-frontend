@@ -15,19 +15,34 @@ import {
   Settings, 
   Home, 
   LogOut,
-  ShieldCheck
+  ShieldCheck,
+  PenTool,
+  ShoppingCart,
+  Image,
+  FolderOpen,
+  UserCheck,
+  MessageCircle,
+  Boxes
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Generate QR", href: "/admin/qr/generate", icon: QrCode },
+  { label: "QR Templates", href: "/admin/qr-templates", icon: PenTool },
+  { label: "Safety QR Products", href: "/admin/safety-id", icon: ShieldCheck },
+  { label: "FMCG Inventory", href: "/admin/products", icon: Boxes },
+  { label: "Categories", href: "/admin/categories", icon: FolderOpen },
   { label: "Tags", href: "/admin/tags", icon: Tag },
+  { label: "Users", href: "/admin/users", icon: UserCheck },
+  { label: "Sales & Orders", href: "/admin/sales", icon: ShoppingCart },
   { label: "Plans & Packs", href: "/admin/plans", icon: Package },
   { label: "Subscriptions", href: "/admin/subscriptions", icon: CreditCard },
   { label: "Sponsors", href: "/admin/sponsors", icon: Users },
+  { label: "Banners", href: "/admin/banners", icon: Image },
   { label: "Call Logs", href: "/admin/calls", icon: PhoneCall },
   { label: "WhatsApp Logs", href: "/admin/sms", icon: MessageSquare },
+  { label: "Leads & Enquiries", href: "/admin/leads", icon: MessageCircle },
   { label: "Scan History", href: "/admin/scans", icon: History },
 ];
 

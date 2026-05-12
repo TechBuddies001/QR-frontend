@@ -36,6 +36,13 @@ interface Sponsor {
   isActive: boolean;
 }
 
+interface QrTemplate {
+  id: string;
+  name: string;
+  layoutType: string;
+  isDefault: boolean;
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function Page() {
@@ -43,6 +50,7 @@ export default function Page() {
   const [bulkLoading, setBulkLoading] = useState(false);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [sponsors, setSponsors] = useState<Sponsor[]>([]);
+  const [templates, setTemplates] = useState<QrTemplate[]>([]);
   const [qrResult, setQrResult] = useState<any>(null);
   const [bulkResult, setBulkResult] = useState<any>(null);
   const [activeMode, setActiveMode] = useState<'single'|'bulk'>('single');
@@ -57,6 +65,7 @@ export default function Page() {
     assetType: "employee",
     planType: "basic",
     sponsorId: "",
+    templateId: "",
     designTypes: ["standard"] as string[],
     quantities: { standard: 1, circle: 1, landscape: 1 } as Record<string, number>,
     customMessage: "",
@@ -64,13 +73,14 @@ export default function Page() {
     customAssetType: ""
   });
 
-  // Fetch plans & sponsors on load
+  // Fetch plans, sponsors & templates on load
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [plansRes, sponsorsRes] = await Promise.all([
+        const [plansRes, sponsorsRes, templatesRes] = await Promise.all([
           api.get("/plans"),
-          api.get("/sponsors")
+          api.get("/sponsors"),
+          api.get("/qr-templates")
         ]);
         
         setPlans(plansRes.data.plans);
@@ -80,6 +90,11 @@ export default function Page() {
 
         const activeSponsors = sponsorsRes.data.sponsors.filter((s: Sponsor) => s.isActive);
         setSponsors(activeSponsors);
+
+        const tmpls: QrTemplate[] = templatesRes.data.templates || [];
+        setTemplates(tmpls);
+        const def = tmpls.find(t => t.isDefault);
+        if (def) setFormData(prev => ({ ...prev, templateId: def.id }));
       } catch (error) {
         console.error("Failed to fetch dependencies");
       }
@@ -498,6 +513,22 @@ export default function Page() {
                           {sponsors.map(s => (<option key={s.id} value={s.id}>{s.name}</option>))}
                         </select>
                       </div>
+
+                      {templates.length > 0 && (
+                        <div className="space-y-1.5">
+                          <label className="text-xs font-bold text-slate-600 dark:text-slate-400">QR Design Template</label>
+                          <select 
+                            className="w-full rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-primary focus:border-primary px-4 py-3 outline-none transition-all font-medium appearance-none"
+                            value={formData.templateId}
+                            onChange={(e) => setFormData({...formData, templateId: e.target.value})}
+                          >
+                            <option value="">Default (No Custom Template)</option>
+                            {templates.map(t => (
+                              <option key={t.id} value={t.id}>{t.name} — {t.layoutType}{t.isDefault ? ' ⭐' : ''}</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
 
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Custom Tag ID (Leave blank to auto-generate)</label>

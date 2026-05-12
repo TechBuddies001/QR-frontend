@@ -96,13 +96,18 @@ router.post('/bulk', authenticateToken, uploadDoc.any(), async (req, res) => {
                             mrp: parseFloat(row.mrp) || 0,
                             dynamicData: JSON.stringify(dynamicFields),
                             adminId: req.admin.id,
-                            qrUrl: `/verify/${productCode}`,
+                            qrUrl: `/scan/${productCode}`,
                         }
                     });
-                    await generateQRCode(productCode, 'standard', null, 'product');
+                    const qrResult = await generateQRCode(productCode, 'raw', null, 'product');
+                    const updatedProduct = await prisma.product.update({
+                        where: { id: product.id },
+                        data: { qrImagePath: qrResult.qrImageUrl }
+                    });
+                    products.push(updatedProduct);
                     createdIds.push(product.id);
                 }
-                res.json({ success: true, count: createdIds.length, productIds: createdIds, products: createdIds.map(id => ({ id })) }); 
+                res.json({ success: true, count: createdIds.length, productIds: createdIds, products: products }); 
             } catch (err) {
                 res.status(500).json({ error: err.message });
             } finally {
@@ -204,7 +209,11 @@ router.post('/:id', authenticateToken, upload.fields([{ name: 'photos', maxCount
 });
 
 // POST /api/products - Create single product
-router.post('/', authenticateToken, upload.fields([{ name: 'photos', maxCount: 5 }]), async (req, res) => {
+router.post('/', authenticateToken, upload.fields([
+    { name: 'photos', maxCount: 5 },
+    { name: 'banner', maxCount: 1 },
+    { name: 'logo', maxCount: 1 }
+]), async (req, res) => {
     try {
         const { 
             name, brand, batchNumber, mfgDate, expDate, mrp, dynamicData, type, categoryId 
@@ -219,6 +228,9 @@ router.post('/', authenticateToken, upload.fields([{ name: 'photos', maxCount: 5
             });
         }
 
+        const banner = req.files && req.files['banner'] ? `/uploads/photos/${req.files['banner'][0].filename}` : null;
+        const logo = req.files && req.files['logo'] ? `/uploads/photos/${req.files['logo'][0].filename}` : null;
+
         const product = await prisma.product.create({
             data: {
                 productCode,
@@ -230,20 +242,22 @@ router.post('/', authenticateToken, upload.fields([{ name: 'photos', maxCount: 5
                 mrp: parseFloat(mrp) || 0,
                 dynamicData: sanitizeString(dynamicData) || "[]",
                 photos: JSON.stringify(photos),
+                banner,
+                logo,
                 type: type || "FMCG",
                 categoryId: categoryId || null,
                 adminId: req.admin.id,
-                qrUrl: `/verify/${productCode}`,
+                qrUrl: `/scan/${productCode}`,
             }
         });
 
-        const qrPath = await generateQRCode(productCode, 'standard', null, 'product');
-        await prisma.product.update({
+        const qrPath = await generateQRCode(productCode, 'raw', null, 'product');
+        const updatedProduct = await prisma.product.update({
             where: { id: product.id },
             data: { qrImagePath: qrPath.qrImageUrl }
         });
 
-        res.json({ ...product, qrUrl: `/verify/${productCode}` });
+        res.json({ ...updatedProduct, qrUrl: `/scan/${productCode}` });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -263,20 +277,65 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 
 router.get('/verify/:code', async (req, res) => {
     try {
-        const product = await prisma.product.findUnique({
+        // 1. Try to find in Products table
+        let product = await prisma.product.findUnique({
             where: { productCode: req.params.code },
         });
-        if (!product) return res.status(404).json({ error: "Product not found" });
 
-        await prisma.productScanLog.create({
-            data: {
-                productId: product.id,
-                scannerIp: req.ip,
-                userAgent: req.headers['user-agent']
-            }
+        if (product) {
+            await prisma.productScanLog.create({
+                data: {
+                    productId: product.id,
+                    scannerIp: req.ip,
+                    userAgent: req.headers['user-agent']
+                }
+            });
+            return res.json({ product });
+        }
+
+        // 2. If not found in Products, try to find in Tag table (Safety Tags)
+        const tag = await prisma.tag.findUnique({
+            where: { tagCode: req.params.code },
+            include: { sponsor: true }
         });
 
-        res.json({ product });
+        if (tag) {
+            // Log the scan in the Tag's scanLog
+            await prisma.scanLog.create({
+                data: {
+                    tagId: tag.id,
+                    scannerIp: req.ip,
+                    userAgent: req.headers['user-agent']
+                }
+            });
+
+            // Transform Tag to look like a Product for the premium UI
+            const transformedTag = {
+                id: tag.id,
+                productCode: tag.tagCode,
+                name: tag.assetType === 'vehicle' ? `Vehicle Security ID` : 
+                      (tag.assetType === 'pet' ? 'Pet Security ID' : 
+                      (tag.assetType === 'person' ? 'Personal Security ID' : 'Safety Tag')),
+                brand: "V-KAWACH SECURITY",
+                batchNumber: tag.planType.toUpperCase() + " PLAN",
+                mfgDate: tag.createdAt,
+                expDate: tag.expiresAt,
+                mrp: 0,
+                dynamicData: tag.dynamicData || "[]",
+                photos: tag.photos || "[]",
+                banner: tag.sponsor?.logo || null,
+                logo: null,
+                type: "SAFETY_TAG",
+                ownerName: tag.ownerName, // Add extra tag info
+                ownerPhone: tag.ownerPhone,
+                emergencyContact: tag.emergencyContact
+            };
+
+            return res.json({ product: transformedTag });
+        }
+
+        // 3. Not found in either
+        res.status(404).json({ error: "Code not recognized by Tarkshya Validation Systems" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

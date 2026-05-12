@@ -311,6 +311,7 @@ const ProductDetails = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [apiUrl, setApiUrl] = useState('');
+  const [mainImageIdx, setMainImageIdx] = useState(0);
 
   const handleAddToCart = () => {
     const token = localStorage.getItem('admin_token');
@@ -398,7 +399,7 @@ const ProductDetails = () => {
               <div className="main-img-wrapper">
                 {
                   (() => {
-                    let src = product.photos[0] ? (product.photos[0].startsWith('http') ? product.photos[0] : `${apiUrl}${product.photos[0]}`) : getFallbackImage();
+                    let src = product.photos[mainImageIdx] ? (product.photos[mainImageIdx].startsWith('http') ? product.photos[mainImageIdx] : `${apiUrl}${product.photos[mainImageIdx]}`) : getFallbackImage();
                     if (src.includes('images.icons8.com')) src = src.replace('images.icons8.com', 'img.icons8.com').replace('/bubbles/', '/fluency/');
                     return <img src={src} alt={product.name} className="main-img" />;
                   })()
@@ -409,7 +410,15 @@ const ProductDetails = () => {
                   product.photos.filter(img => img).map((img, i) => {
                     let thumbSrc = img.startsWith('http') ? img : `${apiUrl}${img}`;
                     if (thumbSrc.includes('images.icons8.com')) thumbSrc = thumbSrc.replace('images.icons8.com', 'img.icons8.com').replace('/bubbles/', '/fluency/');
-                    return <img key={i} src={thumbSrc} alt="thumb" />;
+                    return (
+                      <img 
+                        key={i} 
+                        src={thumbSrc} 
+                        alt="thumb" 
+                        onClick={() => setMainImageIdx(i)}
+                        style={{ borderColor: mainImageIdx === i ? '#C9A84C' : 'transparent' }}
+                      />
+                    );
                   })
                 ) : (
                   <img src={getFallbackImage()} alt="thumb fallback" />

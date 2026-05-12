@@ -75,6 +75,8 @@ interface ProductForm {
   category: string;
   dynamicFields: {label: string, value: string}[];
   selectedPhotos: File[];
+  banner: File | null;
+  logo: File | null;
 }
 
 export default function Page() {
@@ -95,7 +97,9 @@ export default function Page() {
     mrp: "",
     category: "general",
     dynamicFields: [],
-    selectedPhotos: []
+    selectedPhotos: [],
+    banner: null,
+    logo: null
   }]);
 
   useEffect(() => {
@@ -148,7 +152,9 @@ export default function Page() {
       mrp: "",
       category: "general",
       dynamicFields: [],
-      selectedPhotos: []
+      selectedPhotos: [],
+      banner: null,
+      logo: null
     }]);
   };
 
@@ -193,6 +199,8 @@ export default function Page() {
         data.append('mrp', p.mrp);
         data.append('dynamicData', JSON.stringify(p.dynamicFields.filter(f => f.label.trim())));
         p.selectedPhotos.forEach(file => data.append('photos', file));
+        if (p.banner) data.append('banner', p.banner);
+        if (p.logo) data.append('logo', p.logo);
 
         const response = await api.post("/products", data, {
           headers: { 'Content-Type': 'multipart/form-data' }
@@ -228,6 +236,21 @@ export default function Page() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownload = (qrPath: string, code: string) => {
+    if (!qrPath) {
+      toast.error("QR Code image not available");
+      return;
+    }
+    const fullUrl = qrPath.startsWith('http') ? qrPath : `${apiUrl}${qrPath}`;
+    const link = document.createElement("a");
+    link.href = fullUrl;
+    link.download = `QR_${code}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success(`Downloading QR for ${code}`);
   };
 
   return (
@@ -336,6 +359,34 @@ export default function Page() {
                              <button type="button" onClick={() => addDynamicField(p.id)} className="text-[10px] font-black text-emerald-600 uppercase tracking-widest hover:underline">+ Add Verification Field</button>
                            </div>
                         </div>
+
+                        {/* Banner & Logo Uploads */}
+                        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 pt-8 border-t border-slate-100 dark:border-slate-800">
+                           <div className="space-y-2">
+                              <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1 text-emerald-600">Brand Logo</label>
+                              <div className="relative">
+                                 <input 
+                                   type="file" 
+                                   accept="image/*"
+                                   onChange={(e) => updateProduct(p.id, { logo: e.target.files?.[0] || null })}
+                                   className="w-full px-4 py-3 bg-emerald-50/50 dark:bg-emerald-900/10 border-2 border-emerald-100 dark:border-emerald-800/50 rounded-xl font-bold text-xs outline-none cursor-pointer"
+                                 />
+                                 {p.logo && <div className="mt-2 text-[10px] font-bold text-emerald-600">Selected: {p.logo.name}</div>}
+                              </div>
+                           </div>
+                           <div className="space-y-2">
+                              <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1 text-blue-600">Hero Banner</label>
+                              <div className="relative">
+                                 <input 
+                                   type="file" 
+                                   accept="image/*"
+                                   onChange={(e) => updateProduct(p.id, { banner: e.target.files?.[0] || null })}
+                                   className="w-full px-4 py-3 bg-blue-50/50 dark:bg-blue-900/10 border-2 border-blue-100 dark:border-blue-800/50 rounded-xl font-bold text-xs outline-none cursor-pointer"
+                                 />
+                                 {p.banner && <div className="mt-2 text-[10px] font-bold text-blue-600">Selected: {p.banner.name}</div>}
+                              </div>
+                           </div>
+                        </div>
                       </div>
                     ))}
                     <button type="submit" disabled={loading} className="w-full bg-emerald-600 text-white py-6 rounded-[1.5rem] font-black text-sm uppercase tracking-widest hover:bg-emerald-700 transition-all flex items-center justify-center gap-3">
@@ -418,19 +469,34 @@ export default function Page() {
                         </div>
                         <div className="p-8 space-y-6 max-h-[600px] overflow-auto no-scrollbar">
                            {qrResults.map((res, idx) => (
-                             <div key={idx} className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700">
-                                <div className="size-20 bg-white p-1 rounded-xl shadow-sm overflow-hidden shrink-0">
+                             <div key={idx} className="flex flex-col p-6 bg-slate-50 dark:bg-slate-800 rounded-[2.5rem] border border-slate-100 dark:border-slate-700 items-center text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <div className="w-full aspect-square bg-white p-4 rounded-[2rem] shadow-sm overflow-hidden mb-5 relative group">
                                    <img 
                                      src={res.qrImagePath ? (res.qrImagePath.startsWith('http') ? res.qrImagePath : `${apiUrl}${res.qrImagePath}`) : '/api/fallback-qr'} 
                                      className="w-full h-full object-contain" alt="QR" 
                                    />
+                                   <div className="absolute inset-0 bg-emerald-600/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                      <button onClick={() => handleDownload(res.qrImagePath, res.productCode)} className="bg-white p-4 rounded-2xl shadow-xl text-emerald-600 hover:scale-110 transition-transform">
+                                         <Download size={24} />
+                                      </button>
+                                   </div>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                   <h4 className="font-mono text-sm font-black text-emerald-600 truncate">{res.productCode}</h4>
-                                   <p className="text-[10px] font-bold text-slate-400 uppercase truncate">{res.name}</p>
-                                   <div className="flex gap-2 mt-2">
-                                      <button className="text-[9px] font-black text-emerald-600 bg-emerald-100 px-2 py-1 rounded">PNG</button>
-                                      <button className="text-[9px] font-black text-slate-400 bg-slate-200 px-2 py-1 rounded">Verify</button>
+                                <div className="w-full">
+                                   <div className="flex flex-col items-center gap-1 mb-6">
+                                      <h4 className="font-mono text-xl font-black text-emerald-600 tracking-tighter">{res.productCode}</h4>
+                                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{res.name}</p>
+                                   </div>
+                                   
+                                   <div className="flex flex-col gap-2 w-full">
+                                      <button 
+                                        onClick={() => handleDownload(res.qrImagePath, res.productCode)}
+                                        className="flex items-center justify-center gap-3 py-4 bg-emerald-600 text-white rounded-[1.2rem] text-[11px] font-black uppercase tracking-[0.15em] hover:bg-emerald-700 transition-all shadow-xl shadow-emerald-600/20 active:scale-[0.98]"
+                                      >
+                                        <Download size={16} /> DOWNLOAD QR CODE
+                                      </button>
+                                      <button className="flex items-center justify-center gap-3 py-3 bg-white dark:bg-slate-700 text-slate-400 dark:text-slate-300 rounded-[1.2rem] text-[10px] font-black uppercase tracking-[0.15em] border border-slate-100 dark:border-slate-600 hover:bg-slate-50 transition-all">
+                                        Verify Status
+                                      </button>
                                    </div>
                                 </div>
                              </div>

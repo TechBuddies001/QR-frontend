@@ -14,6 +14,7 @@ import SocialInitiative from './pages/SocialInitiative';
 
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import B2BSolutions from './pages/B2BSolutions';
 import AdminDashboard from './pages/AdminDashboard';
 import UserDashboard from './pages/UserDashboard';
 import PublicProfile from './pages/PublicProfile';
@@ -42,6 +43,7 @@ function App() {
                 <Route path="cloud-monitoring" element={<CloudMonitoring />} />
                 <Route path="gps-tracking" element={<GPSTracking />} />
                 <Route path="social-initiative" element={<SocialInitiative />} />
+                <Route path="b2b-solutions" element={<B2BSolutions />} />
                 <Route path="category/:id" element={<CategoryDetails />} />
                 <Route path="product/:id" element={<ProductDetails />} />
                 <Route path="cart" element={<Cart />} />

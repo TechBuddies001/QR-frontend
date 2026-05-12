@@ -20,7 +20,7 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   body {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Outfit', sans-serif;
     color: ${({ theme }) => theme.colors.text};
     background-color: ${({ theme }) => theme.colors.background};
     line-height: 1.6;
@@ -29,8 +29,8 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
     line-height: 1.2;
     color: ${({ theme }) => theme.colors.navy};
   }

@@ -4,9 +4,9 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import api from "@/lib/api";
 import { 
-  ChevronLeft, ChevronRight, Download, Edit2, 
-  Filter, MoreHorizontal, Search, Loader2,
-  Tag as TagIcon, Plus, Info
+  ChevronLeft, ChevronRight, Download, Edit2, Trash2,
+  Tag as TagIcon, Plus, Info, Eye, X, 
+  QrCode, ExternalLink, Search, Loader2, Filter
 } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
@@ -46,6 +46,7 @@ function TagsContent() {
     assetType: "all"
   });
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [quickViewTag, setQuickViewTag] = useState<any>(null);
 
   const fetchTags = async (page = 1, currentLimit = pagination.limit, currentSearch = filters.search) => {
     setLoading(true);
@@ -82,7 +83,7 @@ function TagsContent() {
   useEffect(() => {
     const urlSearch = searchParams.get("search");
     if (urlSearch !== null && urlSearch !== filters.search) {
-      setFilters(prev => ({ ...prev, search: urlSearch }));
+      setFilters((prev: any) => ({ ...prev, search: urlSearch }));
       fetchTags(1, pagination.limit, urlSearch);
     }
   }, [searchParams]);
@@ -90,6 +91,18 @@ function TagsContent() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     fetchTags(1);
+  };
+
+  const handleDelete = async (id: string, code: string) => {
+    if (!window.confirm(`Are you sure you want to delete tag "${code}"?`)) return;
+    
+    try {
+      await api.delete(`/tags/${id}`);
+      toast.success("Tag deleted successfully");
+      fetchTags(pagination.page);
+    } catch (error) {
+      toast.error("Failed to delete tag");
+    }
   };
 
   const handleLimitChange = (newLimit: number) => {
@@ -135,7 +148,7 @@ function TagsContent() {
   };
 
   const toggleSelect = (id: string) => {
-    setSelectedIds(prev => 
+    setSelectedIds((prev: string[]) => 
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
@@ -348,13 +361,27 @@ function TagsContent() {
                             {tag.isActive ? 'Online' : 'Stopped'}
                           </span>
                           
+                          <button 
+                            onClick={() => setQuickViewTag(tag)}
+                            className="size-10 flex items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-400 hover:text-primary transition-all hover:scale-110 active:scale-90"
+                            title="Quick Preview QR"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
                           <Link 
                             href={`/admin/tags/${tag.id}`} 
-                            className="size-10 flex items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-400 hover:text-primary transition-all hover:scale-110 active:scale-90"
-                            title="Edit Tag / View Analytics"
+                            className="size-10 flex items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-400 hover:text-emerald-500 transition-all hover:scale-110 active:scale-90"
+                            title="Full Management"
                           >
                             <Edit2 className="w-4 h-4" />
                           </Link>
+                          <button 
+                            onClick={() => handleDelete(tag.id, tag.tagCode)}
+                            className="size-10 flex items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-400 hover:text-red-600 transition-all hover:scale-110 active:scale-90"
+                            title="Delete Tag"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -425,6 +452,62 @@ function TagsContent() {
           </div>
         )}
       </div>
+      {/* Quick View Modal */}
+      {quickViewTag && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6 animate-in fade-in duration-200">
+           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setQuickViewTag(null)} />
+           <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 slide-in-from-bottom-4 duration-300">
+              <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
+                 <div>
+                   <h3 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight flex items-center gap-2">
+                     <QrCode className="w-5 h-5 text-primary" />
+                     {quickViewTag.tagCode}
+                   </h3>
+                   <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-widest">{quickViewTag.assetType} • {quickViewTag.planType} Plan</p>
+                 </div>
+                 <button onClick={() => setQuickViewTag(null)} className="size-10 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 text-slate-400 hover:text-red-500 transition-all">
+                    <X className="w-5 h-5" />
+                 </button>
+              </div>
+
+              <div className="p-10 flex flex-col items-center">
+                 <div className="aspect-square w-64 bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-center">
+                    <img 
+                      src={`/api/tags/${quickViewTag.id}/qr?t=${new Date().getTime()}`} 
+                      className="w-full h-full object-contain"
+                      alt="QR Preview"
+                    />
+                 </div>
+                 
+                 <div className="grid grid-cols-2 gap-4 w-full mt-8">
+                    <Link 
+                      href={`/admin/tags/${quickViewTag.id}`}
+                      className="flex items-center justify-center gap-2 px-6 py-4 bg-primary text-white rounded-2xl text-sm font-black shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      Edit Details
+                    </Link>
+                    <a 
+                      href={`/api/tags/${quickViewTag.id}/qr?download=true`}
+                      className="flex items-center justify-center gap-2 px-6 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl text-sm font-black hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download
+                    </a>
+                 </div>
+                 
+                 <Link 
+                   href={`/scan/${quickViewTag.tagCode}`}
+                   target="_blank"
+                   className="mt-6 text-[10px] font-black text-slate-400 hover:text-primary uppercase tracking-widest flex items-center gap-2 transition-colors"
+                 >
+                   <ExternalLink className="w-3 h-3" />
+                   Visit Public Landing Page
+                 </Link>
+              </div>
+           </div>
+        </div>
+      )}
     </div>
   );
 }

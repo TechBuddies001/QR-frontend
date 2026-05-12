@@ -12,8 +12,8 @@ export const theme = {
     border: '#E5E7EB',
   },
   fonts: {
-    display: "'Playfair Display', serif",
-    body: "'DM Sans', sans-serif",
+    display: "'Outfit', sans-serif",
+    body: "'Outfit', sans-serif",
   },
   breakpoints: {
     mobile: '576px',
