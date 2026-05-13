@@ -51,7 +51,9 @@ app.use(cors()); // Allow all for local testing
 app.use((req, res, next) => {
   const host = req.get('host');
   if (host && host.includes('railway.app')) {
-    return res.redirect(301, `https://tarkshyasolution.in${req.originalUrl}`);
+    // /scan/TAGCODE → /tag/TAGCODE on tarkshyasolution.in
+    const newUrl = req.originalUrl.replace(/^\/scan\//, '/tag/');
+    return res.redirect(301, `https://tarkshyasolution.in${newUrl}`);
   }
   next();
 });
