@@ -39,6 +39,16 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors()); // Allow all for local testing
 app.use((req, res, next) => {
+  const host = req.get('host');
+  if (host && host.includes('railway.app')) {
+    // /scan/TAGCODE → /tag/TAGCODE on tarkshyasolution.in
+    const newUrl = req.originalUrl.replace(/^\/scan\//, '/tag/');
+    return res.redirect(301, `https://tarkshyasolution.in${newUrl}`);
+  }
+  next();
+});
+
+app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   next();
