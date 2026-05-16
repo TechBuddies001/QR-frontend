@@ -39,13 +39,11 @@ const categoryRoutes = require('./routes/categories');
 const adminUserRoutes = require('./routes/admin_users');
 const salesRoutes = require('./routes/sales');
 const orderRoutes = require('./routes/orders');
+const qrTemplateRoutes = require('./routes/qr_templates');
+const leadRoutes = require('./routes/leads');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-// Security middleware
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-app.use(cors()); // Allow all for local testing
 
 // Global Redirect for old Railway URLs (Ensures printed QR codes still work)
 app.use((req, res, next) => {
@@ -57,6 +55,11 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// Security middleware
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(cors()); // Allow all for local testing
+
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -153,6 +156,8 @@ app.use('/api/users', adminUserRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/admin/sales', salesRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/qr-templates', qrTemplateRoutes);
+app.use('/api/leads', leadRoutes);
 
 // 404
 app.use((req, res) => {
