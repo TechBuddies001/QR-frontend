@@ -24,7 +24,8 @@ const StyledButton = styled.button`
     color: ${theme.colors.white};
     border-color: ${theme.colors.white};
     &:hover {
-      background: ${theme.colors.white};
+      background: ${theme.colors.gold};
+      border-color: ${theme.colors.gold};
       color: ${theme.colors.navy};
     }
   `

@@ -38,7 +38,7 @@ import {
 } from 'lucide-react';
 import Section from '../components/Section';
 import Button from '../components/Button';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 import api from '../lib/api';
@@ -69,6 +69,14 @@ const HeroSection = styled.section`
   z-index: 1;
   transition: background-image 0.8s ease-in-out;
 
+  @media (max-width: 768px) {
+    min-height: 32vh;
+    padding-top: 35px;
+    padding-bottom: 15px;
+    background-position: center;
+    background-image: ${props => props.bgImage ? `linear-gradient(to bottom, rgba(11, 26, 51, 0.7) 0%, rgba(11, 26, 51, 0.5) 100%), url(${props.bgImage})` : 'none'};
+  }
+
   &::before {
     content: '';
     position: absolute;
@@ -91,6 +99,12 @@ const HeroContainer = styled.div`
   position: relative;
   z-index: 2;
   width: 100%;
+
+  @media (max-width: 768px) {
+    padding: 0 20px;
+    align-items: center;
+    text-align: center;
+  }
 `;
 
 const Tagline = styled.h1`
@@ -115,6 +129,13 @@ const Tagline = styled.h1`
     line-height: 1.1;
   }
 
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+    .dim { font-size: 1.0rem; letter-spacing: 0.5px; opacity: 0.8; }
+    .highlight { font-size: 1.6rem; line-height: 1.1; color: #C9A84C; margin-top: 1px; }
+  }
+
   @media (min-width: 1024px) {
     font-size: 3.2rem;
     .dim {
@@ -132,6 +153,16 @@ const Subtext = styled.p`
   margin-bottom: 30px;
   max-width: 650px;
   line-height: 1.6;
+
+  @media (max-width: 768px) {
+    font-size: 0.78rem;
+    margin-bottom: 15px;
+    line-height: 1.4;
+    max-width: 240px;
+    opacity: 0.8;
+    margin-left: auto;
+    margin-right: auto;
+  }
 `;
 
 const HeroImage = styled.div`
@@ -139,6 +170,12 @@ const HeroImage = styled.div`
   max-width: 70%;
   margin: 0 auto;
   transition: all 0.5s ease-in-out;
+
+  @media (max-width: 768px) {
+    max-width: 95%;
+    margin-top: 30px;
+  }
+
   @media (min-width: 1024px) { margin: 0 0 0 auto; }
   img {
     width: 100%;
@@ -165,6 +202,10 @@ const BannerDots = styled.div`
       border-radius: 5px;
     }
   }
+
+  @media (max-width: 768px) {
+    margin-top: 20px;
+  }
 `;
 
 const ActionButton = styled(Link)`
@@ -182,8 +223,16 @@ const ActionButton = styled(Link)`
   transition: all 0.3s ease;
   &:hover {
     transform: translateY(-3px);
-    background-color: ${props => props.variant === 'outline' ? 'white' : '#B08D35'};
+    background-color: ${props => props.variant === 'outline' ? '#C9A84C' : '#B08D35'};
+    border-color: ${props => props.variant === 'outline' ? '#C9A84C' : '#C9A84C'};
     color: #0b1a33;
+  }
+
+  @media (max-width: 768px) {
+    padding: 10px 18px;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    letter-spacing: 0px;
   }
 `;
 
@@ -198,6 +247,10 @@ const SectionTitle = styled.div`
     font-weight: 800;
     text-transform: uppercase;
     span { color: #C9A84C; }
+    
+    @media (max-width: 768px) {
+      font-size: 2rem;
+    }
   }
   p { color: #666; margin-top: 10px; font-size: 1.1rem; }
   .line {
@@ -206,6 +259,15 @@ const SectionTitle = styled.div`
     background: #C9A84C;
     margin: 20px auto;
   }
+`;
+
+const HeroButtons = styled.div`
+  display: flex;
+  gap: 15px;
+  
+  @media (max-width: 768px) {
+    justify-content: center;
+    gap: 10px;
   }
 `;
 
@@ -323,16 +385,29 @@ const CategoryGrid = styled.div`
 
   @media (max-width: 768px) {
     & > * {
-      flex: 0 0 160px;
+      flex: 0 0 150px;
     }
   }
+`;
+
+const CategoryActionButton = styled.span`
+  margin-top: 12px;
+  background-color: #0b1a33;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 0.6rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
 `;
 
 const CategoryCard = styled(Link)`
   background: white;
   border: 1px solid rgba(0,0,0,0.06);
-  padding: 35px 20px;
-  border-radius: 24px;
+  padding: 15px 10px;
+  border-radius: 20px;
   text-align: center;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: pointer;
@@ -341,58 +416,70 @@ const CategoryCard = styled(Link)`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 200px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+  min-height: 140px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 
   &:hover {
-    transform: translateY(-12px);
-    box-shadow: 0 25px 50px rgba(11, 26, 51, 0.12);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(11, 26, 51, 0.08);
     border-color: #C9A84C;
     
     .icon-box {
       background: #0b1a33;
       color: #C9A84C;
-      transform: scale(1.08);
     }
     h3 { color: #C9A84C; }
+    
+    .action-btn {
+      background-color: #C9A84C;
+      color: #0b1a33;
+    }
   }
 
   .icon-box {
-    width: 72px;
-    height: 72px;
-    margin-bottom: 22px;
+    width: 45px;
+    height: 45px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #f0f4f8;
-    border-radius: 18px;
+    border-radius: 12px;
     color: #0b1a33;
     transition: all 0.4s ease;
 
     svg {
-      width: 34px;
-      height: 34px;
-      stroke-width: 1.5px;
+      width: 22px;
+      height: 22px;
+      stroke-width: 2px;
     }
   }
 
   h3 {
-    font-size: 0.9rem;
-    font-weight: 800;
+    font-size: 0.65rem;
+    font-weight: 900;
     text-transform: uppercase;
     color: #0b1a33;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     margin: 0;
     transition: color 0.3s;
+    line-height: 1.2;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;
 
 const ProductGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 30px;
-  max-width: 1400px;
+  max-width: 1000px;
   margin: 0 auto;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const ModernProductCard = styled.div`
@@ -500,7 +587,7 @@ const CircularServiceGrid = styled.div`
 
   @media (max-width: 768px) {
     & > * {
-      flex: 0 0 200px;
+      flex: 0 0 150px;
     }
   }
 `;
@@ -508,7 +595,7 @@ const CircularServiceGrid = styled.div`
 const ServiceCard = styled(Link)`
   background: #ffffff;
   border-radius: 24px;
-  padding: 35px 20px;
+  padding: 25px 15px;
   text-align: center;
   text-decoration: none;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
@@ -518,7 +605,7 @@ const ServiceCard = styled(Link)`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 200px;
+  min-height: 180px;
 
   &:hover {
     transform: translateY(-10px);
@@ -533,30 +620,50 @@ const ServiceCard = styled(Link)`
   }
 
   .icon-wrapper {
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
     background: #f8fafc;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     color: #0b1a33;
     transition: all 0.3s ease;
     
     svg {
-      width: 32px;
-      height: 32px;
+      width: 28px;
+      height: 28px;
       stroke-width: 1.5px;
     }
   }
 
   span {
-    font-size: 1rem;
+    font-size: 0.85rem;
     font-weight: 800;
     color: #0b1a33;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+
+  .btn {
+    margin-top: auto;
+    background: #0b1a33;
+    color: white;
+    padding: 6px 15px;
+    border-radius: 8px;
+    font-size: 0.65rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+  }
+
+  @media (max-width: 768px) {
+    min-height: 150px;
+    padding: 15px 10px;
+    .icon-wrapper { width: 45px; height: 45px; svg { width: 22px; height: 22px; } }
+    span { font-size: 0.7rem; }
   }
 `;
 const ThinAlertBar = styled.div`
@@ -573,6 +680,13 @@ const ThinAlertBar = styled.div`
   gap: 10px;
 
   svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  @media (max-width: 768px) {
+    font-size: 0.75rem;
+    padding: 12px 15px;
+    flex-direction: column;
+    gap: 5px;
+  }
 `;
 
 /* ── Testimonials ── */
@@ -605,8 +719,7 @@ const TestimonialsSection = styled.div`
     gap: 20px;
 
     @media (max-width: 768px) {
-      grid-template-columns: 40px 1fr 40px;
-      gap: 10px;
+      display: block;
     }
   }
 
@@ -624,6 +737,10 @@ const TestimonialsSection = styled.div`
     transition: all 0.3s ease;
     flex-shrink: 0;
     &:hover { background: #0b1a33; color: #C9A84C; border-color: #0b1a33; }
+
+    @media (max-width: 768px) {
+      display: none;
+    }
   }
 
   .carousel-viewport {
@@ -648,25 +765,51 @@ const TestimonialsSection = styled.div`
     }
 
     @media (max-width: 768px) {
+      gap: 0;
       & > * {
         flex: 0 0 100%;
+        padding: 0 10px;
       }
     }
   }
 
-  .dots {
+  .dots-container {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    align-items: center;
+    gap: 20px;
     margin-top: 40px;
-    span {
-      width: 10px;
-      height: 10px;
+
+    .nav-btn-mobile {
+      display: none;
+      width: 45px;
+      height: 45px;
       border-radius: 50%;
-      background: #e2e8f0;
+      border: 2px solid #C9A84C;
+      background: white;
+      color: #0b1a33;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      transition: all 0.3s ease;
-      &.active { background: #C9A84C; transform: scale(1.2); }
+
+      @media (max-width: 768px) {
+        display: flex;
+      }
+    }
+
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      span {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #e2e8f0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        &.active { background: #C9A84C; transform: scale(1.2); }
+      }
     }
   }
 `;
@@ -877,7 +1020,7 @@ const CertificationSection = styled.div`
 const ComparisonContainer = styled.div`
   background: #0b1a33;
   border-radius: 40px;
-  padding: 60px 40px;
+  padding: 40px 40px;
   max-width: 1400px;
   margin: 0 auto 80px;
   color: white;
@@ -885,98 +1028,237 @@ const ComparisonContainer = styled.div`
   overflow: hidden;
   box-shadow: 0 40px 100px rgba(0,0,0,0.3);
 
-  @media (max-width: 1024px) {
-    padding: 40px 20px;
-    border-radius: 20px;
-    margin: 0 20px 60px;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at 70% 20%, rgba(201, 168, 76, 0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    border-radius: 24px;
+    padding: 30px 20px;
+    margin: 0 15px 40px;
   }
 `;
 
 const ComparisonGrid = styled.div`
   display: grid;
-  grid-template-columns: 300px 1fr 1fr 1fr;
-  gap: 0;
+  grid-template-columns: 280px repeat(${props => props.columns || 3}, 1fr);
+  gap: 15px;
   position: relative;
 
   @media (max-width: 1024px) {
-    grid-template-columns: 180px 1fr 1fr 1fr;
+    grid-template-columns: 180px repeat(${props => props.columns || 3}, 1fr);
   }
   @media (max-width: 768px) {
     display: flex;
-    flex-direction: column;
-    gap: 40px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 15px;
+    padding: 10px 0 30px;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
   }
 `;
 
 const ComparisonColumn = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 15px 10px;
   text-align: center;
   position: relative;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  transition: all 0.4s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.04);
+    transform: translateY(-5px);
+  }
   
   &.feature-labels {
+    background: transparent;
+    border: none;
     text-align: left;
-    padding-right: 40px;
-    h3 { font-size: 1.8rem; color: #C9A84C; margin-bottom: 30px; font-weight: 800; }
+    padding: 15px 10px;
+    h3 { 
+      font-size: 1.5rem; 
+      color: #C9A84C; 
+      margin-bottom: 15px; 
+      font-weight: 900;
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
     
     @media (max-width: 768px) {
-      padding-right: 0;
-      h3 { text-align: center; }
+      display: none;
     }
   }
 
   &.featured {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 30px;
-    border: 1px solid rgba(201, 168, 76, 0.2);
+    background: rgba(201, 168, 76, 0.05);
+    border: 2px solid #C9A84C;
+    box-shadow: 0 10px 30px rgba(201, 168, 76, 0.1);
     
     .popular-badge {
       position: absolute;
-      top: -15px;
+      top: -10px;
       left: 50%;
       transform: translateX(-50%);
       background: #C9A84C;
       color: #0b1a33;
-      padding: 5px 20px;
+      padding: 3px 15px;
       border-radius: 100px;
-      font-size: 0.75rem;
-      font-weight: 800;
+      font-size: 0.65rem;
+      font-weight: 900;
       text-transform: uppercase;
+      z-index: 10;
+      box-shadow: 0 4px 10px rgba(201, 168, 76, 0.4);
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex: 0 0 280px;
+    scroll-snap-align: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    
+    .plan-header {
+      .tier { color: #C9A84C; }
+      .price { color: white; }
+    }
+    
+    .feature-cell {
+      justify-content: space-between;
+      padding: 0 15px;
+      min-height: 40px;
+      
+      .mobile-label { 
+        display: block !important; 
+        color: #C9A84C !important; 
+        font-size: 0.8rem !important; 
+        font-weight: 800 !important;
+        text-align: left;
+        flex: 1;
+        padding-right: 15px;
+        opacity: 1 !important;
+        visibility: visible !important;
+      }
+      svg.check { color: #2ecc71; flex-shrink: 0; }
+      span.dash { color: rgba(255, 255, 255, 0.2); flex-shrink: 0; }
+    }
+    
+    &.featured {
+      background: rgba(201, 168, 76, 0.08);
+      border: 2px solid #C9A84C;
     }
   }
 
   .plan-header {
-    margin-bottom: 40px;
-    .tier { font-size: 0.8rem; font-weight: 800; color: #999; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 2px; }
+    margin-bottom: 10px;
+    .tier { 
+      font-size: 0.75rem; 
+      font-weight: 900; 
+      color: #C9A84C; 
+      text-transform: uppercase; 
+      margin-bottom: 5px; 
+      letter-spacing: 1px;
+    }
     .price { 
-      font-size: 2.8rem; font-weight: 900; color: white; 
-      span { font-size: 0.9rem; color: #666; font-weight: 600; }
+      font-size: 2.4rem; 
+      font-weight: 950; 
+      color: white;
+      line-height: 1;
+      span { font-size: 0.8rem; color: rgba(255,255,255,0.3); font-weight: 600; margin-left: 4px; }
     }
   }
 
   .feature-cell {
-    height: 60px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 0.95rem;
-    color: #999;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
     
-    &.label {
-      justify-content: flex-start;
-      color: #ccc;
-      font-weight: 600;
+    .mobile-label {
+      display: none;
     }
     
-    svg.check { color: #C9A84C; }
-    span.dash { color: #333; font-weight: 900; }
+    svg.check { color: #C9A84C; width: 16px; height: 16px; }
+    span.dash { color: rgba(255,255,255,0.1); }
+
+    &.label {
+      justify-content: flex-start;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
   }
 
   .cta-box {
-    margin-top: 40px;
-    button { width: 100%; border-radius: 12px; font-weight: 800; padding: 15px; }
+    margin-top: 15px;
+    padding: 0 5px;
+    
+    button { 
+      width: 100%; 
+      border-radius: 12px; 
+      font-weight: 900; 
+      padding: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 0.75rem;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.02);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+      }
+    }
+  }
+`;
+
+const ComparisonScrollWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
+
+const ComparisonArrow = styled.button`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(201, 168, 76, 0.9);
+  color: #0b1a33;
+  border: none;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #C9A84C;
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  &.left { left: 0px; }
+  &.right { right: 0px; }
+
+  @media (max-width: 768px) {
+    display: flex;
+    &.left { left: 5px; }
+    &.right { right: 5px; }
   }
 `;
 
@@ -986,6 +1268,15 @@ const TabContainer = styled.div`
   gap: 15px;
   margin-bottom: 40px;
   flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    gap: 10px;
+    background: #f1f5f9;
+    padding: 6px;
+    border-radius: 100px;
+    display: inline-flex;
+    margin: 0 auto 30px;
+  }
 `;
 
 const TabButton = styled.button`
@@ -998,6 +1289,34 @@ const TabButton = styled.button`
   cursor: pointer;
   transition: all 0.3s ease;
   min-width: 150px;
+
+  &.comparison-tab {
+    background: ${props => props.active ? '#C9A84C' : 'rgba(255,255,255,0.05)'};
+    color: ${props => props.active ? '#0b1a33' : 'rgba(255,255,255,0.6)'};
+    border-color: ${props => props.active ? '#C9A84C' : 'rgba(255,255,255,0.1)'};
+    
+    &:hover {
+      background: ${props => props.active ? '#C9A84C' : 'rgba(255,255,255,0.1)'};
+      color: white;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    min-width: 140px;
+    padding: 8px 15px;
+    font-size: 0.75rem;
+    border: none;
+    background: ${props => props.active ? 'white' : 'transparent'};
+    box-shadow: ${props => props.active ? '0 2px 10px rgba(0,0,0,0.1)' : 'none'};
+    color: ${props => props.active ? '#0b1a33' : '#64748b'};
+    border-radius: 100px;
+
+    &.comparison-tab {
+      background: ${props => props.active ? 'white' : 'transparent'};
+      color: ${props => props.active ? '#0b1a33' : '#64748b'};
+      box-shadow: ${props => props.active ? '0 2px 10px rgba(0,0,0,0.1)' : 'none'};
+    }
+  }
   
   &:hover {
     border-color: #C9A84C;
@@ -1034,21 +1353,108 @@ const FeatureBox = styled.div`
 const AboutContent = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  text-align: left;
-  h2 { font-size: 2.5rem; color: #0b1a33; font-weight: 900; margin-bottom: 30px; text-align: left; }
-  p { font-size: 1.1rem; line-height: 1.8; color: #555; margin-bottom: 40px; }
-  .stats {
-    display: flex;
-    justify-content: space-between;
-    gap: 30px;
-    flex-wrap: wrap;
+  text-align: center;
+  
+  h2 { 
+    font-size: 3.5rem; 
+    color: #0b1a33; 
+    font-weight: 900; 
+    margin-bottom: 25px; 
     text-align: center;
-    margin-top: 50px;
-    padding-top: 40px;
-    border-top: 1px solid #eee;
+    span { color: #C9A84C; }
+    @media (max-width: 768px) { font-size: 2.5rem; }
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+    color: #C9A84C;
+    font-weight: 800;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+
+  .content-text { 
+    font-size: 1.15rem; 
+    line-height: 1.8; 
+    color: #555; 
+    margin-bottom: 60px; 
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    @media (max-width: 768px) { font-size: 1.05rem; padding: 0 15px; line-height: 1.6; }
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    margin-top: 60px;
+    
+    @media (max-width: 992px) {
+      grid-template-columns: 1fr;
+      gap: 30px;
+      padding: 0 20px;
+    }
+
     .stat-item {
-      h3 { font-size: 2.5rem; color: #C9A84C; font-weight: 900; }
-      span { font-size: 0.9rem; text-transform: uppercase; font-weight: 700; color: #0b1a33; }
+      background: white;
+      padding: 50px 30px;
+      border-radius: 40px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.04);
+      border: 1px solid #f1f5f9;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      
+      &:hover {
+        transform: translateY(-15px);
+        border-color: #C9A84C;
+        box-shadow: 0 40px 80px rgba(201, 168, 76, 0.15);
+        .icon-circle { background: #C9A84C; color: #0b1a33; transform: scale(1.1); }
+      }
+
+      .icon-circle {
+        width: 90px;
+        height: 90px;
+        background: #0b1a33;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 30px;
+        color: #C9A84C;
+        transition: all 0.4s ease;
+        box-shadow: 0 15px 30px rgba(11, 26, 51, 0.1);
+      }
+
+      h3 { 
+        font-size: 3rem; 
+        color: #0b1a33; 
+        font-weight: 900; 
+        margin: 0;
+        @media (max-width: 768px) { font-size: 2.8rem; }
+      }
+      
+      span { 
+        font-size: 1.1rem; 
+        text-transform: uppercase; 
+        font-weight: 800; 
+        color: #C9A84C; 
+        margin-top: 12px; 
+        letter-spacing: 1.5px;
+      }
+      
+      p {
+        font-size: 1rem;
+        color: #64748b;
+        margin-top: 20px;
+        line-height: 1.6;
+        font-weight: 500;
+      }
     }
   }
 `;
@@ -1088,6 +1494,37 @@ const FeatureItem = styled.div`
   }
 `;
 
+const TravelGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (max-width: 992px) {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+
+    .travel-section-title {
+      text-align: center !important;
+      h2 { font-size: 2.2rem !important; }
+    }
+  }
+`;
+
+const TravelFeatures = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 40px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
 const getIcon = (name) => {
   const icons = {
     'ShieldAlert': <ShieldAlert size={32} />,
@@ -1107,6 +1544,7 @@ const getIcon = (name) => {
 const Home = () => {
   const { language } = useLanguage();
   const t = translations[language];
+  const location = useLocation();
   const getCategoryIcon = (name) => {
     const lower = (name || '').toLowerCase();
     // Minimalist Navy/Gold Lucide line icons — no colorful clipart
@@ -1132,8 +1570,8 @@ const Home = () => {
   const [securityFeatures, setSecurityFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activePlanTab, setActivePlanTab] = useState('LITE');
-  const [activeProductTab, setActiveProductTab] = useState('VEHICLE');
+  const [activePlanTab, setActivePlanTab] = useState('bike');
+  const [activeProductTab, setActiveProductTab] = useState('ALL');
   const [heroBanners, setHeroBanners] = useState([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
@@ -1155,6 +1593,15 @@ const Home = () => {
         return;
       }
 
+      // 0. Fetch Settings to get Razorpay Key ID
+      const settingsRes = await api.get('/public/settings');
+      const RAZORPAY_KEY_ID = settingsRes.data.settings?.RAZORPAY_KEY_ID;
+
+      if (!RAZORPAY_KEY_ID) {
+        toast.error('Razorpay is not configured on the server');
+        return;
+      }
+
       // 1. Create Razorpay Order in Backend
       const orderRes = await api.post('/payments/create-order', {
         amount: plan.price,
@@ -1169,7 +1616,7 @@ const Home = () => {
 
       // 2. Open Razorpay Checkout Modal
       const options = {
-        key: 'rzp_test_Sld6vwxfI5Afv3', // Test Key ID
+        key: RAZORPAY_KEY_ID, // Dynamic Key ID from admin panel
         amount: order.amount,
         currency: order.currency,
         name: 'V-KAWACH Safety Plans',
@@ -1226,6 +1673,7 @@ const Home = () => {
 
   const categoriesRef = useRef(null);
   const featuresRef = useRef(null);
+  const comparisonRef = useRef(null);
 
   const scroll = (ref, direction) => {
     if (ref.current) {
@@ -1332,7 +1780,7 @@ const Home = () => {
 
         if (results[0].status === 'fulfilled') {
           const allCats = results[0].value.data?.categories || [];
-          const filteredCats = allCats.filter(cat => cat.name !== 'Smart Home');
+          const filteredCats = allCats.filter(cat => cat.name !== 'Smart Home' && cat.isActive !== false);
           setCategories(filteredCats);
         }
         if (results[1].status === 'fulfilled') {
@@ -1369,12 +1817,36 @@ const Home = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (location.hash === '#plans' && plans.length > 0) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById('plans');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [plans, location.hash]);
+
+  useEffect(() => {
+    if (location.hash === '#products' && products.length > 0) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById('products');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [products, location.hash]);
+
   const currentBgImage = heroBanners[currentBannerIndex]?.imageUrl ? 
     (heroBanners[currentBannerIndex].imageUrl.startsWith('http') ? heroBanners[currentBannerIndex].imageUrl : `${apiUrl}${heroBanners[currentBannerIndex].imageUrl}`) 
     : null;
 
   return (
-    <>
+    <div style={{ overflowX: 'hidden', width: '100%', position: 'relative' }}>
       <HeroSection key={currentBannerIndex} bgImage={currentBgImage}>
         <HeroContainer>
           <div style={{ animation: 'fadeIn 0.8s ease-out', maxWidth: '800px' }}>
@@ -1385,10 +1857,10 @@ const Home = () => {
             <Subtext style={{ fontSize: '1.2rem', opacity: '0.9', marginBottom: '40px' }}>
               {heroBanners[currentBannerIndex]?.subtext || t.hero.subtext}
             </Subtext>
-            <div style={{ display: 'flex', gap: '15px' }}>
+            <HeroButtons>
               <ActionButton to="/smart-qr">{heroBanners[currentBannerIndex]?.button1Text || t.hero.getStarted}</ActionButton>
-              <ActionButton to="/watch-demo" variant="outline">{heroBanners[currentBannerIndex]?.button2Text || t.hero.watchDemo}</ActionButton>
-            </div>
+              <ActionButton to={`/banner/${heroBanners[currentBannerIndex]?.id || 'default'}`} variant="outline">{heroBanners[currentBannerIndex]?.button2Text || t.hero.watchDemo}</ActionButton>
+            </HeroButtons>
             
             {heroBanners.length > 1 && (
               <BannerDots>
@@ -1402,18 +1874,7 @@ const Home = () => {
               </BannerDots>
             )}
           </div>
-          {/* We hide the small preview image as it's now the full background */}
-          {!currentBgImage && (
-            <HeroImage style={{ animation: 'slideInRight 0.8s ease-out' }}>
-              <img 
-                src="/assets/v-kawach-packaging.jpg" 
-                alt="Banner" 
-                style={{ borderRadius: '30px', boxShadow: '0 30px 60px rgba(0,0,0,0.3)' }} 
-              />
-            </HeroImage>
-          )}
         </HeroContainer>
-        
         <style>{`
           @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -1438,10 +1899,11 @@ const Home = () => {
             {categories.map((cat) => {
               return (
                 <CategoryCard key={cat.id} to={`/category/${cat.id}`}>
-                  <div className="icon-box" style={{ padding: '20px', overflow: 'hidden' }}>
+                  <div className="icon-box">
                     {getCategoryIcon(cat.name)}
                   </div>
                   <h3>{cat.name}</h3>
+                  <CategoryActionButton className="action-btn">Explore</CategoryActionButton>
                 </CategoryCard>
               );
             })}
@@ -1449,6 +1911,13 @@ const Home = () => {
               <p style={{ textAlign: 'center', gridColumn: '1/-1', color: '#999', padding: '40px' }}>No categories found. Manage them in Admin Panel.</p>
             )}
           </CategoryGrid>
+          <div className="md:hidden text-center mt-4">
+             <p className="text-[10px] font-black uppercase text-amber-500 tracking-widest flex items-center justify-center gap-2">
+                <span className="h-[1px] w-8 bg-slate-100"></span>
+                Swipe to See More
+                <span className="h-[1px] w-8 bg-slate-100"></span>
+             </p>
+          </div>
           <ScrollButton className="right" onClick={() => scroll(categoriesRef, 'right')}><ChevronRight /></ScrollButton>
         </ScrollWrapper>
       </Section>
@@ -1464,7 +1933,7 @@ const Home = () => {
         </div>
       </Section>
 
-      <Section bg="white">
+      <Section id="products" bg="white">
         <SectionTitle>
           <h2>{t.sections.safetyIds.title} <span>{t.sections.safetyIds.highlight}</span></h2>
           <p>{t.sections.safetyIds.subtext}</p>
@@ -1472,6 +1941,7 @@ const Home = () => {
         </SectionTitle>
         <TabContainer>
           {[
+            { id: 'ALL', label: 'All Products', icon: <Icons.Package size={18} /> },
             { id: 'VEHICLE', label: 'Vehicle', icon: <Icons.Car size={18} /> },
             { id: 'PERSONAL', label: 'Personal', icon: <Icons.User size={18} /> },
             { id: 'PETS', label: 'Pets', icon: <Icons.Dog size={18} /> }
@@ -1490,13 +1960,13 @@ const Home = () => {
         <ProductGrid>
           {products
             .filter(prod => {
+              if (activeProductTab === 'ALL') return true;
               const name = (prod.name || '').toLowerCase();
               if (activeProductTab === 'VEHICLE') return /\b(vehicle|car|cars|bike|bikes|cycle|parking)\b/i.test(name);
               if (activeProductTab === 'PERSONAL') return /\b(kid|child|woman|laptop|bag|luggage|luggge|gadget|office|corporate|identity|card)\b/i.test(name) && !/\b(car|bike)\b/i.test(name);
               if (activeProductTab === 'PETS') return /\b(pet|dog|cat|animal)\b/i.test(name);
               return true;
             })
-            .slice(0, 6)
             .map((prod) => {
               const photos = typeof prod.photos === 'string' ? JSON.parse(prod.photos || "[]") : (prod.photos || []);
               const dynamicData = typeof prod.dynamicData === 'string' ? JSON.parse(prod.dynamicData || "[]") : (prod.dynamicData || []);
@@ -1528,11 +1998,6 @@ const Home = () => {
               );
             })}
         </ProductGrid>
-        <div style={{ textAlign: 'center', marginTop: '40px' }}>
-          <ActionButton to="/smart-qr" variant="outline" style={{ padding: '12px 30px', fontSize: '0.9rem' }}>
-            VIEW ALL PRODUCTS <Icons.ArrowRight size={18} style={{ marginLeft: '8px' }} />
-          </ActionButton>
-        </div>
       </Section>
 
       <Section bg="light">
@@ -1545,35 +2010,41 @@ const Home = () => {
           <ScrollButton className="left" onClick={() => scroll(featuresRef, 'left')}><ChevronLeft /></ScrollButton>
         <CircularServiceGrid ref={featuresRef}>
             <ServiceCard to="/service/instant-call-masking">
-              <div className="icon-wrapper"><Icons.PhoneForwarded size={34} strokeWidth={1.5} /></div>
+              <div className="icon-wrapper"><Icons.PhoneForwarded /></div>
               <span>Call Masking</span>
+              <div className="btn">Explore</div>
             </ServiceCard>
             <ServiceCard to="/service/qr-security">
-              <div className="icon-wrapper"><Icons.Scan size={34} strokeWidth={1.5} /></div>
+              <div className="icon-wrapper"><Icons.Scan /></div>
               <span>QR Security</span>
+              <div className="btn">Explore</div>
             </ServiceCard>
             <ServiceCard to="/service/emergency-helplines">
-              <div className="icon-wrapper"><Icons.PhoneCall size={34} strokeWidth={1.5} /></div>
+              <div className="icon-wrapper"><Icons.PhoneCall /></div>
               <span>Helplines</span>
+              <div className="btn">Explore</div>
             </ServiceCard>
             <ServiceCard to="/service/data-privacy">
-              <div className="icon-wrapper"><Icons.ShieldCheck size={34} strokeWidth={1.5} /></div>
+              <div className="icon-wrapper"><Icons.ShieldCheck /></div>
               <span>Data Privacy</span>
+              <div className="btn">Explore</div>
             </ServiceCard>
             <ServiceCard to="/service/verified">
-              <div className="icon-wrapper"><Icons.BadgeCheck size={34} strokeWidth={1.5} /></div>
+              <div className="icon-wrapper"><Icons.BadgeCheck /></div>
               <span>Verified Identity</span>
+              <div className="btn">Explore</div>
             </ServiceCard>
             <ServiceCard to="/service/instant-alerts">
-              <div className="icon-wrapper"><Icons.Zap size={34} strokeWidth={1.5} /></div>
+              <div className="icon-wrapper"><Icons.Zap /></div>
               <span>Instant Alerts</span>
+              <div className="btn">Explore</div>
             </ServiceCard>
           </CircularServiceGrid>
           <ScrollButton className="right" onClick={() => scroll(featuresRef, 'right')}><ChevronRight /></ScrollButton>
         </ScrollWrapper>
       </Section>
 
-      <Section bg="white">
+      <Section id="plans" bg="white">
         <SectionTitle>
           <h2>{t.sections.features.title} <span>{t.sections.features.highlight}</span></h2>
           <p>{t.sections.features.subtext}</p>
@@ -1581,99 +2052,110 @@ const Home = () => {
         </SectionTitle>
 
         <ComparisonContainer>
-          <TabContainer style={{ marginBottom: '60px' }}>
-            {['BIKE SECURITY', 'CAR SECURITY'].map((cat) => (
-              <TabButton
-                key={cat}
-                active={activePlanTab === (cat === 'BIKE SECURITY' ? 'LITE' : 'ELITE')}
-                onClick={() => setActivePlanTab(cat === 'BIKE SECURITY' ? 'LITE' : 'ELITE')}
-                style={{ 
-                  background: activePlanTab === (cat === 'BIKE SECURITY' ? 'LITE' : 'ELITE') ? '#C9A84C' : 'transparent',
-                  color: activePlanTab === (cat === 'BIKE SECURITY' ? 'LITE' : 'ELITE') ? '#0b1a33' : 'white',
-                  borderColor: activePlanTab === (cat === 'BIKE SECURITY' ? 'LITE' : 'ELITE') ? '#C9A84C' : 'rgba(255,255,255,0.1)',
-                  minWidth: '200px'
-                }}
-              >
-                {cat}
-              </TabButton>
-            ))}
-          </TabContainer>
+          {(() => {
+            const availableCategories = [...new Set(plans.filter(p => p.name && p.name !== 'free_trial').map(p => p.name.split('_')[0]))];
+            const categoriesToShow = availableCategories.length > 0 ? availableCategories : ['bike', 'car'];
+            
+            const currentCat = categoriesToShow.includes(activePlanTab) ? activePlanTab : categoriesToShow[0];
+            
+            const categoryPlans = plans.filter(p => p.name && p.name.startsWith(`${currentCat}_`)).sort((a, b) => a.price - b.price);
+            
+            const allFeaturesSet = new Set();
+            categoryPlans.forEach(p => {
+              if(p.features) p.features.forEach(f => allFeaturesSet.add(f));
+            });
+            const allFeatures = Array.from(allFeaturesSet);
 
-          <ComparisonGrid>
-            <ComparisonColumn className="feature-labels">
-              <h3>Compare Tiers</h3>
-              {[
-                'Basic QR Scan',
-                'Direct Call (No Masking)',
-                'WhatsApp Alert (No Masking)',
-                'Privacy Masking',
-                'Call Masking (Protected)',
-                'WhatsApp Masking (Protected)',
-                'Live Location Sharing'
-              ].map((f, i) => (
-                <div key={i} className="feature-cell label">{f}</div>
-              ))}
-            </ComparisonColumn>
-
-            {['LITE', 'PRO', 'ELITE'].map((tierName) => {
-              const plan = plans.find(p => p.tier?.toUpperCase() === tierName);
-              if (!plan) return <ComparisonColumn key={tierName} />;
-              
-              const planFeatures = (plan.features || []).map(f => f.toLowerCase());
-              
-              return (
-                <ComparisonColumn key={tierName} className={tierName === 'PRO' ? 'featured' : ''}>
-                  {tierName === 'PRO' && <div className="popular-badge">Popular</div>}
-                  <div className="plan-header">
-                    <div className="tier">{tierName}</div>
-                    <div className="price">₹{plan.price} <span>/yr</span></div>
-                  </div>
-                  
-                  {[
-                    'scan',
-                    'direct',
-                    'whatsapp alert',
-                    'privacy',
-                    'call masking',
-                    'whatsapp masking',
-                    'location'
-                  ].map((featKey, i) => {
-                    const hasFeature = planFeatures.some(f => f.includes(featKey));
-                    return (
-                      <div key={i} className="feature-cell">
-                        {hasFeature ? <Icons.Check size={20} className="check" /> : <span className="dash">—</span>}
-                      </div>
-                    );
-                  })}
-
-                  <div className="cta-box">
-                    <Button 
-                      onClick={() => handlePlanCheckout(plan)}
-                      style={{ 
-                        background: tierName === 'PRO' ? '#C9A84C' : 'transparent',
-                        color: tierName === 'PRO' ? '#0b1a33' : '#C9A84C',
-                        border: '2px solid #C9A84C'
-                      }}
+            return (
+              <>
+                <TabContainer style={{ marginBottom: '60px' }}>
+                  {categoriesToShow.map((cat) => (
+                    <TabButton
+                      key={cat}
+                      active={currentCat === cat}
+                      onClick={() => setActivePlanTab(cat)}
+                      className="comparison-tab"
                     >
-                      Get {tierName.charAt(0) + tierName.slice(1).toLowerCase()}
-                    </Button>
-                  </div>
-                </ComparisonColumn>
-              );
-            })}
-          </ComparisonGrid>
+                      {cat.toUpperCase()} SECURITY
+                    </TabButton>
+                  ))}
+                </TabContainer>
+
+                <ComparisonScrollWrapper>
+                  <ComparisonArrow className="left" onClick={() => scroll(comparisonRef, 'left')}>
+                    <Icons.ChevronLeft size={24} />
+                  </ComparisonArrow>
+
+                  <ComparisonGrid ref={comparisonRef} columns={categoryPlans.length}>
+                    <ComparisonColumn className="feature-labels">
+                      <h3>Compare Tiers</h3>
+                      {allFeatures.map((f, i) => (
+                        <div key={i} className="feature-cell label" style={{ textTransform: 'capitalize' }}>{f}</div>
+                      ))}
+                      {allFeatures.length === 0 && <div className="feature-cell label">No features defined</div>}
+                    </ComparisonColumn>
+
+                    {categoryPlans.map((plan) => {
+                      const tierName = plan.name.split('_')[1]?.toUpperCase() || 'PLAN';
+                      const isPopular = tierName === 'PRO' || tierName === 'PREMIUM';
+                      
+                      return (
+                        <ComparisonColumn key={plan.id} className={isPopular ? 'featured' : ''}>
+                          {isPopular && <div className="popular-badge">Popular</div>}
+                          <div className="plan-header">
+                            <div className="tier">{tierName}</div>
+                            <div className="price">₹{plan.price} <span>/yr onwards</span></div>
+                          </div>
+                          
+                          {allFeatures.map((feat, i) => {
+                            const hasFeature = plan.features?.includes(feat);
+                            return (
+                              <div key={i} className="feature-cell">
+                                <span className="mobile-label" style={{ textTransform: 'capitalize' }}>{feat}</span>
+                                {hasFeature ? <Icons.Check size={20} className="check" /> : <span className="dash">—</span>}
+                              </div>
+                            );
+                          })}
+
+                          <div className="cta-box">
+                            <Button 
+                              onClick={() => handlePlanCheckout(plan)}
+                              style={{ 
+                                background: isPopular ? '#C9A84C' : 'transparent',
+                                color: isPopular ? '#0b1a33' : '#C9A84C',
+                                border: '2px solid #C9A84C',
+                                padding: '18px',
+                                fontSize: '1rem',
+                                boxShadow: isPopular ? '0 10px 20px rgba(201, 168, 76, 0.2)' : 'none'
+                              }}
+                            >
+                              Get {tierName}
+                            </Button>
+                          </div>
+                        </ComparisonColumn>
+                      );
+                    })}
+                  </ComparisonGrid>
+
+                  <ComparisonArrow className="right" onClick={() => scroll(comparisonRef, 'right')}>
+                    <Icons.ChevronRight size={24} />
+                  </ComparisonArrow>
+                </ComparisonScrollWrapper>
+              </>
+            );
+          })()}
         </ComparisonContainer>
       </Section>
 
       <Section bg="white">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center', maxWidth: '1400px', margin: '0 auto' }}>
+        <TravelGrid>
           <div>
-            <SectionTitle style={{ textAlign: 'left', margin: 0 }}>
+            <SectionTitle className="travel-section-title" style={{ textAlign: 'left', margin: 0 }}>
               <h2 style={{ fontSize: '3rem' }}>Travel with <span>Absolute Peace</span></h2>
               <p style={{ margin: '25px 0' }}>Never worry about lost luggage again. Our Smart QR tags ensure that your bags are always connected to you, anywhere in the world.</p>
               <div className="line" style={{ margin: '0 0 30px 0' }} />
             </SectionTitle>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '40px' }}>
+            <TravelFeatures>
               <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
                 <Icons.Globe size={24} color="#C9A84C" />
                 <h4 style={{ margin: '10px 0 5px' }}>Global Reach</h4>
@@ -1684,8 +2166,8 @@ const Home = () => {
                 <h4 style={{ margin: '10px 0 5px' }}>ID Privacy</h4>
                 <p style={{ fontSize: '0.85rem', color: '#666' }}>Your personal contact details are never exposed to the public.</p>
               </div>
-            </div>
-            <Button as={Link} to="/smart-qr" variant="primary" style={{ padding: '15px 40px' }}>EXPLORE TAGS</Button>
+            </TravelFeatures>
+            <Button as="a" href="/#products" variant="primary" style={{ padding: '15px 40px', textDecoration: 'none' }}>EXPLORE TAGS</Button>
           </div>
           <div style={{ position: 'relative' }}>
             <img src="/assets/luggage-sticker-red.jpg" alt="Luggage Tags" style={{ width: '100%', borderRadius: '40px', boxShadow: '0 40px 80px rgba(0,0,0,0.1)' }} />
@@ -1693,7 +2175,7 @@ const Home = () => {
               <img src="/assets/luggage-sticker-green.jpg" alt="Luggage Tags" style={{ width: '100%' }} />
             </div>
           </div>
-        </div>
+        </TravelGrid>
       </Section>
 
       {/* ── TESTIMONIALS ── */}
@@ -1743,10 +2225,18 @@ const Home = () => {
             <Icons.ChevronRight size={20} />
           </button>
         </div>
-        <div className="dots">
-          {[0,1,2,3,4,5,6,7].map(i => (
-            <span key={i} className={testimonialSlide === i ? 'active' : ''} onClick={() => setTestimonialSlide(i)} />
-          ))}
+        <div className="dots-container">
+          <button className="nav-btn-mobile" onClick={() => setTestimonialSlide(s => (s - 1 + 8) % 8)}>
+            <Icons.ChevronLeft size={20} />
+          </button>
+          <div className="dots">
+            {[0,1,2,3,4,5,6,7].map(i => (
+              <span key={i} className={testimonialSlide === i ? 'active' : ''} onClick={() => setTestimonialSlide(i)} />
+            ))}
+          </div>
+          <button className="nav-btn-mobile" onClick={() => setTestimonialSlide(s => (s + 1) % 8)}>
+            <Icons.ChevronRight size={20} />
+          </button>
         </div>
       </TestimonialsSection>
       
@@ -1786,21 +2276,28 @@ const Home = () => {
 
       <Section bg="light">
         <AboutContent>
-          <h2>{t.about.title} <span>{t.about.highlight}</span></h2>
-          <div dangerouslySetInnerHTML={{ __html: t.about.content }} />
+          <div className="subtitle">OUR MISSION</div>
+          <h2>About <span>V-KAWACH</span></h2>
+          <div className="content-text" dangerouslySetInnerHTML={{ __html: t.about.content }} />
 
           <div className="stats">
             <div className="stat-item">
+              <div className="icon-circle"><Icons.Clock size={40} /></div>
               <h3>24/7</h3>
               <span>{t.about.stats.monitoring}</span>
+              <p>Round-the-clock monitoring and instant emergency response connectivity whenever you need it.</p>
             </div>
             <div className="stat-item">
+              <div className="icon-circle"><Icons.Eye size={40} /></div>
               <h3>Vision</h3>
-              <span>Impact 10,000+ Lives</span>
+              <span>{t.about.stats.activeUsers}</span>
+              <p>Our core mission is to impact 10,000+ lives by making advanced safety accessible to everyone.</p>
             </div>
             <div className="stat-item">
-              <h3>Looking for</h3>
-              <span>Partners</span>
+              <div className="icon-circle"><Icons.Users size={40} /></div>
+              <h3>Partners</h3>
+              <span>{t.social.stats.partnersDesc}</span>
+              <p>We are actively looking for dedicated partners to expand our safety network across the nation.</p>
             </div>
           </div>
         </AboutContent>
@@ -1809,7 +2306,7 @@ const Home = () => {
       <ThinAlertBar>
         <ShieldAlert /> V-Kawach Safety QR आपकी सुरक्षा के लिए है, इससे किसी भी प्रकार का payment नहीं किया जा सकता है।
       </ThinAlertBar>
-    </>
+    </div>
   );
 };
 
