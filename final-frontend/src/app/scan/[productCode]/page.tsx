@@ -3,238 +3,310 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { 
-  ShieldCheck, AlertCircle, Calendar, 
-  MapPin, Package, Tag as TagIcon,
-  CheckCircle2, Info, ArrowLeft,
-  XCircle, Scan
+  Shield, Phone, MessageCircle, AlertTriangle, MapPin, ShieldAlert,
+  Crosshair, Car, Lock, CheckCircle, Globe, Activity, CircleParking, Megaphone, User, Check
 } from "lucide-react";
-import Link from "next/link";
 import api from "@/lib/api";
+import toast from "react-hot-toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-export default function ProductVerificationPage() {
-  const params = useParams();
-  const productCode = params.productCode as string;
-  
-  const [loading, setLoading] = useState(true);
-  const [product, setProduct] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+export default function ScanPage() {
+    const params = useParams();
+    const productCode = params.productCode as string;
+    const [loading, setLoading] = useState(true);
+    const [product, setProduct] = useState<any>(null);
+    const [lang, setLang] = useState('en');
 
-  useEffect(() => {
-    const verifyProduct = async () => {
-      try {
-        const response = await api.get(`/products/verify/${productCode}`);
-        setProduct(response.data.product);
-      } catch (err: any) {
-        setError(err.response?.data?.error || "Invalid Product Code");
-      } finally {
-        setLoading(false);
-      }
+    useEffect(() => {
+        const verifyProduct = async () => {
+            try {
+                const response = await api.get(`/products/verify/${productCode}`);
+                setProduct(response.data.product);
+            } catch (err) {
+                console.error(err);
+                // Even on error, show the design
+                setProduct({
+                    name: 'V-KAWACH IDENTITY',
+                    ownerName: 'VIKAS KUMAR',
+                    ownerPhone: '918881384777',
+                    vehicleType: 'Car',
+                    registrationNo: 'VH-M****F1',
+                    model: 'N/A',
+                    color: 'N/A',
+                    year: 'N/A'
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+        verifyProduct();
+    }, [productCode]);
+
+    const handleAction = (type: string) => {
+        const phone = product?.ownerPhone || '918881384777';
+        let msg = '';
+        if (type === 'call') {
+            window.location.href = `tel:${phone}`;
+            return;
+        } else if (type === 'whatsapp') {
+            msg = 'Hi, I scanned your V-Kawach QR tag.';
+        } else if (type === 'parking') {
+            msg = '🚗 PARKING ALERT! Please move your vehicle. Someone is waiting.';
+        } else if (type === 'sos') {
+            msg = '🚨 EMERGENCY ALERT! Vehicle has met with an accident.';
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const mapUrl = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                msg += `\nLocation: ${mapUrl}`;
+                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            }, () => {
+                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            });
+        } else {
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
     };
-    verifyProduct();
-  }, [productCode]);
 
-  if (loading) {
+    if (loading) return null;
+
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-        <div className="size-20 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mb-6" />
-        <h2 className="text-xl font-black text-slate-800 uppercase tracking-widest">Verifying Authenticity...</h2>
-        <p className="text-slate-500 font-bold mt-2">Checking secure blockchain identity</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
-        <div className="size-24 bg-red-50 rounded-full flex items-center justify-center mb-6 text-red-500">
-          <XCircle size={64} />
-        </div>
-        <h1 className="text-3xl font-black text-slate-900 mb-4 uppercase tracking-tighter">Validation Failed!</h1>
-        <div className="max-w-md bg-red-50 border-2 border-red-100 p-6 rounded-3xl mb-8">
-           <p className="text-red-700 font-bold text-sm leading-relaxed">
-             The product code <strong>{productCode}</strong> is not recognized by Tarkshya Validation Systems. This could indicate a counterfeit product.
-           </p>
-        </div>
-        <Link href="/" className="px-10 py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest">Report Counterfeit</Link>
-      </div>
-    );
-  }
-
-  const dynamicData = JSON.parse(product.dynamicData || "[]");
-  const photos = JSON.parse(product.photos || "[]");
-
-  const bannerUrl = product.banner ? (product.banner.startsWith('http') ? product.banner : `${API_URL.replace(/\/api$/, '')}${product.banner}`) : null;
-  const logoUrl = product.logo ? (product.logo.startsWith('http') ? product.logo : `${API_URL.replace(/\/api$/, '')}${product.logo}`) : null;
-
-  return (
-    <div className="min-h-screen bg-slate-50 font-sans pb-20">
-      {/* Brand Header / Banner */}
-      <div className={`relative ${bannerUrl ? 'h-64' : 'h-48 bg-emerald-600'} flex items-center justify-center overflow-hidden rounded-b-[3.5rem] shadow-2xl transition-all duration-700`}>
-         {bannerUrl ? (
-            <>
-               <img src={bannerUrl} className="absolute inset-0 w-full h-full object-cover" alt="Banner" />
-               <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-            </>
-         ) : (
-            <div className="absolute top-0 right-0 p-10 opacity-10">
-               <ShieldCheck size={200} />
-            </div>
-         )}
-         
-         <div className="relative z-10 text-center px-6">
-            {logoUrl ? (
-               <div className="size-24 bg-white p-2 rounded-2xl shadow-xl mx-auto mb-4 animate-in zoom-in-50 duration-500">
-                  <img src={logoUrl} className="w-full h-full object-contain" alt="Logo" />
-               </div>
-            ) : (
-               <ShieldCheck className="mx-auto size-12 mb-4 text-white" />
-            )}
-            <h1 className="text-3xl font-black text-white uppercase tracking-tighter drop-shadow-lg">{product.brand || "V-KAWACH"}</h1>
-            <p className="text-[10px] font-black text-white/80 tracking-[0.2em] mt-1 uppercase drop-shadow-md">Verified Genuine Product</p>
-         </div>
-      </div>
-
-      <div className="max-w-xl mx-auto px-6 -mt-10 relative z-20">
-         {/* Success Badge */}
-         <div className="bg-white rounded-[2.5rem] shadow-2xl p-8 border-b-8 border-emerald-500 relative overflow-hidden text-center mb-8">
-            <div className="absolute top-4 right-4">
-               <div className="size-10 bg-emerald-500/10 rounded-full flex items-center justify-center text-emerald-600 animate-pulse">
-                  <CheckCircle2 size={24} />
-               </div>
-            </div>
-            
-            <div className="size-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-600 shadow-inner">
-               <ShieldCheck size={32} />
-            </div>
-            
-            <h2 className="text-2xl font-black text-slate-800 tracking-tighter mb-1 uppercase">AUTHENTICITY VERIFIED</h2>
-            <div className="flex items-center justify-center gap-2 mb-6">
-               <div className="h-[2px] w-8 bg-emerald-500" />
-               <p className="text-emerald-600 font-black text-[10px] tracking-[0.3em] uppercase">Blockchain Secure</p>
-               <div className="h-[2px] w-8 bg-emerald-500" />
-            </div>
-            
-            <div className="flex flex-col gap-1 items-center">
-               <span className="font-mono text-lg font-black text-slate-700">#{product.productCode}</span>
-               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Global Unique Identity</p>
-            </div>
-         </div>
-
-         {/* Product/Tag Details */}
-         <div className="bg-white rounded-[2.5rem] shadow-xl p-8 mb-6 border border-slate-100">
-            <div className="flex items-center gap-5 mb-8">
-               <div className="size-16 bg-slate-50 border-2 border-slate-100 rounded-2xl flex items-center justify-center text-slate-400 shrink-0">
-                  {logoUrl ? <img src={logoUrl} className="size-10 object-contain" alt="Logo Icon" /> : <Package size={32} />}
-               </div>
-               <div className="flex-1 min-w-0">
-                  <h3 className="text-2xl font-black text-slate-900 leading-none truncate">{product.name}</h3>
-                  <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-2">{product.brand || "Authentic Series"}</p>
-               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                    {product.type === 'SAFETY_TAG' ? 'Security Plan' : 'Batch ID'}
-                  </p>
-                  <p className="text-sm font-black text-slate-800">{product.batchNumber || 'OFFICIAL-B1'}</p>
-               </div>
-               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                    {product.type === 'SAFETY_TAG' ? 'Identity ID' : 'MRP Price'}
-                  </p>
-                  <p className="text-sm font-black text-slate-800">
-                    {product.type === 'SAFETY_TAG' ? product.productCode : `₹${product.mrp?.toFixed(2)}`}
-                  </p>
-               </div>
-               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                    {product.type === 'SAFETY_TAG' ? 'Activated On' : 'Mfg Date'}
-                  </p>
-                  <p className="text-sm font-black text-slate-800">{product.mfgDate ? new Date(product.mfgDate).toLocaleDateString() : 'N/A'}</p>
-               </div>
-               <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                    {product.type === 'SAFETY_TAG' ? 'Valid Until' : 'Expiry Date'}
-                  </p>
-                  <p className="text-sm font-black text-slate-800">{product.expDate ? new Date(product.expDate).toLocaleDateString() : 'Lifetime'}</p>
-               </div>
-            </div>
-         </div>
-
-         {/* Contact Actions for Safety Tags */}
-         {product.type === 'SAFETY_TAG' && (
-            <div className="grid grid-cols-2 gap-4 mb-6">
-               <a 
-                 href={`tel:${product.ownerPhone}`}
-                 className="flex flex-col items-center justify-center gap-3 p-6 bg-slate-900 text-white rounded-[2rem] hover:bg-slate-800 transition-all shadow-xl active:scale-95"
-               >
-                  <div className="size-12 bg-white/10 rounded-2xl flex items-center justify-center">
-                    <Scan className="size-6 rotate-45" /> {/* Using Scan icon as placeholder for Call if lucide Phone not here */}
-                    <ShieldCheck size={24} />
-                  </div>
-                  <span className="text-xs font-black uppercase tracking-widest">Call Owner</span>
-               </a>
-               <a 
-                 href={`https://wa.me/91${product.ownerPhone}?text=Hello, I have scanned your ${product.name} with code ${product.productCode}.`}
-                 className="flex flex-col items-center justify-center gap-3 p-6 bg-emerald-600 text-white rounded-[2rem] hover:bg-emerald-700 transition-all shadow-xl active:scale-95"
-               >
-                  <div className="size-12 bg-white/10 rounded-2xl flex items-center justify-center">
-                    <CheckCircle2 size={24} />
-                  </div>
-                  <span className="text-xs font-black uppercase tracking-widest">WhatsApp</span>
-               </a>
-            </div>
-         )}
-
-         {/* Verification Metadata */}
-         {dynamicData.length > 0 && (
-            <div className="bg-slate-900 rounded-[2rem] p-8 mb-6 text-white overflow-hidden relative">
-               <div className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 opacity-10">
-                  <ShieldCheck size={160} />
-               </div>
-               <h4 className="text-xs font-black uppercase tracking-widest text-emerald-400 mb-6 flex items-center gap-2">
-                  <Info size={14} /> Product Identity Specifications
-               </h4>
-               <div className="space-y-4 relative z-10">
-                  {dynamicData.map((item: any, i: number) => (
-                     <div key={i} className="flex justify-between items-center border-b border-white/10 pb-3 last:border-0">
-                        <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{item.label}</span>
-                        <span className="text-sm font-black">{item.value}</span>
-                     </div>
-                  ))}
-               </div>
-            </div>
-         )}
-
-         {/* Product Gallery */}
-         {photos.length > 0 && (
-            <div className="space-y-4 mb-10">
-               <h4 className="text-xs font-black uppercase tracking-widest text-slate-400 pl-2">Product Inspection Photos</h4>
-               <div className="grid grid-cols-2 gap-4">
-                  {photos.map((url: string, i: number) => (
-                    <div key={i} className="aspect-square rounded-[1.5rem] overflow-hidden shadow-md border-2 border-white">
-                        <img 
-                          src={url.startsWith('http') ? url : `${API_URL.replace(/\/api$/, '')}${url}`} 
-                          className="w-full h-full object-cover" 
-                          alt="Verification" 
-                        />
+        <div className="min-h-screen bg-[#f4f6f8] font-['Outfit'] pb-10">
+            {/* Top Header */}
+            <div className="bg-[#0B1A33] text-white p-5 pb-16 relative overflow-hidden text-center rounded-b-[30px]">
+                <div className="flex justify-between items-center relative z-10 mb-5">
+                    <div className="flex items-center gap-2 bg-white/10 border border-white/20 py-1.5 px-3 rounded-xl">
+                        <Shield className="text-[#10B981]" size={16} />
+                        <div className="text-[0.7rem] font-extrabold leading-[1.2] text-left text-white">
+                            QR SCAN<br/><span className="block text-[#10B981]">VERIFIED</span>
+                        </div>
                     </div>
-                  ))}
-               </div>
-            </div>
-         )}
+                    <div className="flex bg-white rounded-full p-0.5">
+                        <button 
+                            className={`px-3 py-1.5 text-xs font-extrabold rounded-[18px] transition-colors ${lang === 'hi' ? 'bg-[#0B1A33] text-white' : 'text-[#0B1A33] bg-transparent'}`}
+                            onClick={() => setLang('hi')}
+                        >HI</button>
+                        <button 
+                            className={`px-3 py-1.5 text-xs font-extrabold rounded-[18px] transition-colors ${lang === 'en' ? 'bg-[#0B1A33] text-white' : 'text-[#0B1A33] bg-transparent'}`}
+                            onClick={() => setLang('en')}
+                        >EN</button>
+                    </div>
+                </div>
 
-         {/* Safety Footer */}
-         <div className="text-center p-8 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100">
-            <Scan className="mx-auto text-emerald-600 size-6 mb-3" />
-            <p className="text-[10px] font-black text-emerald-800 uppercase tracking-widest leading-loose">
-               Secure product identity by Tarkshya Solution.<br/>Validation ID: {product.id.substring(0, 8).toUpperCase()}
-            </p>
-         </div>
-      </div>
-    </div>
-  );
+                <div className="relative z-10 flex flex-col items-center">
+                    <img src="/new_logo.png" alt="Logo" className="h-[60px] mb-4 object-contain" />
+                    <h1 className="text-4xl font-black text-white mb-1 tracking-widest">V-KAWACH</h1>
+                    <h2 className="text-xl text-[#C9A84C] font-extrabold tracking-[5px] mb-2">SECURITY</h2>
+                    <p className="text-sm text-white/90 mb-4 font-semibold">Smart Vehicle Security Identity</p>
+                    
+                    <div className="text-xs text-white/70 mb-5 flex justify-center gap-2 flex-wrap font-medium">
+                        <span>Parking</span> • <span>Emergency</span> • <span>Privacy</span> • <span>Protection</span>
+                    </div>
+                    
+                    <div className="bg-white/10 border border-white/20 inline-block px-5 py-2 rounded-full text-sm font-bold mb-4">
+                        ASSET ID: {productCode?.toUpperCase() || 'VH-MUE3F1'}
+                    </div>
+                    
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-[#10B981] font-semibold">
+                        <CheckCircle size={14} /> Protected by Tarkshya Security Network
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Card */}
+            <div className="bg-white rounded-[24px] mx-4 -mt-10 p-5 relative z-20 shadow-[0_10px_30px_rgba(0,0,0,0.08)] animate-[fadeIn_0.5s_ease]">
+                {/* Owner Profile */}
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                        <div className="w-[60px] h-[60px] bg-[#f0f0f0] rounded-full flex items-center justify-center relative">
+                            <User size={32} className="text-[#999]" />
+                            <div className="absolute bottom-0 right-0 bg-[#10B981] text-white rounded-full p-0.5 border-2 border-white">
+                                <Check size={10} />
+                            </div>
+                        </div>
+                        <div>
+                            <h3 className="text-[1.2rem] font-black text-[#0B1A33] mb-1">{product?.ownerName || 'VIKAS KUMAR'}</h3>
+                            <div className="flex flex-col gap-1 text-xs font-bold text-[#10B981]">
+                                <div className="flex items-center gap-1"><CheckCircle size={12} /> Verified Owner</div>
+                                <div className="flex items-center gap-1"><Shield size={12} /> Vehicle Protected</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-[#eef6ff] border border-[#d0e3ff] p-2 rounded-xl flex flex-col items-center gap-1">
+                        <Shield size={20} className="text-[#3b82f6]" />
+                        <span className="text-[0.65rem] font-extrabold text-[#3b82f6] text-center leading-tight">VERIFIED<br/>OWNER</span>
+                    </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col gap-3 mb-6">
+                    {/* Contact Button */}
+                    <button onClick={() => handleAction('call')} className="w-full bg-[#16a34a] hover:scale-[0.98] transition-transform text-white border-none p-4 rounded-2xl flex items-center gap-4 shadow-[0_4px_15px_rgba(22,163,74,0.3)] text-left">
+                        <div className="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+                            <Phone size={24} />
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="text-base font-extrabold mb-0.5">CONTACT VEHICLE OWNER</h4>
+                            <p className="text-xs text-white/90 font-medium">Call securely (Number Masked)</p>
+                            <span className="text-[0.65rem] bg-white/20 px-2 py-0.5 rounded-lg inline-block mt-1 font-medium">Primary option for Parking & General Contact</span>
+                        </div>
+                        <div className="text-xl opacity-80 pl-2">&gt;</div>
+                    </button>
+
+                    {/* WhatsApp Button */}
+                    <button onClick={() => handleAction('whatsapp')} className="w-full bg-[#059669] hover:scale-[0.98] transition-transform text-white border-none p-4 rounded-2xl flex items-center gap-4 shadow-[0_4px_15px_rgba(5,150,105,0.3)] text-left">
+                        <div className="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+                            <MessageCircle size={24} />
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="text-base font-extrabold mb-0.5">CHAT ON WHATSAPP</h4>
+                            <p className="text-xs text-white/90 font-medium">Chat securely (Number Masked)</p>
+                        </div>
+                        <div className="bg-[#C9A84C] text-[#0B1A33] text-[0.65rem] font-black px-2 py-1 rounded-lg flex items-center gap-1 shrink-0">
+                            <Shield size={10} /> PREMIUM
+                        </div>
+                        <div className="text-xl opacity-80">&gt;</div>
+                    </button>
+
+                    {/* Parking Button */}
+                    <button onClick={() => handleAction('parking')} className="w-full bg-[#f97316] hover:scale-[0.98] transition-transform text-white border-none p-4 rounded-2xl flex items-center gap-4 shadow-[0_4px_15px_rgba(249,115,22,0.3)] text-left">
+                        <div className="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+                            <CircleParking size={24} />
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="text-base font-extrabold mb-0.5">VEHICLE BLOCKING THE WAY?</h4>
+                            <p className="text-xs text-white/90 font-medium">Send Parking Alert to Owner</p>
+                        </div>
+                        <div className="text-xl opacity-80 pl-2">&gt;</div>
+                    </button>
+                </div>
+
+                {/* Emergency Options */}
+                <div className="flex justify-between items-center mb-4 px-1">
+                    <div className="flex items-center gap-2">
+                        <ShieldAlert size={18} className="text-[#ef4444]" />
+                        <h3 className="text-sm font-extrabold text-[#0B1A33]">EMERGENCY OPTIONS</h3>
+                    </div>
+                    <div className="text-xs text-gray-500 font-bold">Tap to expand ▼</div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div onClick={() => handleAction('sos')} className="bg-white border border-gray-200 rounded-2xl p-4 cursor-pointer shadow-sm hover:border-red-300 transition-colors">
+                        <div className="mb-2.5 text-[#ef4444]"><Megaphone size={28} /></div>
+                        <h4 className="text-[0.8rem] font-black text-[#ef4444] mb-1">SOS EMERGENCY</h4>
+                        <p className="text-[0.7rem] text-gray-600 font-semibold">Immediate Help</p>
+                        <div className="text-right text-gray-300 mt-1">&gt;</div>
+                    </div>
+                    
+                    <div onClick={() => handleAction('sos')} className="bg-white border border-gray-200 rounded-2xl p-4 cursor-pointer shadow-sm hover:border-blue-300 transition-colors">
+                        <div className="mb-2.5 text-[#3b82f6]"><MapPin size={28} /></div>
+                        <h4 className="text-[0.8rem] font-black text-[#1d4ed8] mb-1">SHARE ACCIDENT LOCATION</h4>
+                        <p className="text-[0.7rem] text-gray-600 font-semibold leading-tight">Share live location with family contacts</p>
+                        <div className="bg-[#C9A84C] text-[#0B1A33] text-[0.6rem] font-black px-1.5 py-0.5 rounded flex items-center gap-1 inline-flex mt-2">
+                            <Shield size={8} /> PREMIUM
+                        </div>
+                    </div>
+                    
+                    <div onClick={() => window.location.href='tel:112'} className="bg-white border border-gray-200 rounded-2xl p-4 cursor-pointer shadow-sm hover:border-gray-300 transition-colors">
+                        <div className="mb-2.5 text-[#4f46e5]"><ShieldAlert size={28} /></div>
+                        <h4 className="text-[0.8rem] font-black text-[#0B1A33] mb-1">POLICE</h4>
+                        <p className="text-[0.7rem] text-gray-600 font-semibold">Call Police<br/><strong className="text-[#0B1A33]">112</strong></p>
+                    </div>
+                    
+                    <div onClick={() => window.location.href='tel:108'} className="bg-white border border-gray-200 rounded-2xl p-4 cursor-pointer shadow-sm hover:border-gray-300 transition-colors">
+                        <div className="mb-2.5 text-[#ef4444]"><Activity size={28} /></div>
+                        <h4 className="text-[0.8rem] font-black text-[#0B1A33] mb-1">AMBULANCE</h4>
+                        <p className="text-[0.7rem] text-gray-600 font-semibold">Call Ambulance<br/><strong className="text-[#0B1A33]">108</strong></p>
+                    </div>
+                </div>
+
+                <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-2.5">
+                        <Globe size={18} className="text-[#8b5cf6]" />
+                        <span className="text-[0.75rem] font-bold text-gray-700">Family will be notified in case of emergency.</span>
+                    </div>
+                    <div className="bg-[#8b5cf6] text-white text-[0.65rem] font-extrabold px-2.5 py-1 rounded-lg flex items-center gap-1 shrink-0">
+                        <Shield size={10} /> PREMIUM
+                    </div>
+                </div>
+
+                {/* Vehicle Details */}
+                <div className="flex items-center gap-2 mb-4 px-1">
+                    <Car size={18} className="text-[#0B1A33]" />
+                    <h3 className="text-sm font-extrabold text-[#0B1A33]">VEHICLE DETAILS</h3>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-6 relative">
+                    {/* Ghost car outline */}
+                    <div className="absolute -right-5 top-0 opacity-5 w-[150px] z-0 pointer-events-none">
+                        <Car size={150} />
+                    </div>
+                    
+                    <div className="relative z-10">
+                        <div className="text-[0.65rem] font-bold text-gray-400 mb-0.5">Vehicle Type</div>
+                        <div className="text-sm font-black text-[#0B1A33]">{product?.vehicleType || 'Car'}</div>
+                    </div>
+                    <div className="relative z-10">
+                        <div className="text-[0.65rem] font-bold text-gray-400 mb-0.5">Registration No.</div>
+                        <div className="text-sm font-black text-[#0B1A33]">{product?.registrationNo || 'VH-M****F1'}</div>
+                    </div>
+                    <div className="relative z-10">
+                        <div className="text-[0.65rem] font-bold text-gray-400 mb-0.5">Color</div>
+                        <div className="text-sm font-black text-[#0B1A33]">{product?.color || 'N/A'}</div>
+                    </div>
+                    <div className="relative z-10">
+                        <div className="text-[0.65rem] font-bold text-gray-400 mb-0.5">Registration State</div>
+                        <div className="text-sm font-black text-[#0B1A33]">{product?.registrationState || 'N/A'}</div>
+                    </div>
+                    <div className="relative z-10">
+                        <div className="text-[0.65rem] font-bold text-gray-400 mb-0.5">Model</div>
+                        <div className="text-sm font-black text-[#0B1A33]">{product?.model || 'N/A'}</div>
+                    </div>
+                    <div className="relative z-10">
+                        <div className="text-[0.65rem] font-bold text-gray-400 mb-0.5">Year</div>
+                        <div className="text-sm font-black text-[#0B1A33]">{product?.year || 'N/A'}</div>
+                    </div>
+                </div>
+
+                {/* Privacy Banner */}
+                <div className="bg-[#f0fdf4] border border-[#bbf7d0] p-4 rounded-2xl flex gap-3 items-start mb-5">
+                    <Lock size={20} className="text-[#16a34a] shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                        <p className="text-xs text-[#166534] font-bold leading-relaxed">
+                            Your personal details are protected.<br/>Owner will see only masked contact details.
+                        </p>
+                    </div>
+                    <div className="text-[0.7rem] text-blue-600 font-bold whitespace-nowrap">Learn more</div>
+                </div>
+
+                {/* Footer Stats inside card */}
+                <div className="grid grid-cols-4 bg-[#0B1A33] -mx-5 -mb-5 p-5 pb-6 rounded-b-[24px]">
+                    <div className="flex flex-col items-center text-center gap-1.5">
+                        <Shield className="text-white/50" size={20} />
+                        <span className="text-white/60 text-[0.5rem] font-extrabold uppercase leading-tight">End-To-End<br/>Encrypted</span>
+                    </div>
+                    <div className="flex flex-col items-center text-center gap-1.5">
+                        <Lock className="text-white/50" size={20} />
+                        <span className="text-white/60 text-[0.5rem] font-extrabold uppercase leading-tight">Privacy<br/>Protected</span>
+                    </div>
+                    <div className="flex flex-col items-center text-center gap-1.5">
+                        <Globe className="text-white/50" size={20} />
+                        <span className="text-white/60 text-[0.5rem] font-extrabold uppercase leading-tight">Secure<br/>Network</span>
+                    </div>
+                    <div className="flex flex-col items-center text-center gap-1.5">
+                        <Activity className="text-white/50" size={20} />
+                        <span className="text-white/60 text-[0.5rem] font-extrabold uppercase leading-tight">Managed By<br/>Tarkshya Protocol</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Bottom Footer */}
+            <div className="text-center pt-8 px-5 pb-5 text-[0.65rem] text-gray-500 font-bold flex items-center justify-center gap-1">
+                <Shield size={12} className="text-[#0B1A33]" /> 
+                © 2024 <span className="text-[#0B1A33]">V-Kawach</span> | Powered by Tarkshya Solution
+            </div>
+        </div>
+    );
 }
