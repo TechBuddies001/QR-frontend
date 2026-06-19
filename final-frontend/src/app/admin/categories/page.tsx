@@ -58,6 +58,7 @@ function CategoriesContent() {
     description: "",
     icon: "",
     color: "#C9A84C",
+    isActive: true,
     features: [] as string[],
     benefits: "",
     heroImage: "",
@@ -141,6 +142,7 @@ function CategoriesContent() {
       description: category.description || "",
       icon: category.icon || "",
       color: category.color || "#C9A84C",
+      isActive: category.isActive !== false,
       features: category.features ? JSON.parse(category.features as any) : [],
       benefits: category.benefits || "",
       heroImage: category.heroImage || "",
@@ -175,7 +177,7 @@ function CategoriesContent() {
         </div>
         
         <button 
-          onClick={() => { setEditingCategory(null); setFormData({name: "", description: "", icon: "", color: "#C9A84C", features: [], benefits: "", heroImage: "", preventionHeading: "", preventionText: "", preventionCards: [], emergencyHeading: "", emergencyText: "", emergencyCards: [], howItWorksHeading: "", howItWorksText: "", videoUrl: "", trackingHeading: "", trackingText: "", trackingCards: []}); setIsModalOpen(true); }}
+          onClick={() => { setEditingCategory(null); setFormData({name: "", description: "", icon: "", color: "#C9A84C", isActive: true, features: [], benefits: "", heroImage: "", preventionHeading: "", preventionText: "", preventionCards: [], emergencyHeading: "", emergencyText: "", emergencyCards: [], howItWorksHeading: "", howItWorksText: "", videoUrl: "", trackingHeading: "", trackingText: "", trackingCards: []}); setIsModalOpen(true); }}
           className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-sm font-black transition-all shadow-xl shadow-blue-600/20"
         >
           <Plus className="w-5 h-5" /> Add New Category
@@ -208,9 +210,35 @@ function CategoriesContent() {
                 </div>
                 <h3 className="text-lg font-black text-slate-800 dark:text-white mb-1">{cat.name}</h3>
                 <p className="text-sm text-slate-500 line-clamp-2 mb-4">{cat.description || "No description."}</p>
-                <div className="flex items-center gap-2 pt-4 border-t border-slate-50 dark:border-slate-800">
-                  <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Status:</span>
-                  <span className="text-[10px] px-2 py-1 bg-green-500/10 text-green-600 rounded-lg font-black">ACTIVE ECOSYSTEM</span>
+                <div className="flex items-center justify-between pt-4 border-t border-slate-50 dark:border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Status:</span>
+                    {cat.isActive !== false ? (
+                      <span className="text-[10px] px-2 py-1 bg-green-500/10 text-green-600 rounded-lg font-black">ACTIVE ECOSYSTEM</span>
+                    ) : (
+                      <span className="text-[10px] px-2 py-1 bg-red-500/10 text-red-600 rounded-lg font-black">INACTIVE ECOSYSTEM</span>
+                    )}
+                  </div>
+                  
+                  <button 
+                    onClick={async () => {
+                      const toastId = toast.loading("Updating status...");
+                      try {
+                        await api.put(`/categories/${cat.id}`, { ...cat, isActive: cat.isActive === false ? true : false });
+                        toast.success("Status updated", { id: toastId });
+                        fetchCategories();
+                      } catch (err) {
+                        toast.error("Failed to update status", { id: toastId });
+                      }
+                    }}
+                    className={`text-[9px] px-3 py-1.5 font-black uppercase tracking-wider rounded-xl border transition-all ${
+                      cat.isActive !== false 
+                        ? "bg-slate-50 hover:bg-red-50 text-slate-600 hover:text-red-600 border-slate-200 hover:border-red-200" 
+                        : "bg-blue-600 hover:bg-blue-700 text-white border-transparent"
+                    }`}
+                  >
+                    {cat.isActive !== false ? "Disable" : "Enable"}
+                  </button>
                 </div>
               </div>
             ))
@@ -231,12 +259,12 @@ function CategoriesContent() {
                 <button onClick={() => setIsModalOpen(false)} className="p-3 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 hover:rotate-90 transition-transform"><X size={20} /></button>
             </div>
 
-            <div className="flex border-b border-slate-100 dark:border-slate-800 bg-slate-50/50">
+            <div className="flex border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 overflow-x-auto no-scrollbar snap-x">
                 {["basic", "prevention", "emergency", "how-it-works", "tracking"].map((tab) => (
                     <button 
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`px-8 py-4 text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${activeTab === tab ? "border-blue-600 text-blue-600 bg-white dark:bg-slate-900" : "border-transparent text-slate-400 hover:text-slate-600"}`}
+                        className={`px-6 md:px-8 py-4 text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all border-b-2 whitespace-nowrap snap-start ${activeTab === tab ? "border-blue-600 text-blue-600 bg-white dark:bg-slate-900" : "border-transparent text-slate-400 hover:text-slate-600"}`}
                     >
                         {tab.replace("-", " ")}
                     </button>
@@ -274,6 +302,17 @@ function CategoriesContent() {
                             <div className="space-y-1.5 flex flex-col">
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Accent Theme Color</label>
                                 <input type="color" value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} className="h-14 w-full bg-slate-50 border-2 border-slate-100 rounded-2xl cursor-pointer" />
+                            </div>
+                            <div className="space-y-1.5 flex flex-col">
+                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Ecosystem Status</label>
+                                <select 
+                                    value={formData.isActive ? "active" : "inactive"} 
+                                    onChange={e => setFormData({...formData, isActive: e.target.value === "active"})} 
+                                    className="px-5 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl font-bold text-sm focus:border-blue-500 outline-none transition-all focus:ring-2 focus:ring-blue-500/20"
+                                >
+                                    <option value="active">Active (Visible on Website)</option>
+                                    <option value="inactive">Inactive (Hidden from Website)</option>
+                                </select>
                             </div>
                         </div>
                     </div>

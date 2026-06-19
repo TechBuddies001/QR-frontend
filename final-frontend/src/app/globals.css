@@ -1,11 +1,35 @@
 @import "tailwindcss";
 
 @theme {
+  /* Legacy/Existing */
   --color-primary: #ec5b13;
   --color-background-light: #f8f9fc;
   --color-background-dark: #0f172a;
   --color-amber-accent: #f59e0b;
   --color-emergency-red: #dc2626;
+  
+  /* V-Kawach Brand */
+  --color-navy: #061B44;
+  --color-navy-dark: #04122E;
+  --color-gold: #F5B700;
+
+  /* CTA */
+  --color-brand-green: #16A34A;
+  --color-brand-green-dark: #15803D;
+  --color-brand-orange: #F97316;
+  --color-brand-orange-dark: #EA580C;
+  --color-brand-red: #DC2626;
+  --color-brand-red-dark: #B91C1C;
+  --color-brand-blue: #2563EB;
+  --color-brand-blue-dark: #1D4ED8;
+
+  /* Neutral */
+  --color-brand-bg: #F8FAFC;
+  --color-brand-card: #FFFFFF;
+  --color-brand-text: #0F172A;
+  --color-brand-muted: #64748B;
+  --color-brand-border: #E2E8F0;
+
   --font-display: var(--font-public-sans), "Public Sans", sans-serif;
 }
 

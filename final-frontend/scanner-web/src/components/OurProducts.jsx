@@ -35,13 +35,48 @@ const CategoryHeader = styled.div`
   margin-bottom: 30px;
   padding-left: 15px;
   border-left: 4px solid ${({ theme }) => theme.colors.gold};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
   
   h3 {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #333;
+    font-size: 1rem;
+    font-weight: 800;
+    color: ${({ theme }) => theme.colors.navy};
     margin: 0;
     text-transform: uppercase;
+    letter-spacing: -0.02em;
+
+    @media (max-width: 600px) {
+      font-size: 0.85rem;
+      max-width: 70%;
+    }
+  }
+`;
+
+const ViewAllButton = styled.button`
+  background-color: transparent;
+  color: ${({ theme }) => theme.colors.navy};
+  border: 2px solid ${({ theme }) => theme.colors.navy};
+  padding: 8px 20px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  border-radius: 50px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  letter-spacing: 0.1em;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.navy};
+    color: #ffffff;
+  }
+
+  @media (max-width: 600px) {
+    padding: 6px 15px;
+    font-size: 0.65rem;
   }
 `;
 
@@ -239,6 +274,7 @@ const OurProducts = () => {
         
         <CategoryHeader>
           <h3>EMERGENCY / WRONG PARKING SAFETY QR</h3>
+          <ViewAllButton>View Catalog</ViewAllButton>
         </CategoryHeader>
         
         <Grid>

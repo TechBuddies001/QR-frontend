@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import {
     LayoutDashboard,
@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import api from '../lib/api';
+import AdminSettings from '../components/AdminSettings';
 
 const DashboardWrapper = styled.div`
   display: flex;
@@ -292,6 +294,20 @@ const Status = styled.span`
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
+    const [leads, setLeads] = useState([]);
+    const [activeTab, setActiveTab] = useState('dashboard');
+
+    useEffect(() => {
+        const fetchLeads = async () => {
+            try {
+                const res = await api.get('/leads');
+                if (res.data.leads) setLeads(res.data.leads);
+            } catch (err) {
+                console.error('Error fetching leads:', err);
+            }
+        };
+        fetchLeads();
+    }, []);
 
     const stats = [
         { label: 'Active QRs', value: '12', icon: <QrCode /> },
@@ -318,31 +334,13 @@ const AdminDashboard = () => {
             <Sidebar>
                 <NavList>
                     <NavItem>
-                        <NavLink to="/admin/dashboard" className="active">
+                        <NavLink to="#" className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>
                             <LayoutDashboard />
                             Master Panel
                         </NavLink>
                     </NavItem>
                     <NavItem>
-                        <NavLink to="#">
-                            <QrCode />
-                            Bulk Manage
-                        </NavLink>
-                    </NavItem>
-                    <NavItem>
-                        <NavLink to="#">
-                            <History />
-                            System Health
-                        </NavLink>
-                    </NavItem>
-                    <NavItem>
-                        <NavLink to="#">
-                            <User />
-                            User Database
-                        </NavLink>
-                    </NavItem>
-                    <NavItem>
-                        <NavLink to="#">
+                        <NavLink to="#" className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>
                             <Settings />
                             System Settings
                         </NavLink>
@@ -378,23 +376,25 @@ const AdminDashboard = () => {
                         </div>
                     </UserMenu>
                 </TopBar>
-
-                <WelcomeCard>
-                    <h1>Super Admin Control</h1>
-                    <p>Managing 1,284 scan events across the Tarkshya ecosystem. 3 new critical alerts pending review.</p>
-                </WelcomeCard>
                 
-                <StatsGrid>
-                    {stats.map((stat, i) => (
-                        <StatCard key={i}>
-                            <div className="icon-box">{stat.icon}</div>
-                            <div className="info">
-                                <h4>{stat.label}</h4>
-                                <span>{stat.value}</span>
-                            </div>
-                        </StatCard>
-                    ))}
-                </StatsGrid>
+                {activeTab === 'dashboard' && (
+                  <>
+                    <WelcomeCard>
+                        <h1>Super Admin Control</h1>
+                        <p>Managing 1,284 scan events across the Tarkshya ecosystem. 3 new critical alerts pending review.</p>
+                    </WelcomeCard>
+                    
+                    <StatsGrid>
+                        {stats.map((stat, i) => (
+                            <StatCard key={i}>
+                                <div className="icon-box">{stat.icon}</div>
+                                <div className="info">
+                                    <h4>{stat.label}</h4>
+                                    <span>{stat.value}</span>
+                                </div>
+                            </StatCard>
+                        ))}
+                    </StatsGrid>
 
                 <ContentGrid>
                     <Card>
@@ -445,6 +445,44 @@ const AdminDashboard = () => {
                         </div>
                     </Card>
                 </ContentGrid>
+                
+                <ContentGrid style={{ marginTop: '30px', gridTemplateColumns: '1fr' }}>
+                    <Card>
+                        <div className="header">
+                            <h3>Chatbot Inquiries & Leads</h3>
+                            <button><PlusCircle size={18} style={{ verticalAlign: 'middle', marginRight: '5px' }} /> View All</button>
+                        </div>
+                        <Table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Inquiry</th>
+                                    <th>Status</th>
+                                    <th>Date Captured</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {leads.length > 0 ? leads.map((lead) => (
+                                    <tr key={lead.id}>
+                                        <td style={{ fontWeight: 600 }}>{lead.name}</td>
+                                        <td>{lead.phone}</td>
+                                        <td>{lead.message || lead.inquiry || '-'}</td>
+                                        <td><Status type={lead.status === 'new' ? 'inactive' : 'active'}>{lead.status}</Status></td>
+                                        <td>{new Date(lead.createdAt).toLocaleDateString()}</td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: '#999' }}>No leads captured yet.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </Table>
+                    </Card>
+                </ContentGrid>
+                  </>
+                )}
+                {activeTab === 'settings' && <AdminSettings />}
             </MainContent>
         </DashboardWrapper>
         </>

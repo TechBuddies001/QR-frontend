@@ -96,7 +96,7 @@ const SocialInitiative = () => {
         name: '',
         email: '',
         phone: '',
-        message: 'I want to join Mission Rakshak'
+        message: 'I want to become a partner'
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState(null);
@@ -109,7 +109,7 @@ const SocialInitiative = () => {
         e.preventDefault();
         setIsSubmitting(true);
         
-        const message = `Hi, I want to join Mission Rakshak!\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nMessage: ${formData.message}`;
+        const message = `Hi, I want to become a partner!\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nMessage: ${formData.message}`;
         const whatsappUrl = `https://wa.me/918881384777?text=${encodeURIComponent(message)}`;
         
         window.open(whatsappUrl, '_blank');
@@ -121,7 +121,7 @@ const SocialInitiative = () => {
         <>
             <Hero>
                 <MissionContent>
-                    <h1 style={{ fontSize: '3rem', color: '#C9A84C' }}>Mission Rakshak</h1>
+                    <h1 style={{ fontSize: '3rem', color: '#C9A84C' }}>Become a partner</h1>
                     <p style={{ fontSize: '1.2rem', marginTop: '20px', opacity: 0.9 }}>
                         Our commitment to safer roads and connected communities.
                     </p>
@@ -132,12 +132,12 @@ const SocialInitiative = () => {
                 <MissionContent>
                     <h2>The Story</h2>
                     <p style={{ fontSize: '1.1rem', marginTop: '20px', lineHeight: '1.8' }}>
-                        Mission Rakshak was born from a simple realization: in an emergency, every second counts.
+                        Our partnership initiative was born from a simple realization: in an emergency, every second counts.
                         Too often, accident victims or lost individuals cannot be helped simply because there is no way
                         to contact their family.
                     </p>
                     <p style={{ fontSize: '1.1rem', marginTop: '20px', lineHeight: '1.8' }}>
-                        Through Mission Rakshak, we distribute subsidized Smart QR stickers to public transport,
+                        Through our partner program, we distribute subsidized Smart QR stickers to public transport,
                         elderly citizens, and school children, creating a safety net that spans across the city.
                     </p>
 
@@ -160,7 +160,7 @@ const SocialInitiative = () => {
                     </StatGrid>
 
                     <FormContainer id="join-form">
-                        <h3>Become a Rakshak</h3>
+                        <h3>Become a Partner</h3>
                         <form onSubmit={handleSubmit}>
                             <FormGroup>
                                 <Label>Full Name</Label>

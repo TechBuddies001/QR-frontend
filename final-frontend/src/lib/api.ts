@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: process.env.NODE_ENV === 'production' 
-    ? 'https://qrscanner-production-ca51.up.railway.app/api'
+    ? 'https://admin.tarkshyasolution.in/api'
     : 'http://localhost:5001/api',
   headers: {
     'Content-Type': 'application/json',

@@ -11,6 +11,8 @@ export default function Page() {
   const [tag, setTag] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<any>({});
+  const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
+  const [selectedVideos, setSelectedVideos] = useState<File[]>([]);
   
   useEffect(() => {
     if (tagId) {
@@ -23,6 +25,7 @@ export default function Page() {
           address: res.data.tag.address || "",
           planType: res.data.tag.planType || "basic",
           assetType: res.data.tag.assetType || "vehicle",
+          customAssetType: res.data.tag.customAssetType || "",
           isActive: res.data.tag.isActive ?? true
         });
       }).catch(err => {
@@ -34,9 +37,20 @@ export default function Page() {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.put(`/tags/${tagId}`, formData);
+      const fd = new FormData();
+      Object.entries(formData).forEach(([key, val]) => {
+        fd.append(key, val as string);
+      });
+      selectedPhotos.forEach(file => fd.append('photos', file));
+      selectedVideos.forEach(file => fd.append('videos', file));
+
+      await api.put(`/tags/${tagId}`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       toast.success("Tag details updated successfully!");
       setIsEditing(false);
+      setSelectedPhotos([]);
+      setSelectedVideos([]);
       // Reload tag data
       const res = await api.get(`/tags/${tagId}`);
       setTag(res.data.tag);
@@ -107,6 +121,22 @@ export default function Page() {
                  <option value="other">Other</option>
                </select>
              </div>
+             {formData.assetType === 'vehicle' && (
+               <div>
+                 <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Vehicle Subcategory</label>
+                 <select value={formData.customAssetType} onChange={(e) => setFormData({...formData, customAssetType: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 font-bold text-slate-800 dark:text-white text-sm">
+                   <option value="">Select (Optional)</option>
+                   <option value="2 Wheeler">🏍️ 2 Wheeler</option>
+                   <option value="4 Wheeler">🚙 4 Wheeler</option>
+                 </select>
+               </div>
+             )}
+             {formData.assetType === 'other' && (
+               <div>
+                 <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Custom Asset Name</label>
+                 <input type="text" value={formData.customAssetType} onChange={(e) => setFormData({...formData, customAssetType: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 font-bold text-slate-800 dark:text-white text-sm" />
+               </div>
+             )}
              <div className="col-span-full">
                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Address</label>
                <textarea value={formData.address} onChange={(e) => setFormData({...formData, address: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 font-bold text-slate-800 dark:text-white text-sm" rows={3}></textarea>
@@ -122,6 +152,72 @@ export default function Page() {
                 <label htmlFor="isActive" className="text-sm font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
                   Tag is Active (allows scanning & calls)
                 </label>
+             </div>
+             <div className="col-span-full grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 dark:border-slate-800 pt-4 mt-2">
+                <div>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Replace Photos (Max 5)</label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        const newFiles = Array.from(e.target.files);
+                        setSelectedPhotos(prev => [...prev, ...newFiles].slice(0, 5));
+                      }
+                      e.target.value = ''; // Reset input to allow selecting same files again if needed
+                    }}
+                    className="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all cursor-pointer"
+                  />
+                  {selectedPhotos.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {selectedPhotos.map((file, idx) => (
+                        <div key={idx} className="relative group rounded-lg overflow-hidden border border-slate-200 w-16 h-16">
+                          <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setSelectedPhotos(prev => prev.filter((_, i) => i !== idx))}
+                            className="absolute top-1 right-1 bg-black/50 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5">Replace Videos (Max 2)</label>
+                  <input
+                    type="file"
+                    multiple
+                    accept="video/*"
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        const newFiles = Array.from(e.target.files);
+                        setSelectedVideos(prev => [...prev, ...newFiles].slice(0, 2));
+                      }
+                      e.target.value = '';
+                    }}
+                    className="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 transition-all cursor-pointer"
+                  />
+                  {selectedVideos.length > 0 && (
+                    <div className="mt-3 flex flex-col gap-1.5">
+                      {selectedVideos.map((file, idx) => (
+                        <div key={idx} className="flex items-center justify-between bg-slate-50 border border-slate-100 px-3 py-1.5 rounded-lg">
+                          <span className="text-xs text-slate-600 font-medium truncate">{file.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedVideos(prev => prev.filter((_, i) => i !== idx))}
+                            className="text-red-500 hover:text-red-700 text-xs font-bold"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
              </div>
              <div className="col-span-full flex justify-end border-t border-slate-100 dark:border-slate-800 pt-6 mt-2">
                <button type="submit" className="px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm rounded-xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95 flex items-center gap-2">

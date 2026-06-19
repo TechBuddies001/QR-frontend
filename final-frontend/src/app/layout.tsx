@@ -9,8 +9,8 @@ const publicSans = Public_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Tarkshya Solution",
-  description: "Secure access to Tarkshya Solution dashboard",
+  title: "V-Kawach",
+  description: "Secure access to V-Kawach dashboard",
 };
 
 export default function RootLayout({

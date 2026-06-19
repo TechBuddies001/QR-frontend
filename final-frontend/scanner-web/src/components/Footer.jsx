@@ -28,6 +28,11 @@ const Column = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
+
+  @media (max-width: 768px) {
+    align-items: center;
+    text-align: center;
+  }
 `;
 
 const Logo = styled.div`
@@ -109,6 +114,10 @@ const Socials = styled.div`
       border-color: ${({ theme }) => theme.colors.gold};
     }
   }
+
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
 `;
 
 const Copyright = styled.div`
@@ -149,23 +158,24 @@ const Footer = () => {
             <li key="smart-qr"><FooterLink to="/smart-qr">Smart QR Safety</FooterLink></li>
             <li key="cloud"><FooterLink to="/cloud-monitoring">Cloud Monitoring</FooterLink></li>
             <li key="gps"><FooterLink to="/gps-tracking">GPS Tracking</FooterLink></li>
-            <li key="social"><FooterLink to="/social-initiative">Mission Rakshak</FooterLink></li>
+            <li key="social"><FooterLink to="/social-initiative">Become a partner</FooterLink></li>
+            <li key="contact"><FooterLink to="/contact">Contact Us</FooterLink></li>
           </LinkList>
         </Column>
 
         <Column>
           <Heading>Contact Us</Heading>
           <ContactItem>
-            <MapPin size={18} />
-            <span>Chandausi, Uttar Pradesh - 244412</span>
-          </ContactItem>
-          <ContactItem>
             <Mail size={18} />
-            <span>contact@tarkshya.com</span>
+            <a href="mailto:Info@tarkshyasolution.in">Info@tarkshyasolution.in</a>
           </ContactItem>
           <ContactItem>
             <Phone size={18} />
-            <span>+91 88813 84777</span>
+            <a href="tel:+919412300716" title="Call Us" style={{ textDecoration: 'none', color: 'inherit' }}>+91 94123 00716</a>
+          </ContactItem>
+          <ContactItem>
+            <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="18" width="18" xmlns="http://www.w3.org/2000/svg" style={{ color: '#E8B642', minWidth: '18px' }}><path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21"></path><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"></path></svg>
+            <a href="https://wa.me/919412300716" target="_blank" rel="noreferrer" title="Chat on WhatsApp" style={{ textDecoration: 'none', color: 'inherit' }}>WhatsApp Us</a>
           </ContactItem>
         </Column>
       </Container>

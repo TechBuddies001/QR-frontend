@@ -24,7 +24,7 @@ export default function BannersPage() {
             id: Date.now().toString(),
             taglineDim: response.data.settings?.heroTaglineDim || "THE NEXT EVOLUTION OF",
             taglineHighlight: response.data.settings?.heroTaglineHighlight || "SMART SAFETY",
-            subtext: response.data.settings?.heroSubtext || "V-KAWACH provides a high-security ecosystem...",
+            subtext: response.data.settings?.heroSubtext || "V-Kawach provides a high-security ecosystem...",
             button1Text: response.data.settings?.heroButton1Text || "GET STARTED",
             button2Text: response.data.settings?.heroButton2Text || "WATCH DEMO",
             imageUrl: response.data.settings?.heroImageUrl || "/assets/car_qr_tag_mockup_1776107740073.png"

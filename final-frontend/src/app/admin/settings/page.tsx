@@ -17,7 +17,8 @@ import {
   Eye,
   EyeOff,
   User,
-  Users as UsersIcon
+  Users as UsersIcon,
+  CreditCard
 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -122,6 +123,12 @@ export default function SettingsPage() {
             onClick={() => setActiveTab('security')} 
             icon={<Shield className="w-4 h-4" />} 
             label="Security" 
+          />
+          <TabButton 
+            active={activeTab === 'payment'} 
+            onClick={() => setActiveTab('payment')} 
+            icon={<CreditCard className="w-4 h-4" />} 
+            label="Payment Gateway" 
           />
           <TabButton 
             active={activeTab === 'team'} 
@@ -241,6 +248,36 @@ export default function SettingsPage() {
                   value={settings.privacyUrl || ""} 
                   onChange={(v) => handleChange('privacyUrl', v)} 
                 />
+              </div>
+            )}
+
+            {activeTab === 'payment' && (
+              <div className="space-y-8 animate-in fade-in duration-300">
+                <div className="flex items-center gap-4 p-6 bg-blue-500/5 rounded-3xl border border-blue-500/20 mb-4">
+                   <div className="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center p-2">
+                     <span className="font-bold text-blue-600">RZP</span>
+                   </div>
+                   <div>
+                      <h4 className="font-black text-blue-600 text-sm uppercase">Razorpay Integration</h4>
+                      <p className="text-xs font-medium text-slate-500">Configure your Razorpay API keys for checkout payments.</p>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-8">
+                  <SettingInput 
+                    label="Razorpay Key ID" 
+                    value={settings.RAZORPAY_KEY_ID || ""} 
+                    onChange={(v) => handleChange('RAZORPAY_KEY_ID', v)} 
+                    placeholder="rzp_test_..."
+                  />
+                  <SettingInput 
+                    label="Razorpay Key Secret" 
+                    value={settings.RAZORPAY_KEY_SECRET || ""} 
+                    onChange={(v) => handleChange('RAZORPAY_KEY_SECRET', v)} 
+                    placeholder="Secret Key"
+                    isSecret
+                  />
+                </div>
               </div>
             )}
 

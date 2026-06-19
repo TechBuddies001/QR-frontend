@@ -33,6 +33,7 @@ function ProductsContent() {
 
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
@@ -77,6 +78,26 @@ function ProductsContent() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     fetchProducts(1);
+  };
+
+  const toggleStatus = async (id: string, currentStatus: boolean) => {
+    setTogglingId(id);
+    const toastId = toast.loading("Updating status...");
+    try {
+      const formData = new FormData();
+      formData.append("isActive", (!currentStatus).toString());
+      
+      await api.post(`/products/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      toast.success("Status updated successfully", { id: toastId });
+      fetchProducts(pagination.page);
+    } catch (error) {
+      toast.error("Failed to update status", { id: toastId });
+    } finally {
+      setTogglingId(null);
+    }
   };
 
   const handleDelete = async (id: string, name: string) => {
@@ -181,11 +202,22 @@ function ProductsContent() {
                       </td>
                       <td className="px-8 py-5 text-right">
                         <div className="flex items-center justify-end gap-3">
-                           <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight flex items-center gap-2 border ${
-                            product.isActive ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-red-50 text-red-600 border-red-100'
-                          }`}>
-                            {product.isActive ? 'Genuine' : 'Deactivated'}
-                          </span>
+                           <button 
+                            disabled={togglingId === product.id}
+                            onClick={() => toggleStatus(product.id, product.isActive)}
+                            className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight flex items-center gap-2 border cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 ${
+                             product.isActive ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100/50' : 'bg-red-50 text-red-600 border-red-100 hover:bg-red-100/50'
+                           }`}
+                           title="Click to toggle status"
+                          >
+                            {togglingId === product.id ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : product.isActive ? (
+                              'Genuine'
+                            ) : (
+                              'Deactivated'
+                            )}
+                          </button>
                           <Link 
                             href={`/admin/products/${product.id}`} 
                             className="size-10 flex items-center justify-center bg-slate-50 dark:bg-slate-800 rounded-xl text-slate-400 hover:text-emerald-600 transition-all"

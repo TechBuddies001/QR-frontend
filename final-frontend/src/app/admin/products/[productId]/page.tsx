@@ -9,7 +9,7 @@ import {
   MapPin, Calendar, Clock, 
   Package, Tag as TagIcon, DollarSign,
   History, Eye, Trash2, CheckCircle, 
-  XCircle, Loader2, Upload, Plus
+  XCircle, Loader2, Upload, Plus, Phone, Headphones
 } from "lucide-react";
 import Link from "next/link";
 
@@ -31,7 +31,10 @@ export default function ProductDetailPage() {
     expDate: "",
     mrp: "",
     isActive: true,
-    categoryId: ""
+    categoryId: "",
+    subcategory: "",
+    supportPhone: "",
+    supportWhatsapp: ""
   });
   const [categories, setCategories] = useState<any[]>([]);
   const [dynamicFields, setDynamicFields] = useState<{label: string, value: string}[]>([]);
@@ -54,7 +57,10 @@ export default function ProductDetailPage() {
         expDate: p.expDate ? new Date(p.expDate).toISOString().split('T')[0] : "",
         mrp: p.mrp?.toString() || "",
         isActive: p.isActive,
-        categoryId: p.categoryId || ""
+        categoryId: p.categoryId || "",
+        subcategory: p.subcategory || "",
+        supportPhone: p.supportPhone || "",
+        supportWhatsapp: p.supportWhatsapp || ""
       });
       setDynamicFields(JSON.parse(p.dynamicData || "[]"));
     } catch (error) {
@@ -170,6 +176,38 @@ export default function ProductDetailPage() {
                            />
                         </div>
                         <div className="space-y-1.5 flex flex-col">
+                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Category</label>
+                           <select 
+                             value={formData.categoryId} 
+                             onChange={e => {
+                               const catId = e.target.value;
+                               const cat = categories.find(c => c.id === catId);
+                               const isVehicle = cat?.name?.toLowerCase().includes('vehicle');
+                               setFormData({...formData, categoryId: catId, subcategory: isVehicle ? formData.subcategory : ""});
+                             }}
+                             className="px-4 py-3 bg-slate-50 border-2 border-slate-50 rounded-xl font-bold text-sm focus:border-emerald-500 outline-none transition-all"
+                           >
+                             <option value="">No Category</option>
+                             {categories.map((cat: any) => (
+                               <option key={cat.id} value={cat.id}>{cat.name}</option>
+                             ))}
+                           </select>
+                        </div>
+                        {categories.find(c => c.id === formData.categoryId)?.name?.toLowerCase().includes('vehicle') && (
+                          <div className="space-y-1.5 flex flex-col">
+                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Subcategory</label>
+                             <select 
+                               value={formData.subcategory} 
+                               onChange={e => setFormData({...formData, subcategory: e.target.value})}
+                               className="px-4 py-3 bg-slate-50 border-2 border-slate-50 rounded-xl font-bold text-sm focus:border-emerald-500 outline-none transition-all"
+                             >
+                               <option value="">Select Vehicle Type</option>
+                               <option value="2 Wheeler">2 Wheeler</option>
+                               <option value="4 Wheeler">4 Wheeler</option>
+                             </select>
+                          </div>
+                        )}
+                        <div className="space-y-1.5 flex flex-col">
                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Batch #</label>
                            <input 
                              value={formData.batchNumber} 
@@ -195,16 +233,36 @@ export default function ProductDetailPage() {
                              className="px-4 py-3 bg-slate-50 border-2 border-slate-50 rounded-xl font-bold text-sm focus:border-emerald-500 outline-none transition-all"
                            />
                         </div>
-                        <div className="space-y-1.5 flex flex-col">
-                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Exp Date</label>
-                           <input 
-                             type="date"
-                             value={formData.expDate} 
-                             onChange={e => setFormData({...formData, expDate: e.target.value})}
-                             className="px-4 py-3 bg-slate-50 border-2 border-slate-50 rounded-xl font-bold text-sm focus:border-emerald-500 outline-none transition-all"
-                           />
-                        </div>
-                     </div>
+                         <div className="space-y-1.5 flex flex-col">
+                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Exp Date</label>
+                            <input 
+                              type="date"
+                              value={formData.expDate} 
+                              onChange={e => setFormData({...formData, expDate: e.target.value})}
+                              className="px-4 py-3 bg-slate-50 border-2 border-slate-50 rounded-xl font-bold text-sm focus:border-emerald-500 outline-none transition-all"
+                            />
+                         </div>
+                         <div className="space-y-1.5 flex flex-col">
+                            <label className="text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-1">Support Phone (Direct)</label>
+                            <input 
+                              type="text"
+                              value={formData.supportPhone} 
+                              onChange={e => setFormData({...formData, supportPhone: e.target.value})}
+                              placeholder="e.g. 918881384777"
+                              className="px-4 py-3 bg-emerald-50/30 border-2 border-emerald-100/50 rounded-xl font-bold text-sm focus:border-emerald-500 outline-none transition-all"
+                            />
+                         </div>
+                         <div className="space-y-1.5 flex flex-col">
+                            <label className="text-[10px] font-black text-teal-600 uppercase tracking-widest ml-1">Support WhatsApp (Direct)</label>
+                            <input 
+                              type="text"
+                              value={formData.supportWhatsapp} 
+                              onChange={e => setFormData({...formData, supportWhatsapp: e.target.value})}
+                              placeholder="e.g. 918881384777"
+                              className="px-4 py-3 bg-teal-50/30 border-2 border-teal-100/50 rounded-xl font-bold text-sm focus:border-emerald-500 outline-none transition-all"
+                            />
+                         </div>
+                      </div>
 
                      <div className="pt-6 border-t border-slate-100">
                         <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Extended Specifications (Dynamic)</h4>
@@ -311,12 +369,34 @@ export default function ProductDetailPage() {
                               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Batch Number</span>
                               <span className="text-sm font-black text-slate-700 bg-slate-50 px-3 py-1 rounded-lg w-fit">{product.batchNumber || 'N/A'}</span>
                            </div>
-                           <div className="flex flex-col gap-1 text-right">
-                              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Manufacturing History</span>
-                              <span className="text-sm font-black text-slate-700">MFG: {product.mfgDate ? new Date(product.mfgDate).toLocaleDateString() : '--'}</span>
-                              <span className="text-xs font-bold text-red-400 uppercase tracking-tight">EXP: {product.expDate ? new Date(product.expDate).toLocaleDateString() : '--'}</span>
-                           </div>
-                        </div>
+                            <div className="flex flex-col gap-1 text-right">
+                               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Manufacturing History</span>
+                               <span className="text-sm font-black text-slate-700">MFG: {product.mfgDate ? new Date(product.mfgDate).toLocaleDateString() : '--'}</span>
+                               <span className="text-xs font-bold text-red-400 uppercase tracking-tight">EXP: {product.expDate ? new Date(product.expDate).toLocaleDateString() : '--'}</span>
+                            </div>
+                            {product.supportPhone && (
+                              <div className="flex items-center gap-4 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100 col-span-1">
+                                 <div className="size-10 bg-white rounded-xl flex items-center justify-center text-emerald-600 shadow-sm">
+                                    <Headphones size={20} />
+                                 </div>
+                                 <div className="flex flex-col">
+                                    <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Call Support</span>
+                                    <span className="text-sm font-black text-emerald-700">{product.supportPhone}</span>
+                                 </div>
+                              </div>
+                            )}
+                            {product.supportWhatsapp && (
+                              <div className="flex items-center gap-4 p-4 bg-teal-50/50 rounded-2xl border border-teal-100 col-span-1">
+                                 <div className="size-10 bg-white rounded-xl flex items-center justify-center text-teal-600 shadow-sm">
+                                    <Headphones size={20} />
+                                 </div>
+                                 <div className="flex flex-col">
+                                    <span className="text-[9px] font-black text-teal-400 uppercase tracking-widest">WhatsApp Support</span>
+                                    <span className="text-sm font-black text-teal-700">{product.supportWhatsapp}</span>
+                                 </div>
+                              </div>
+                            )}
+                         </div>
 
                         {/* Extended Meta Tags */}
                         {JSON.parse(product.dynamicData || "[]").length > 0 && (

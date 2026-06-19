@@ -349,8 +349,20 @@ const ProductDetails = () => {
         // FIX: access product from res.data instead of res directly
         const found = res.data?.product;
         if (found) {
-          found.photos = typeof found.photos === 'string' ? JSON.parse(found.photos || "[]") : (found.photos || []);
-          found.dynamicData = typeof found.dynamicData === 'string' ? JSON.parse(found.dynamicData || "[]") : (found.dynamicData || []);
+          const safeParse = (str, fallback) => {
+            if (!str) return fallback;
+            let res = str;
+            try {
+              while (typeof res === 'string') {
+                res = JSON.parse(res);
+              }
+              return Array.isArray(res) ? res : fallback;
+            } catch(e) {
+              return fallback;
+            }
+          };
+          found.photos = safeParse(found.photos, []);
+          found.dynamicData = safeParse(found.dynamicData, []);
           setProduct(found);
         }
       } catch (err) {

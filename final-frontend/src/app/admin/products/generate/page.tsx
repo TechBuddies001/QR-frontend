@@ -11,7 +11,7 @@ import {
   Package, Calendar, DollarSign, Tag as TagIcon,
   Plus, Trash2, ChevronDown, ListFilter,
   FileBox, Droplet, Wheat, Shovel,
-  BookOpen, HelpCircle
+  BookOpen, HelpCircle, Phone
 } from "lucide-react";
 
 // --- Category definitions ---
@@ -77,6 +77,8 @@ interface ProductForm {
   selectedPhotos: File[];
   banner: File | null;
   logo: File | null;
+  supportPhone: string;
+  supportWhatsapp: string;
 }
 
 export default function Page() {
@@ -99,7 +101,9 @@ export default function Page() {
     dynamicFields: [],
     selectedPhotos: [],
     banner: null,
-    logo: null
+    logo: null,
+    supportPhone: "",
+    supportWhatsapp: ""
   }]);
 
   useEffect(() => {
@@ -154,7 +158,9 @@ export default function Page() {
       dynamicFields: [],
       selectedPhotos: [],
       banner: null,
-      logo: null
+      logo: null,
+      supportPhone: "",
+      supportWhatsapp: ""
     }]);
   };
 
@@ -197,6 +203,8 @@ export default function Page() {
         data.append('mfgDate', p.mfgDate);
         data.append('expDate', p.expDate);
         data.append('mrp', p.mrp);
+        data.append('supportPhone', p.supportPhone);
+        data.append('supportWhatsapp', p.supportWhatsapp || "");
         data.append('dynamicData', JSON.stringify(p.dynamicFields.filter(f => f.label.trim())));
         p.selectedPhotos.forEach(file => data.append('photos', file));
         if (p.banner) data.append('banner', p.banner);
@@ -304,11 +312,11 @@ export default function Page() {
                            </div>
                         </div>
                         {/* Category Selector */}
-                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+                        <div className="flex overflow-x-auto sm:grid sm:grid-cols-5 gap-3 mb-8 pb-2 no-scrollbar snap-x snap-mandatory">
                           {PRODUCT_CATEGORIES.map((cat) => (
                             <button
                               key={cat.id} type="button" onClick={() => handleCategoryChange(p.id, cat.id)}
-                              className={`flex flex-col items-center gap-2 p-4 rounded-3xl border-2 transition-all ${p.category === cat.id ? 'border-emerald-500 bg-emerald-50/50 text-emerald-600 shadow-lg shadow-emerald-500/10' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 text-slate-400 hover:text-slate-600'}`}
+                              className={`flex flex-col items-center gap-2 p-4 min-w-[100px] sm:min-w-0 rounded-3xl border-2 transition-all snap-start ${p.category === cat.id ? 'border-emerald-500 bg-emerald-50/50 text-emerald-600 shadow-lg shadow-emerald-500/10' : 'border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700 text-slate-400 hover:text-slate-600'}`}
                             >
                               <cat.icon size={20} />
                               <span className="text-[9px] font-black uppercase tracking-tight text-center leading-none">{cat.name}</span>
@@ -339,12 +347,26 @@ export default function Page() {
                                </div>
                             </div>
                             <div className="space-y-2">
-                               <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">MRP (₹)</label>
-                               <div className="relative group">
-                                 <input type="number" value={p.mrp} onChange={(e) => updateProduct(p.id, { mrp: e.target.value })} placeholder="0.00" className="w-full pl-12 pr-4 py-4 bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700/50 rounded-[1.2rem] font-bold text-sm outline-none focus:border-emerald-500/50 transition-all"/>
-                                 <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-5" />
-                               </div>
-                            </div>
+                                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">MRP (₹)</label>
+                                <div className="relative group">
+                                  <input type="number" value={p.mrp} onChange={(e) => updateProduct(p.id, { mrp: e.target.value })} placeholder="0.00" className="w-full pl-12 pr-4 py-4 bg-slate-50/50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700/50 rounded-[1.2rem] font-bold text-sm outline-none focus:border-emerald-500/50 transition-all"/>
+                                  <DollarSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 size-5" />
+                                </div>
+                             </div>
+                             <div className="space-y-2">
+                                <label className="text-xs font-black text-emerald-600 uppercase tracking-widest ml-1">Support Phone (Direct)</label>
+                                <div className="relative group">
+                                  <input type="text" value={p.supportPhone} onChange={(e) => updateProduct(p.id, { supportPhone: e.target.value })} placeholder="e.g. 918881384777" className="w-full pl-12 pr-4 py-4 bg-emerald-50/30 dark:bg-emerald-900/10 border-2 border-emerald-100 dark:border-emerald-800/50 rounded-[1.2rem] font-bold text-sm outline-none focus:border-emerald-500/50 transition-all"/>
+                                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500 size-5" />
+                                </div>
+                             </div>
+                             <div className="space-y-2">
+                                <label className="text-xs font-black text-teal-600 uppercase tracking-widest ml-1">Support WhatsApp (Direct)</label>
+                                <div className="relative group">
+                                  <input type="text" value={p.supportWhatsapp} onChange={(e) => updateProduct(p.id, { supportWhatsapp: e.target.value })} placeholder="e.g. 918881384777" className="w-full pl-12 pr-4 py-4 bg-teal-50/30 dark:bg-teal-900/10 border-2 border-teal-100 dark:border-teal-800/50 rounded-[1.2rem] font-bold text-sm outline-none focus:border-teal-500/50 transition-all"/>
+                                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-teal-500 size-5" />
+                                </div>
+                             </div>
                         </div>
                         {/* Dynamic Field Rows */}
                         <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800">

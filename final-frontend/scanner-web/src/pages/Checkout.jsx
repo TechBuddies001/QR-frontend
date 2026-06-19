@@ -220,6 +220,14 @@ const Checkout = () => {
         return;
       }
 
+      // 0. Fetch Settings to get Razorpay Key ID
+      const settingsRes = await api.get('/public/settings');
+      const RAZORPAY_KEY_ID = settingsRes.data.settings?.RAZORPAY_KEY_ID;
+
+      if (!RAZORPAY_KEY_ID) {
+        throw new Error('Razorpay is not configured on the server');
+      }
+
       // 1. Create Razorpay Order in Backend
       const orderRes = await api.post('/payments/create-order', {
         amount: cartTotal,
@@ -234,7 +242,7 @@ const Checkout = () => {
 
       // 2. Open Razorpay Checkout Modal
       const options = {
-        key: 'rzp_test_Sld6vwxfI5Afv3', // Test Key ID
+        key: RAZORPAY_KEY_ID, // Dynamic Key ID from admin panel
         amount: order.amount,
         currency: order.currency,
         name: 'V-KAWACH Safety IDs',

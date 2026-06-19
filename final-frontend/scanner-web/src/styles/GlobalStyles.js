@@ -15,8 +15,11 @@ export const GlobalStyles = createGlobalStyle`
     padding: 0;
   }
 
-  html {
+  html, body {
     scroll-behavior: smooth;
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
   }
 
   body {

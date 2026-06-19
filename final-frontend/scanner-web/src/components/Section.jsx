@@ -17,9 +17,9 @@ const Container = styled.div`
   padding: 0 20px;
 `;
 
-const Section = ({ children, bg = 'white', className }) => {
+const Section = ({ children, bg = 'white', className, ...props }) => {
     return (
-        <StyledSection $bg={bg} className={className}>
+        <StyledSection $bg={bg} className={className} {...props}>
             <Container>{children}</Container>
         </StyledSection>
     );

@@ -38,6 +38,34 @@ router.get('/', async (req, res) => {
         if (type) {
             where.type = type;
         }
+
+        // Check if there is a valid admin token to decide whether to return inactive products
+        const authHeader = req.headers['authorization'];
+        let token = authHeader && authHeader.split(' ')[1];
+        if (!token && req.query.token) {
+            token = req.query.token;
+        }
+
+        let isAdmin = false;
+        if (token) {
+            try {
+                const jwt = require('jsonwebtoken');
+                const decoded = jwt.verify(token, process.env.JWT_SECRET || 'tarkshya_super_secret_jwt_key_2024');
+                const adminAccount = await prisma.admin.findUnique({
+                    where: { id: decoded.id }
+                });
+                if (adminAccount) {
+                    isAdmin = true;
+                }
+            } catch (err) {
+                // Ignore errors, treat as public
+            }
+        }
+
+        if (!isAdmin) {
+            where.isActive = true;
+        }
+
         const [products, total] = await Promise.all([
             prisma.product.findMany({
                 where,
@@ -175,7 +203,8 @@ router.get('/:id/qr', authenticateToken, async (req, res) => {
 router.post('/:id', authenticateToken, upload.fields([{ name: 'photos', maxCount: 5 }]), async (req, res) => {
     try {
         const { 
-            name, brand, batchNumber, mfgDate, expDate, mrp, dynamicData, isActive 
+            name, brand, batchNumber, mfgDate, expDate, mrp, dynamicData, isActive,
+            supportPhone, supportWhatsapp, categoryId, subcategory
         } = req.body;
 
         const updateData = {
@@ -185,8 +214,12 @@ router.post('/:id', authenticateToken, upload.fields([{ name: 'photos', maxCount
             mfgDate: mfgDate ? new Date(mfgDate) : undefined,
             expDate: expDate ? new Date(expDate) : undefined,
             mrp: mrp ? parseFloat(mrp) : undefined,
+            categoryId: categoryId || undefined,
+            subcategory: subcategory !== undefined ? sanitizeString(subcategory) : undefined,
             dynamicData: sanitizeString(dynamicData),
-            isActive: isActive === 'true' || isActive === true ? true : (isActive === 'false' || isActive === false ? false : undefined)
+            isActive: isActive === 'true' || isActive === true ? true : (isActive === 'false' || isActive === false ? false : undefined),
+            supportPhone: supportPhone !== undefined ? sanitizeString(supportPhone) : undefined,
+            supportWhatsapp: supportWhatsapp !== undefined ? sanitizeString(supportWhatsapp) : undefined
         };
 
         if (req.files && req.files['photos']) {
@@ -216,7 +249,8 @@ router.post('/', authenticateToken, upload.fields([
 ]), async (req, res) => {
     try {
         const { 
-            name, brand, batchNumber, mfgDate, expDate, mrp, dynamicData, type, categoryId 
+            name, brand, batchNumber, mfgDate, expDate, mrp, dynamicData, type, categoryId, subcategory,
+            supportPhone, supportWhatsapp
         } = req.body;
 
         const productCode = req.body.productCode || generateProductCode();
@@ -244,10 +278,13 @@ router.post('/', authenticateToken, upload.fields([
                 photos: JSON.stringify(photos),
                 banner,
                 logo,
-                type: type || "FMCG",
+                type: type || 'FMCG',
                 categoryId: categoryId || null,
+                subcategory: subcategory !== undefined ? sanitizeString(subcategory) : null,
                 adminId: req.admin.id,
                 qrUrl: `/scan/${productCode}`,
+                supportPhone: sanitizeString(supportPhone) || null,
+                supportWhatsapp: sanitizeString(supportWhatsapp) || null,
             }
         });
 
@@ -283,6 +320,9 @@ router.get('/verify/:code', async (req, res) => {
         });
 
         if (product) {
+            if (!product.isActive) {
+                return res.status(403).json({ error: "This product verification code has been deactivated or disabled by the manufacturer." });
+            }
             await prisma.productScanLog.create({
                 data: {
                     productId: product.id,

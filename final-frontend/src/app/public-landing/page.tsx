@@ -44,7 +44,7 @@ export default function Page() {
                 </span>
               </div>
               <h1 className="text-3xl font-extrabold tracking-tight mt-2">
-                Tarkshya Solution
+                V-Kawach
               </h1>
               <p className="text-indigo-100 text-sm font-medium opacity-90">
                 Asset ID: <span className="font-mono">TS-99210</span>
@@ -63,7 +63,7 @@ export default function Page() {
             verified
           </span>
           <p className="text-amber-800 dark:text-amber-400 text-xs font-semibold uppercase tracking-wide">
-            Securely Managed by Tarkshya Protocol
+            Securely Managed by V-Kawach System
           </p>
         </div>
 

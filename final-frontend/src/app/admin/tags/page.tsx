@@ -111,20 +111,18 @@ function TagsContent() {
 
   const handleExportExcel = async () => {
     try {
-      const params = new URLSearchParams(
-        selectedIds.length > 0 
-          ? { ids: selectedIds.join(',') }
-          : {
-              ...(filters.search && { search: filters.search }),
-              ...(filters.status !== "all" && { status: filters.status }),
-              ...(filters.planType !== "all" && { planType: filters.planType }),
-              ...(filters.assetType !== "all" && { assetType: filters.assetType })
-            }
-      );
-      
-      const response = await api.get(`/tags/export-excel?${params.toString()}`, {
-        responseType: 'blob'
-      });
+      let response;
+      if (selectedIds.length > 0) {
+        response = await api.post('/tags/export-excel', { ids: selectedIds }, { responseType: 'blob' });
+      } else {
+        const params = new URLSearchParams({
+          ...(filters.search && { search: filters.search }),
+          ...(filters.status !== "all" && { status: filters.status }),
+          ...(filters.planType !== "all" && { planType: filters.planType }),
+          ...(filters.assetType !== "all" && { assetType: filters.assetType })
+        });
+        response = await api.get(`/tags/export-excel?${params.toString()}`, { responseType: 'blob' });
+      }
       
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -136,6 +134,36 @@ function TagsContent() {
       toast.success("Excel exported successfully");
     } catch (error) {
       toast.error("Failed to export Excel");
+    }
+  };
+
+  const handleExportQrOnlyExcel = async () => {
+    const toastId = toast.loading("Generating QR Print Sheet...");
+    try {
+      let response;
+      if (selectedIds.length > 0) {
+        response = await api.post('/tags/export-qr-only-excel', { ids: selectedIds }, { responseType: 'blob' });
+      } else {
+        const params = new URLSearchParams({
+          ...(filters.search && { search: filters.search }),
+          ...(filters.status !== "all" && { status: filters.status }),
+          ...(filters.planType !== "all" && { planType: filters.planType }),
+          ...(filters.assetType !== "all" && { assetType: filters.assetType })
+        });
+        response = await api.get(`/tags/export-qr-only-excel?${params.toString()}`, { responseType: 'blob' });
+      }
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `QR_Print_Only_${new Date().getTime()}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success("QR Print Sheet Downloaded!", { id: toastId });
+    } catch (error) {
+      toast.error("Failed to generate QR print sheet", { id: toastId });
     }
   };
 
@@ -189,6 +217,18 @@ function TagsContent() {
           >
             <Download className="w-5 h-5" />
             {selectedIds.length > 0 ? `Export Selected (${selectedIds.length})` : 'Download Excel for Print'}
+          </button>
+
+          <button
+            onClick={handleExportQrOnlyExcel}
+            className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-black transition-all shadow-lg active:scale-95 border-2 ${
+              selectedIds.length > 0 
+                ? "bg-orange-600 border-orange-600 text-white hover:bg-orange-700" 
+                : "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-orange-600 dark:text-orange-400 hover:border-orange-500/30"
+            }`}
+          >
+            <Download className="w-5 h-5" />
+            {selectedIds.length > 0 ? `Printing with only QR Image (${selectedIds.length})` : 'Printing with only QR Image'}
           </button>
  
           <Link 

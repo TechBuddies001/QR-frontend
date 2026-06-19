@@ -6,8 +6,9 @@ export const translations = {
       qrSafety: "QR Safety",
       cloudMonitoring: "Cloud Monitoring",
       gpsTracking: "GPS Tracking",
-      initiative: "Initiative",
+      initiative: "Become a Partner",
       b2b: "B2B Solutions",
+      pricing: "Pricing",
       login: "LOGIN / DASHBOARD"
     },
     hero: {
@@ -411,8 +412,9 @@ export const translations = {
       qrSafety: "क्यूआर सुरक्षा",
       cloudMonitoring: "क्लाउड मॉनिटरिंग",
       gpsTracking: "जीपीएस ट्रैकिंग",
-      initiative: "पहल",
+      initiative: "पार्टनर बनें",
       b2b: "व्यापारिक समाधान",
+      pricing: "प्लान्स",
       login: "लॉगिन / डैशबोर्ड"
     },
     hero: {

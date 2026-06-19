@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import * as XLSX from "xlsx";
 import api from "@/lib/api";
 import toast from "react-hot-toast";
 import { 
@@ -56,6 +57,8 @@ export default function Page() {
   const [activeMode, setActiveMode] = useState<'single'|'bulk'>('single');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
+  const [selectedVideos, setSelectedVideos] = useState<File[]>([]);
   
   const [formData, setFormData] = useState({
     ownerName: "",
@@ -121,9 +124,19 @@ export default function Page() {
 
     setLoading(true);
     try {
-      const response = await api.post("/tags", {
-        ...formData,
-        designTypes: formData.designTypes // Send array to backend
+      const fd = new FormData();
+      Object.entries(formData).forEach(([key, val]) => {
+        if (key === 'designTypes' || key === 'quantities') {
+          fd.append(key, JSON.stringify(val));
+        } else {
+          fd.append(key, val as string);
+        }
+      });
+      selectedPhotos.forEach(file => fd.append('photos', file));
+      selectedVideos.forEach(file => fd.append('videos', file));
+
+      const response = await api.post("/tags", fd, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       
       setQrResult(response.data);
@@ -196,6 +209,8 @@ export default function Page() {
       address: "",
       customAssetType: ""
     });
+    setSelectedPhotos([]);
+    setSelectedVideos([]);
     setQrResult(null);
   };
 
@@ -302,7 +317,7 @@ export default function Page() {
           
           doc.setFontSize(10);
           doc.setTextColor(150, 150, 150);
-          doc.text(`V-KAWACH Premium QR Tag - ${tagCode} (${design.toUpperCase()})`, 105, isCircle ? 230 : (isLandscape ? 215 : 260), { align: 'center' });
+          doc.text(`V-Kawach Premium QR Tag - ${tagCode} (${design.toUpperCase()})`, 105, isCircle ? 230 : (isLandscape ? 215 : 260), { align: 'center' });
           doc.text(`Copy ${q + 1} of ${qty} | Generated on ${new Date().toLocaleDateString()}`, 105, isCircle ? 235 : (isLandscape ? 220 : 265), { align: 'center' });
         }
       }
@@ -320,7 +335,7 @@ export default function Page() {
     
     const toastId = toast.loading(`Preparing your ${format.toUpperCase()} ZIP file...`);
     try {
-      const response = await api.post("tags/bulk-download", {
+      const response = await api.post("/tags/bulk-download", {
         ids: bulkResult.tagIds,
         quantities: formData.quantities, // Respect selection for bulk too
         designTypes: formData.designTypes,
@@ -350,7 +365,7 @@ export default function Page() {
     
     const toastId = toast.loading("Generating High-Quality PDF...");
     try {
-      const response = await api.post("tags/bulk-pdf", {
+      const response = await api.post("/tags/bulk-pdf", {
         ids: bulkResult.tagIds,
         quantities: formData.quantities, // Respect selection for bulk too
         designTypes: formData.designTypes
@@ -489,6 +504,21 @@ export default function Page() {
                         </div>
                       </div>
 
+                      {formData.assetType === 'vehicle' && (
+                        <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-200 dark:border-blue-900/30">
+                          <label className="text-xs font-bold text-blue-700 dark:text-blue-400">Vehicle Subcategory</label>
+                          <select
+                            className="w-full bg-white dark:bg-slate-800 rounded-lg border border-blue-200 dark:border-blue-800/50 focus:ring-blue-500 focus:border-blue-500 px-3 py-2 outline-none transition-all font-medium text-sm"
+                            value={formData.customAssetType || ''}
+                            onChange={(e) => setFormData({...formData, customAssetType: e.target.value})}
+                          >
+                            <option value="">Select (Optional)</option>
+                            <option value="2 Wheeler">🏍️ 2 Wheeler</option>
+                            <option value="4 Wheeler">🚙 4 Wheeler</option>
+                          </select>
+                        </div>
+                      )}
+
                       {formData.assetType === 'other' && (
                         <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 p-3 bg-orange-50 dark:bg-orange-900/10 rounded-xl border border-orange-200 dark:border-orange-900/30">
                           <label className="text-xs font-bold text-orange-700 dark:text-orange-400">Specify Custom Asset Name</label>
@@ -501,6 +531,34 @@ export default function Page() {
                           />
                         </div>
                       )}
+
+                      <div className="space-y-1.5 border-t border-slate-100 dark:border-slate-800 pt-4 mt-2">
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Attach Photos (Max 5)</label>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files) setSelectedPhotos(Array.from(e.target.files).slice(0, 5));
+                          }}
+                          className="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all cursor-pointer"
+                        />
+                        {selectedPhotos.length > 0 && <p className="text-[10px] text-slate-500">{selectedPhotos.length} photo(s) selected</p>}
+                      </div>
+                      
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Attach Videos (Max 2)</label>
+                        <input
+                          type="file"
+                          multiple
+                          accept="video/*"
+                          onChange={(e) => {
+                            if (e.target.files) setSelectedVideos(Array.from(e.target.files).slice(0, 2));
+                          }}
+                          className="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 transition-all cursor-pointer"
+                        />
+                        {selectedVideos.length > 0 && <p className="text-[10px] text-slate-500">{selectedVideos.length} video(s) selected</p>}
+                      </div>
 
                       <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-600 dark:text-slate-400">Sponsorship (Optional)</label>
@@ -655,23 +713,44 @@ export default function Page() {
                         </div>
                         <h3 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">Bulk Generation</h3>
                     </div>
-                    <button 
-                        onClick={() => {
-                            const csvContent = "ownerName,ownerPhone,emergencyContact,assetType,planType\nJohn Doe,9876543210,,vehicle,basic";
-                            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                            const url = URL.createObjectURL(blob);
-                            const link = document.createElement("a");
-                            link.setAttribute("href", url);
-                            link.setAttribute("download", "tags_template.csv");
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                        }}
-                        className="text-xs font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1.5 underline underline-offset-4 decoration-primary/30"
-                    >
-                        <Download className="w-3.5 h-3.5" />
-                        Download Instructions
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button 
+                            onClick={() => {
+                                // Generate a proper .xlsx with tagID + qrVariable columns
+                                const ws = XLSX.utils.aoa_to_sheet([
+                                    ["tagID", "qrVariable"],
+                                    ["VH-001", "DL4CAB1234"],
+                                    ["VH-002", "MH12AB5678"],
+                                ]);
+                                // Style the header row (column widths)
+                                ws["!cols"] = [{ wch: 18 }, { wch: 22 }];
+                                const wb = XLSX.utils.book_new();
+                                XLSX.utils.book_append_sheet(wb, ws, "Tag Format");
+                                XLSX.writeFile(wb, "TagID_QRVariable_Format.xlsx");
+                            }}
+                            className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-all flex items-center gap-1.5 px-3 py-1.5 rounded-lg"
+                        >
+                            <FileSpreadsheet className="w-3.5 h-3.5" />
+                            Download Format Excel
+                        </button>
+                        <button 
+                            onClick={() => {
+                                const csvContent = "ownerName,ownerPhone,emergencyContact,assetType,planType\nJohn Doe,9876543210,,vehicle,basic";
+                                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                                const url = URL.createObjectURL(blob);
+                                const link = document.createElement("a");
+                                link.setAttribute("href", url);
+                                link.setAttribute("download", "tags_template.csv");
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                            }}
+                            className="text-xs font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-1.5 underline underline-offset-4 decoration-primary/30"
+                        >
+                            <Download className="w-3.5 h-3.5" />
+                            Download Instructions
+                        </button>
+                    </div>
                 </div>
 
                     <div className="mb-6 p-6 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-200 dark:border-slate-700/50">
@@ -814,9 +893,9 @@ export default function Page() {
                                         if (!bulkResult?.tagIds?.length) return;
                                         const toastId = toast.loading("Generating Excel Data...");
                                         try {
-                                            const params = new URLSearchParams();
-                                            params.append('ids', bulkResult.tagIds.join(','));
-                                            const response = await api.get(`/tags/export-excel?${params.toString()}`, {
+                                            const response = await api.post('/tags/export-excel', {
+                                                ids: bulkResult.tagIds
+                                            }, {
                                                 responseType: 'blob'
                                             });
                                             const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -857,6 +936,40 @@ export default function Page() {
                                 >
                                     <FileText className="w-4 h-4" />
                                     Download {bulkResult.successCount} Brand Tags (PDF)
+                                </button>
+
+                                {/* Divider */}
+                                <div className="border-t border-slate-100 my-1" />
+
+                                {/* NEW: Printing with Only QR Image */}
+                                <button 
+                                    onClick={async () => {
+                                        if (!bulkResult?.tagIds?.length) return;
+                                        const toastId = toast.loading("Generating QR Print Sheet...");
+                                        try {
+                                            const response = await api.post('/tags/export-qr-only-excel', {
+                                                ids: bulkResult.tagIds,
+                                                designType: formData.designTypes[0] || 'standard'
+                                            }, {
+                                                responseType: 'blob'
+                                            });
+                                            const url = window.URL.createObjectURL(new Blob([response.data]));
+                                            const link = document.createElement('a');
+                                            link.href = url;
+                                            link.setAttribute('download', `QR_Print_Only_${new Date().getTime()}.xlsx`);
+                                            document.body.appendChild(link);
+                                            link.click();
+                                            link.remove();
+                                            window.URL.revokeObjectURL(url);
+                                            toast.success("QR Print Sheet Downloaded!", { id: toastId });
+                                        } catch (error) {
+                                            toast.error("Failed to generate QR print sheet", { id: toastId });
+                                        }
+                                    }}
+                                    className="flex items-center gap-2 text-orange-600 bg-orange-50 px-6 py-2 rounded-xl text-xs font-bold border border-orange-200 hover:bg-orange-100 transition-all shadow-sm"
+                                >
+                                    <Printer className="w-4 h-4" />
+                                    Printing with Only QR Image ({bulkResult.successCount} tags)
                                 </button>
                             </div>
                         )}

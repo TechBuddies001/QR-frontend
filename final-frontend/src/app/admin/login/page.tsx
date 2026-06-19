@@ -52,7 +52,7 @@ export default function Page() {
               Admin Panel
             </h1>
             <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm">
-              Secure access to Tarkshya Solution dashboard
+              Secure access to V-Kawach dashboard
             </p>
           </div>
 
@@ -131,7 +131,7 @@ export default function Page() {
 
           <div className="bg-slate-50 dark:bg-slate-900/50 p-6 text-center border-t border-slate-100 dark:border-slate-800">
             <p className="text-xs text-slate-400 dark:text-slate-500">
-              © 2024 Tarkshya Solution. All rights reserved. <br />
+              © 2024 V-Kawach. All rights reserved. <br />
               Authorized Personnel Only.
             </p>
           </div>

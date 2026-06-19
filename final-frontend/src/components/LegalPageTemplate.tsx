@@ -70,7 +70,7 @@ export default function LegalPageTemplate({ title, settingKey }: LegalPageTempla
             {title}
           </h1>
           <p className="text-xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200">
-            At Tarkshya Solution, transparency and trust are the foundation of our ecosystem. 
+            At V-Kawach, transparency and trust are the foundation of our ecosystem. 
             Review our latest {title.toLowerCase()} below.
           </p>
         </div>
@@ -107,7 +107,7 @@ export default function LegalPageTemplate({ title, settingKey }: LegalPageTempla
           <div className="flex flex-col items-center md:items-start gap-4 text-center md:text-left">
             <div className="flex items-center gap-2">
                <div className="size-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-black">T</div>
-               <span className="font-black text-lg tracking-tighter">Tarkshya Solution</span>
+               <span className="font-black text-lg tracking-tighter">V-Kawach</span>
             </div>
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Securing the world with Indian Innovation</p>
           </div>

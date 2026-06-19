@@ -66,6 +66,7 @@ model Tag {
   // Dynamic Content & Photos
   dynamicData      String?             // JSON string: [ { label: "...", value: "..." } ]
   photos           String?             // JSON string: [ "/uploads/...", ... ]
+  videos           String?             // JSON string: [ "/uploads/...", ... ]
 
   // Relations
   adminId          String
@@ -132,6 +133,11 @@ model Plan {
   features      String   // JSON string of features array
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
+
+  // New fields
+  tier          String?  @default("Pro")
+  image         String?  @default("")
+  productTitle  String?  @default("")
 }
 
 model Lead {
@@ -236,6 +242,7 @@ model Product {
   qrUrl            String?
   qrImagePath      String?
   type             String    @default("FMCG") // FMCG or SAFETY
+  subcategory      String?
   
   categoryId       String?
   category         Category? @relation(fields: [categoryId], references: [id])
@@ -252,6 +259,8 @@ model Product {
   
   banner           String?             // Large banner image path
   logo             String?             // Brand logo image path
+  supportPhone     String?
+  supportWhatsapp  String?
   
   scanLogs         ProductScanLog[]
   
@@ -292,4 +301,26 @@ model OrderItem {
   quantity    Int
   price       Float
   totalPrice  Float
+}
+
+model QrTemplate {
+  id              String   @id @default(uuid())
+  name            String
+  description     String?
+  layoutType      String   @default("standard")
+  headerColor     String   @default("#002e8a")
+  headerColor2    String   @default("#001a52")
+  footerColor     String   @default("#b31919")
+  footerColor2    String   @default("#7a0a0a")
+  qrDotColor      String   @default("#000000")
+  qrBgColor       String   @default("#ffffff")
+  brandName       String   @default("V-KAWACH")
+  brandTagline    String   @default("SECURING YOUR WORLD")
+  footerText      String   @default("SCAN IN EMERGENCY")
+  footerSubText   String   @default("FOR IMMEDIATE HELP & ALERTS")
+  qrDotShape      String   @default("square")
+  logoInCenter    Boolean  @default(false)
+  isDefault       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

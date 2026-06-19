@@ -54,6 +54,10 @@ router.get('/tag/:tagCode', async (req, res) => {
         address: tag.address,
         sponsor: tag.sponsor,
         planType: tag.planType,
+        photos: tag.photos,
+        videos: tag.videos,
+        customAssetType: tag.customAssetType,
+        dynamicData: tag.dynamicData,
         ownerPhone: tag.planType === 'basic' ? tag.ownerPhone : undefined
       },
       scanId: scanLog.id,
@@ -155,9 +159,11 @@ router.post('/tag/:tagCode/call', async (req, res) => {
 router.get('/exotel/webhook/connect', async (req, res) => {
   try {
     const { CallFrom, CallSid, From } = req.query;
-    const scannerPhone = From || CallFrom;
-
-    if (!scannerPhone) return res.send('destination_number=0'); // Fail call
+    const scannerPhoneFull = From || CallFrom;
+    
+    if (!scannerPhoneFull) return res.json({ "fetch_after_attempt": false, "destination": { "numbers": [] } }); // Fail call
+    
+    const scannerPhone = scannerPhoneFull.slice(-10);
 
     // Lookup the most recent pending call request from this scanner phone
     const pendingCall = await prisma.callLog.findFirst({
@@ -172,7 +178,7 @@ router.get('/exotel/webhook/connect', async (req, res) => {
 
     if (!pendingCall || !pendingCall.tag) {
       console.log(`[Exotel Webhook] No pending call found for ${scannerPhone}`);
-      return res.send('destination_number=0');
+      return res.json({ "fetch_after_attempt": false, "destination": { "numbers": [] } });
     }
 
     // Update status to 'bridging'
@@ -181,13 +187,34 @@ router.get('/exotel/webhook/connect', async (req, res) => {
       data: { status: 'bridging', callSid: CallSid }
     });
 
-    // Response for Exotel Connect Applet
-    // Format: destination_number=XXXXX&conversation_duration=300
-    res.send(`destination_number=${pendingCall.tag.ownerPhone}&conversation_duration=600`);
+    const ownerPhone = pendingCall.tag.ownerPhone;
+    let formattedOwnerNumber = ownerPhone;
+    if (formattedOwnerNumber.startsWith('+91')) {
+      formattedOwnerNumber = formattedOwnerNumber.slice(3);
+    } else if (formattedOwnerNumber.startsWith('0') && formattedOwnerNumber.length === 11) {
+      formattedOwnerNumber = formattedOwnerNumber.slice(1);
+    }
+
+    // Response for Exotel Dynamic Dial Applet
+    res.json({
+      "fetch_after_attempt": false,
+      "destination": {
+        "numbers": [
+          formattedOwnerNumber
+        ]
+      },
+      "record": true,
+      "recording_channels": "dual",
+      "max_ringing_duration": 45,
+      "max_conversation_duration": 3600
+    });
     
   } catch (err) {
     console.error('[Exotel Webhook Error]:', err.message);
-    res.send('destination_number=0');
+    res.json({
+      "fetch_after_attempt": false,
+      "destination": { "numbers": [] }
+    });
   }
 });
 
@@ -314,30 +341,22 @@ router.post('/exotel/webhook/flow', async (req, res) => {
 
     const ownerNumber = pendingCall.tag.ownerPhone;
 
-    // 2. Construct the exact response structure requested by the user
+    const formattedOwnerNumber = ownerNumber.startsWith('+91') 
+      ? ownerNumber 
+      : ownerNumber.length === 10 ? `+91${ownerNumber}` : ownerNumber;
+
+    // 2. Construct the exact response structure expected by Exotel Dynamic Dial Applet
     const responseData = {
-      "Data": {
-        "call_sid": payload.call_sid || "manual_" + Date.now(),
-        "from": scannerPhone,
-        "to": ownerNumber, // <--- This is now the Owner's Number from DB
-        "server": payload.server || "080_32",
-        "direction": "inbound",
-        "phoneNumberSid": exophone,
-        "status": "completed",
-        "StartTime": new Date().toISOString().replace('T', ' ').split('.')[0],
-        "EndTime": new Date().toISOString().replace('T', ' ').split('.')[0],
-        "TenantId": payload.TenantId || "419634",
-        "CSMap": {
-          "events": {
-            "global": {
-              "flow_id": "1197128",
-              "flow_name": "QR_Code",
-              "flow_start_time": Date.now(),
-              "max_conversation_duration": 14400
-            }
-          }
-        }
-      }
+      "fetch_after_attempt": false,
+      "destination": {
+        "numbers": [
+          formattedOwnerNumber
+        ]
+      },
+      "record": true,
+      "recording_channels": "dual",
+      "max_ringing_duration": 45,
+      "max_conversation_duration": 3600
     };
 
     // 3. Log the completion in our database

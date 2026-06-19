@@ -1,6 +1,7 @@
 
 import styled from 'styled-components';
 import { Smartphone, Shield, PhoneForwarded } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Section from '../components/Section';
 import Button from '../components/Button';
 
@@ -89,7 +90,7 @@ const SmartQR = () => {
                         Protect what matters with our advanced QR technology.
                         Vehicles, pets, and loved ones — secured with instant connectivity and privacy.
                     </Subtitle>
-                    <Button as="a" href="https://wa.me/918881384777?text=Hi%20Tarkshya%2C%20I%20would%20like%20to%20order%20a%20Smart%20QR%20Identity%20Tag.%20Please%20provide%20details." target="_blank" rel="noopener noreferrer">Get Your Smart ID</Button>
+                    <Button as="a" href="/#products">Get Your Smart ID</Button>
                 </Content>
             </Hero>
 
@@ -123,12 +124,12 @@ const SmartQR = () => {
                     <img src="/assets/v-kawach-sticker-interior.jpg" alt="V-Kawach Premium Sticker" style={{ width: '100%', display: 'block' }} />
                   </div>
                   <div>
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#0b1a33', marginBottom: '20px' }}>Premium 3D <span style={{ color: '#C9A84C' }}>Dome Stickers</span></h2>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#0b1a33', marginBottom: '20px' }}>Premium 3D <span style={{ color: '#C9A84C' }}>Stickers</span></h2>
                     <p style={{ fontSize: '1.1rem', color: '#666', lineHeight: '1.8', marginBottom: '30px' }}>
-                      Our industrial-grade 3D dome stickers are not just functional—they are designed to complement your vehicle's interior. 
+                      Our industrial-grade 3D stickers are not just functional—they are designed to complement your vehicle's interior. 
                       Built with high-quality resin, they are weatherproof, scratch-resistant, and feature a crystal-clear 3D depth.
                     </p>
-                    <Button as="a" href="https://wa.me/918881384777?text=Hi%20Tarkshya%2C%20I%20would%20like%20to%20order%20the%20Premium%203D%20Dome%20Sticker." target="_blank" rel="noopener noreferrer">Order 3D Sticker</Button>
+                    <Button as="a" href="/#products">Order 3D Sticker</Button>
                   </div>
                 </div>
             </Section>
@@ -143,7 +144,7 @@ const SmartQR = () => {
                     <FeatureItem><Shield size={20} /> Weatherproof & Durable Tags</FeatureItem>
                 </FeatureList>
                 <div style={{ textAlign: 'center' }}>
-                    <Button as="a" href="https://wa.me/918881384777?text=Hi%20Tarkshya%2C%20I%20would%20like%20to%20order%20a%20Smart%20QR%20Tag.%20Please%20provide%20details." target="_blank" rel="noopener noreferrer">Order Now</Button>
+                    <Button as="a" href="/#products">Order Now</Button>
                 </div>
             </Section>
         </>

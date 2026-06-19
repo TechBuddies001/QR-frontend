@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import {
     Shield, Phone, MessageCircle, AlertTriangle, MapPin, ShieldAlert,
-    Crosshair, Car, Lock, CheckCircle, Globe, Activity, CircleParking, Megaphone
+    Crosshair, Car, Lock, CheckCircle, Globe, Activity, CircleParking, Megaphone, User
 } from 'lucide-react';
 import api from '../lib/api';
 import toast from 'react-hot-toast';
@@ -542,7 +542,7 @@ export default function PublicProfile() {
         const phone = product?.ownerPhone || '918881384777';
         let msg = '';
         if (type === 'call') {
-            window.location.href = \`tel:\${phone}\`;
+            window.location.href = `tel:${phone}`;
             return;
         } else if (type === 'whatsapp') {
             msg = 'Hi, I scanned your V-Kawach QR tag.';
@@ -554,14 +554,14 @@ export default function PublicProfile() {
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((pos) => {
-                const mapUrl = \`https://www.google.com/maps?q=\${pos.coords.latitude},\${pos.coords.longitude}\`;
-                msg += \`\\nLocation: \${mapUrl}\`;
-                window.open(\`https://wa.me/\${phone}?text=\${encodeURIComponent(msg)}\`, '_blank');
+                const mapUrl = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                msg += `\nLocation: ${mapUrl}`;
+                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
             }, () => {
-                window.open(\`https://wa.me/\${phone}?text=\${encodeURIComponent(msg)}\`, '_blank');
+                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
             });
         } else {
-            window.open(\`https://wa.me/\${phone}?text=\${encodeURIComponent(msg)}\`, '_blank');
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
     };
 

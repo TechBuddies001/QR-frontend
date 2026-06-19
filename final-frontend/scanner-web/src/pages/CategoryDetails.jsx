@@ -541,11 +541,24 @@ const CategoryDetails = () => {
       try {
         const all = await api.get('/categories');
         const found = all.data?.categories?.find(c => c.id === id);
-        if (found) {
-          found.features = typeof found.features === 'string' ? JSON.parse(found.features || "[]") : (found.features || []);
-          found.preventionCards = typeof found.preventionCards === 'string' ? JSON.parse(found.preventionCards || "[]") : (found.preventionCards || []);
-          found.emergencyCards = typeof found.emergencyCards === 'string' ? JSON.parse(found.emergencyCards || "[]") : (found.emergencyCards || []);
-          found.trackingCards = typeof found.trackingCards === 'string' ? JSON.parse(found.trackingCards || "[]") : (found.trackingCards || []);
+        if (found && found.isActive !== false) {
+          const safeParse = (str, fallback) => {
+            if (!str) return fallback;
+            let res = str;
+            try {
+              while (typeof res === 'string') {
+                res = JSON.parse(res);
+              }
+              return Array.isArray(res) ? res : fallback;
+            } catch(e) {
+              return fallback;
+            }
+          };
+
+          found.features = safeParse(found.features, []);
+          found.preventionCards = safeParse(found.preventionCards, []);
+          found.emergencyCards = safeParse(found.emergencyCards, []);
+          found.trackingCards = safeParse(found.trackingCards, []);
           setData(found);
         }
       } catch (err) {
@@ -660,7 +673,7 @@ const CategoryDetails = () => {
             <div className="content-box">
               <h3>{language === 'hi' ? (data.howItWorksHeading_hi || data.howItWorksHeading) : data.howItWorksHeading}</h3>
               <p>{language === 'hi' ? (data.howItWorksText_hi || data.howItWorksText) : data.howItWorksText}</p>
-              <Button as="a" href="#" style={{ background: '#B51B2E', borderColor: '#B51B2E' }}>DISCOVER MORE</Button>
+              <Button as={Link} to="/smart-qr" style={{ background: '#B51B2E', borderColor: '#B51B2E', color: '#ffffff' }}>DISCOVER MORE</Button>
             </div>
           </HowItWorksSection>
         </Section>
@@ -704,8 +717,20 @@ const CategoryDetails = () => {
               <button className="nav-btn prev" onClick={() => handleScroll(scrollRefs.products, 'prev')}><ChevronLeft /></button>
               <ProductGrid ref={scrollRefs.products}>
                 {data.products.map(product => {
-                  const photos = typeof product.photos === 'string' ? JSON.parse(product.photos || "[]") : (product.photos || []);
-                  const dynamicData = typeof product.dynamicData === 'string' ? JSON.parse(product.dynamicData || "[]") : (product.dynamicData || []);
+                  const safeParse = (str, fallback) => {
+                    if (!str) return fallback;
+                    let res = str;
+                    try {
+                      while (typeof res === 'string') {
+                        res = JSON.parse(res);
+                      }
+                      return Array.isArray(res) ? res : fallback;
+                    } catch(e) {
+                      return fallback;
+                    }
+                  };
+                  const photos = safeParse(product.photos, []);
+                  const dynamicData = safeParse(product.dynamicData, []);
                   const mainPhoto = photos[0] ? (photos[0].startsWith('http') ? photos[0] : `${apiUrl}${photos[0]}`) : "/assets/car_qr_tag_mockup_1776107740073.png";
                   
                   return (

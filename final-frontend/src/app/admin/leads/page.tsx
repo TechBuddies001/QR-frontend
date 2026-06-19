@@ -9,6 +9,7 @@ export default function LeadsPage() {
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [selectedLead, setSelectedLead] = useState<any>(null);
 
   const fetchLeads = async () => {
     setLoading(true);
@@ -31,6 +32,7 @@ export default function LeadsPage() {
     try {
       await api.delete(`/leads/${id}`);
       toast.success("Lead deleted");
+      if (selectedLead?.id === id) setSelectedLead(null);
       fetchLeads();
     } catch (e) {
       toast.error("Delete failed");
@@ -98,7 +100,7 @@ export default function LeadsPage() {
                       {lead.subject || "N/A"}
                     </span>
                   </td>
-                  <td className="px-6 py-4 font-medium text-slate-600 dark:text-slate-400 max-w-xs truncate">
+                  <td className="px-6 py-4 font-medium text-slate-600 dark:text-slate-400 max-w-xs truncate cursor-pointer hover:text-primary transition-colors" onClick={() => setSelectedLead(lead)}>
                     {lead.message || "No message"}
                   </td>
                   <td className="px-6 py-4 font-bold text-slate-500">
@@ -109,10 +111,18 @@ export default function LeadsPage() {
                        dateStyle: "medium", timeStyle: "short"
                     })}
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-right flex items-center justify-end gap-2">
+                    <button 
+                      onClick={() => setSelectedLead(lead)}
+                      className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                      title="View Details"
+                    >
+                      <Info className="w-4 h-4" />
+                    </button>
                     <button 
                       onClick={() => handleDelete(lead.id)}
                       className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete Lead"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -136,6 +146,75 @@ export default function LeadsPage() {
           </table>
         </div>
       </div>
+
+      {/* Lead Details Modal */}
+      {selectedLead && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedLead(null)}>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border border-slate-200 dark:border-slate-800" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800">
+              <h2 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-tight">Lead Details</h2>
+              <button onClick={() => setSelectedLead(null)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                ✕
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto flex-1 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
+                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Name</p>
+                  <p className="font-bold text-slate-800 dark:text-white">{selectedLead.name}</p>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
+                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Company</p>
+                  <p className="font-bold text-slate-800 dark:text-white">{selectedLead.company || "Individual"}</p>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
+                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Phone Number</p>
+                  <p className="font-bold text-emerald-600 flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" /> {selectedLead.phone}</p>
+                </div>
+                <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
+                  <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-1">Email Address</p>
+                  <p className="font-bold text-blue-600 flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> {selectedLead.email || "N/A"}</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
+                <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2">Subject / Inquiry Type</p>
+                <span className="px-3 py-1.5 bg-primary/10 text-primary rounded-lg font-black text-xs uppercase tracking-wide">
+                  {selectedLead.subject || "N/A"}
+                </span>
+              </div>
+
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl">
+                <p className="text-[10px] font-black uppercase text-slate-400 tracking-wider mb-2">Complete Message</p>
+                <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap font-medium leading-relaxed">
+                  {selectedLead.message || "No message provided."}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <span>Received At</span>
+                <span>{new Date(selectedLead.createdAt).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'long' })}</span>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/20 rounded-b-2xl flex justify-end gap-3">
+              <button 
+                onClick={() => handleDelete(selectedLead.id)}
+                className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 rounded-xl font-bold text-sm transition-colors flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" /> Delete Lead
+              </button>
+              <button 
+                onClick={() => setSelectedLead(null)}
+                className="px-6 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-sm transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

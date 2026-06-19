@@ -34,7 +34,7 @@ const DEFAULT: Partial<QrTemplate> = {
   footerColor2: "#7a0a0a",
   qrDotColor: "#000000",
   qrBgColor: "#ffffff",
-  brandName: "V-KAWACH",
+  brandName: "V-Kawach",
   brandTagline: "SECURING YOUR WORLD",
   footerText: "SCAN IN EMERGENCY",
   footerSubText: "FOR IMMEDIATE HELP & ALERTS",
