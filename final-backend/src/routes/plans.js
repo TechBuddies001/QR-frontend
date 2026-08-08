@@ -3,15 +3,62 @@ const router = express.Router();
 const prisma = require('../lib/prisma');
 const { authenticateToken } = require('../middleware/auth');
 
-const DEFAULT_PLANS = [
-  { name: 'basic', displayName: 'Basic', price: 299, validityDays: 365, features: JSON.stringify(['1 QR Tag', 'Call Masking', 'Scan Alerts']) },
-  { name: 'standard', displayName: 'Standard', price: 599, validityDays: 730, features: JSON.stringify(['3 QR Tags', 'Call Masking', 'SMS Alerts', 'Priority Support']) },
-  { name: 'premium', displayName: 'Premium', price: 1499, validityDays: 1825, features: JSON.stringify(['10 QR Tags', 'Call Masking', 'SMS Alerts', 'Emergency Contact', 'Premium Support', 'Sponsor Branding']) },
+const MASTER_FEATURES = [
+  'Dynamic QR',
+  'Owner Information',
+  'Emergency Scan',
+  'Direct Call',
+  'Masked Call',
+  'WhatsApp Alert',
+  'Emergency Contact Routing',
+  'Call Privacy',
+  'Advanced Alerts'
 ];
+
+const DEFAULT_PLANS = [
+  { 
+    name: 'basic', 
+    displayName: 'Basic Plan', 
+    price: 299, 
+    validityDays: 365, 
+    features: JSON.stringify([
+      'Dynamic QR', 
+      'Owner Information', 
+      'Emergency Scan', 
+      'Direct Call'
+    ]) 
+  },
+  { 
+    name: 'premium', 
+    displayName: 'Premium Plan (V-Kawach)', 
+    price: 950, 
+    validityDays: 365, 
+    features: JSON.stringify([
+      'Dynamic QR', 
+      'Owner Information', 
+      'Emergency Scan', 
+      'Masked Call', 
+      'WhatsApp Alert', 
+      'Emergency Contact Routing', 
+      'Call Privacy', 
+      'Advanced Alerts'
+    ]) 
+  },
+];
+
+async function seedPlansIfEmpty() {
+  const count = await prisma.plan.count();
+  if (count === 0) {
+    for (const p of DEFAULT_PLANS) {
+      await prisma.plan.create({ data: p });
+    }
+  }
+}
 
 // GET /api/plans
 router.get('/', async (req, res) => {
   try {
+    await seedPlansIfEmpty();
     const showAll = req.query.showAll === 'true';
     const plans = await prisma.plan.findMany({ 
       where: showAll ? {} : { isActive: true }, 
@@ -22,10 +69,42 @@ router.get('/', async (req, res) => {
       plans: plans.map(p => ({ 
         ...p, 
         features: p.features ? JSON.parse(p.features) : [] 
-      })) 
+      })),
+      masterFeatures: MASTER_FEATURES
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch plans" });
+  }
+});
+
+// POST /api/plans/reset-defaults (admin)
+router.post('/reset-defaults', authenticateToken, async (req, res) => {
+  try {
+    for (const defPlan of DEFAULT_PLANS) {
+      const existing = await prisma.plan.findUnique({ where: { name: defPlan.name } });
+      if (existing) {
+        await prisma.plan.update({
+          where: { id: existing.id },
+          data: {
+            displayName: defPlan.displayName,
+            price: defPlan.price,
+            validityDays: defPlan.validityDays,
+            features: defPlan.features,
+            isActive: true,
+          }
+        });
+      } else {
+        await prisma.plan.create({ data: defPlan });
+      }
+    }
+    
+    const plans = await prisma.plan.findMany({ orderBy: { price: 'asc' } });
+    res.json({ 
+      message: 'V-Kawach plans updated to standard matrix successfully',
+      plans: plans.map(p => ({ ...p, features: p.features ? JSON.parse(p.features) : [] }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -35,7 +114,7 @@ router.post('/', authenticateToken, async (req, res) => {
     const { name, displayName, price, validityDays, features } = req.body;
     const plan = await prisma.plan.create({
       data: { 
-        name, 
+        name: name.toLowerCase().replace(/\s+/g, '-'), 
         displayName, 
         price: parseFloat(price), 
         validityDays: parseInt(validityDays), 

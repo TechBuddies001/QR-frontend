@@ -82,6 +82,44 @@ export default function SubscriptionsPage() {
     }
   };
 
+  const handleRenew = async (sub: Subscription) => {
+    try {
+      await api.post("/subscriptions/renew", {
+        subscriptionId: sub.id,
+        tagId: sub.tagId,
+        validityDays: 365,
+      });
+      toast.success(`Renewed subscription for ${sub.ownerName} (+1 Year)!`);
+      fetchData();
+    } catch (error) {
+      toast.error("Failed to renew subscription");
+    }
+  };
+
+  const handleReactivate = async (sub: Subscription) => {
+    try {
+      await api.post("/subscriptions/reactivate", {
+        subscriptionId: sub.id,
+        tagId: sub.tagId,
+        validityDays: 365,
+      });
+      toast.success(`Reactivated subscription for ${sub.ownerName}!`);
+      fetchData();
+    } catch (error) {
+      toast.error("Failed to reactivate subscription");
+    }
+  };
+
+  const handleProcessExpired = async () => {
+    try {
+      const res = await api.post("/subscriptions/mark-expired");
+      toast.success(`Processed: ${res.data.expiredSubscriptionsCount} expired subs, ${res.data.expiredTagsCount} tags marked expired.`);
+      fetchData();
+    } catch (error) {
+      toast.error("Failed to process expired items");
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-50/50 dark:bg-slate-950">
       {/* Top Stats Cards */}
@@ -143,6 +181,15 @@ export default function SubscriptionsPage() {
                 onChange={(e) => setSearch(e.target.value)}
               />
            </form>
+
+           <button
+             onClick={handleProcessExpired}
+             className="px-4 py-3.5 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl text-xs font-black uppercase tracking-wider shadow-md transition flex items-center gap-2"
+             title="Scan system for subscriptions past expiry date and mark them expired"
+           >
+             <Clock className="w-4 h-4" />
+             Sync Expired
+           </button>
 
            <div className="flex p-1 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-2xl">
               <button 
@@ -229,17 +276,36 @@ export default function SubscriptionsPage() {
                           {sub.status}
                         </span>
                     </td>
-                    <td className="px-8 py-6 text-right">
-                       <select 
-                         className="bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-primary px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all"
-                         value={sub.status}
-                         onChange={(e) => handleUpdateStatus(sub.id, e.target.value)}
-                       >
-                          <option value="active">Active</option>
-                          <option value="expired">Expired</option>
-                          <option value="cancelled">Cancelled</option>
-                       </select>
-                    </td>
+                     <td className="px-8 py-6 text-right">
+                       <div className="flex items-center justify-end gap-2">
+                         {sub.status === 'expired' ? (
+                           <button
+                             onClick={() => handleReactivate(sub)}
+                             className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase rounded-xl shadow transition"
+                             title="Reactivate Subscription (+1 Year)"
+                           >
+                             Reactivate
+                           </button>
+                         ) : (
+                           <button
+                             onClick={() => handleRenew(sub)}
+                             className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase rounded-xl shadow transition"
+                             title="Renew Subscription (+1 Year)"
+                           >
+                             Renew +1Yr
+                           </button>
+                         )}
+                         <select 
+                           className="bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-primary px-3 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all"
+                           value={sub.status}
+                           onChange={(e) => handleUpdateStatus(sub.id, e.target.value)}
+                         >
+                            <option value="active">Active</option>
+                            <option value="expired">Expired</option>
+                            <option value="cancelled">Cancelled</option>
+                         </select>
+                       </div>
+                     </td>
                   </tr>
                 ))}
                 {subscriptions.length === 0 && !loading && (

@@ -16,17 +16,29 @@ const authenticateToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const admin = await prisma.admin.findUnique({
-      where: { id: decoded.id },
-      select: { id: true, email: true, name: true, role: true },
-    });
-
-    if (!admin) {
-      return res.status(401).json({ error: 'Admin not found' });
+    
+    if (decoded.role === 'partner') {
+      const partner = await prisma.partner.findUnique({
+        where: { id: decoded.id },
+      });
+      if (!partner) return res.status(401).json({ error: 'Partner not found' });
+      req.user = partner;
+      req.partner = partner; // Also set req.partner just in case
+      return next();
+    } else {
+      // Default Admin logic
+      const admin = await prisma.admin.findUnique({
+        where: { id: decoded.id },
+        select: { id: true, email: true, name: true, role: true },
+      });
+  
+      if (!admin) {
+        return res.status(401).json({ error: 'Admin not found' });
+      }
+  
+      req.admin = admin;
+      return next();
     }
-
-    req.admin = admin;
-    next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
       return res.status(401).json({ error: 'Token expired' });

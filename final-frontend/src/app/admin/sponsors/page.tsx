@@ -23,7 +23,30 @@ interface Sponsor {
   };
 }
 
-// API URL is handled by resolveImageUrl utility
+function SponsorCardImage({ logo, name }: { logo: string | null; name: string }) {
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [logo]);
+
+  if (!logo || imgError) {
+    return (
+      <div className="size-16 bg-slate-200 dark:bg-slate-700 rounded-2xl flex items-center justify-center text-slate-400">
+        <Building2 className="w-8 h-8 text-slate-400" />
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={resolveImageUrl(logo)} 
+      alt={name}
+      onError={() => setImgError(true)}
+      className="max-h-full max-w-full object-contain filter drop-shadow-lg"
+    />
+  );
+}
 
 export default function SponsorsPage() {
   const [loading, setLoading] = useState(true);
@@ -165,17 +188,7 @@ export default function SponsorsPage() {
             {sponsors.map((sponsor) => (
               <div key={sponsor.id} className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-xl border border-slate-100 dark:border-slate-800 overflow-hidden group hover:scale-[1.02] transition-all duration-300">
                  <div className="h-40 bg-slate-50 dark:bg-slate-800/50 relative flex items-center justify-center p-8">
-                    {sponsor.logo ? (
-                       <img 
-                         src={resolveImageUrl(sponsor.logo)} 
-                         alt={sponsor.name}
-                         className="max-h-full max-w-full object-contain filter drop-shadow-lg"
-                       />
-                    ) : (
-                       <div className="size-16 bg-slate-200 dark:bg-slate-700 rounded-2xl flex items-center justify-center text-slate-400">
-                          <ImageIcon className="w-8 h-8" />
-                       </div>
-                    )}
+                    <SponsorCardImage logo={sponsor.logo} name={sponsor.name} />
                     
                     <div className="absolute top-4 right-4">
                         <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight flex items-center gap-2 border shadow-sm ${

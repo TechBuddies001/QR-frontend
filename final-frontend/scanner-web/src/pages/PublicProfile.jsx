@@ -3,10 +3,11 @@ import { useParams } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import {
     Shield, Phone, MessageCircle, AlertTriangle, MapPin, ShieldAlert,
-    Crosshair, Car, Lock, CheckCircle, Globe, Activity, CircleParking, Megaphone, User
+    Crosshair, Car, Lock, CheckCircle, Globe, Activity, CircleParking, Megaphone, User, QrCode, Crown
 } from 'lucide-react';
 import api from '../lib/api';
 import toast from 'react-hot-toast';
+import { translations } from '../utils/translations';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -23,15 +24,24 @@ const PageWrapper = styled.div`
 `;
 
 const TopHeader = styled.div`
-  background: #0B1A33;
+  background: #0B1A33 url('/hero_bg.jpg') center/cover no-repeat;
   color: white;
-  padding: 20px;
+  padding: 16px 20px;
   position: relative;
   overflow: hidden;
   text-align: center;
-  padding-bottom: 60px;
+  padding-bottom: 50px;
   border-bottom-left-radius: 30px;
   border-bottom-right-radius: 30px;
+  
+  /* Dark overlay to make text readable */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(11, 26, 51, 0.7);
+    z-index: 1;
+  }
 `;
 
 const TopControls = styled.div`
@@ -92,36 +102,36 @@ const BrandSection = styled.div`
   z-index: 2;
   
   img {
-    height: 60px;
-    margin-bottom: 15px;
+    height: 45px;
+    margin-bottom: 10px;
   }
   
   h1 {
-    font-size: 2.2rem;
+    font-size: 1.8rem;
     font-weight: 900;
     color: white;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
     letter-spacing: 1px;
   }
   
   h2 {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: #C9A84C;
     font-weight: 800;
     letter-spacing: 5px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   
   .subtitle {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: rgba(255,255,255,0.9);
-    margin-bottom: 15px;
+    margin-bottom: 10px;
   }
   
   .features {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: rgba(255,255,255,0.7);
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     display: flex;
     justify-content: center;
     gap: 8px;
@@ -129,14 +139,15 @@ const BrandSection = styled.div`
   }
   
   .asset-id {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
+    background: #202c45;
+    border: 1px solid rgba(255,255,255,0.1);
     display: inline-block;
-    padding: 8px 20px;
+    padding: 6px 18px;
     border-radius: 20px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
+    color: white;
   }
   
   .protected {
@@ -144,7 +155,7 @@ const BrandSection = styled.div`
     align-items: center;
     justify-content: center;
     gap: 6px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #10B981;
     font-weight: 600;
   }
@@ -235,6 +246,7 @@ const OwnerProfile = styled.div`
       font-size: 0.65rem;
       font-weight: 800;
       color: #3b82f6;
+      text-align: center;
     }
   }
 `;
@@ -347,6 +359,7 @@ const EmergencyCard = styled.div`
   padding: 15px;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  position: relative;
   
   .icon-wrapper {
     margin-bottom: 10px;
@@ -358,12 +371,14 @@ const EmergencyCard = styled.div`
     font-weight: 900;
     color: ${props => props.textColor || '#ef4444'};
     margin-bottom: 4px;
+    padding-right: 15px;
   }
   
   p {
     font-size: 0.7rem;
     color: #666;
     font-weight: 500;
+    padding-right: 15px;
   }
   
   .premium {
@@ -471,6 +486,98 @@ const PrivacyBanner = styled.div`
   }
 `;
 
+const InfoBox = styled.div`
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 15px;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 25px;
+  
+  svg { color: #10B981; flex-shrink: 0; margin-top: 2px; }
+  
+  .text {
+    p {
+      font-size: 0.75rem;
+      color: #333;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    a {
+      font-size: 0.7rem;
+      color: #3b82f6;
+      font-weight: 600;
+      text-decoration: none;
+    }
+  }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  width: 100%;
+  max-width: 340px;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+`;
+
+const ModalTitle = styled.h3`
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0B1A33;
+  margin-bottom: 8px;
+`;
+
+const ModalInput = styled.input`
+  width: 100%;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 15px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0B1A33;
+  margin-bottom: 15px;
+  outline: none;
+  font-family: 'Outfit', sans-serif;
+  
+  &:focus {
+    border-color: #0B1A33;
+  }
+`;
+
+const ModalButton = styled.button`
+  width: 100%;
+  background: #0B1A33;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: 'Outfit', sans-serif;
+  
+  &:disabled {
+    background: #94a3b8;
+  }
+`;
+
 const FooterStats = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -510,70 +617,213 @@ const BottomFooter = styled.div`
 export default function PublicProfile() {
     const { id } = useParams();
     const [loading, setLoading] = useState(true);
-    const [product, setProduct] = useState(null);
-    const [lang, setLang] = useState('en');
+    const [isDummy, setIsDummy] = useState(false);
+    const [activateData, setActivateData] = useState({
+        ownerName: '',
+        ownerPhone: '',
+        emergencyContact: '',
+        password: '',
+        assetType: 'vehicle',
+        assetNumber: ''
+    });
+    const [activating, setActivating] = useState(false);
+
+    const t = translations[lang]?.publicProfile || translations.en.publicProfile;
 
     useEffect(() => {
-        const verifyProduct = async () => {
-            try {
-                const response = await api.get(`/products/verify/${id}`);
-                setProduct(response.data.product);
-            } catch (err) {
-                console.error(err);
-                // Even on error, show a mock design so they see the UI
-                setProduct({
-                    name: 'V-KAWACH IDENTITY',
-                    ownerName: 'VIKAS KUMAR',
-                    ownerPhone: '918881384777',
-                    vehicleType: 'Car',
-                    registrationNo: 'VH-M****F1',
-                    model: 'N/A',
-                    color: 'N/A',
-                    year: 'N/A'
-                });
-            } finally {
-                setLoading(false);
+        const savedPhone = localStorage.getItem('scannerPhone');
+        if (savedPhone) {
+            setModalPhone(savedPhone);
+        }
+    }, []);
+
+    const cleanId = id ? id.replace(/^(VH-|TS-|PT-|PS-|OT-)\1+/, '$1') : id;
+
+    const verifyProduct = async () => {
+        try {
+            const response = await api.get(`/public/tag/${cleanId}`);
+            if (response.data.isDummy) {
+                setIsDummy(true);
+                setProduct(response.data.tag);
+            } else {
+                setIsDummy(false);
+                setProduct(response.data.tag);
             }
-        };
+        } catch (err) {
+            console.error(err);
+            toast.error("Tag not found or invalid.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         verifyProduct();
     }, [id]);
 
-    const handleAction = (type) => {
-        const phone = product?.ownerPhone || '918881384777';
-        let msg = '';
-        if (type === 'call') {
-            window.location.href = `tel:${phone}`;
+    const handleActivateSubmit = async (e) => {
+        e.preventDefault();
+        if (!activateData.ownerName || !activateData.ownerPhone || !activateData.password) {
+            toast.error("Name, Phone Number and Password are required.");
             return;
-        } else if (type === 'whatsapp') {
-            msg = 'Hi, I scanned your V-Kawach QR tag.';
-        } else if (type === 'parking') {
-            msg = '🚗 PARKING ALERT! Please move your vehicle. Someone is waiting.';
-        } else if (type === 'sos') {
-            msg = '🚨 EMERGENCY ALERT! Vehicle has met with an accident.';
         }
+        setActivating(true);
+        try {
+            await api.post(`/public/tag/${cleanId}/activate`, activateData);
+            toast.success("Tag activated successfully!");
+            setIsDummy(false);
+            verifyProduct();
+        } catch (err) {
+            toast.error(err.response?.data?.error || "Activation failed. Please try again.");
+        } finally {
+            setActivating(false);
+        }
+    };
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((pos) => {
-                const mapUrl = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-                msg += `\nLocation: ${mapUrl}`;
-                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-            }, () => {
-                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-            });
+    const handleAction = async (type) => {
+        setPendingAction(type);
+        setCallReadyUrl(null);
+        
+        const savedPhone = localStorage.getItem('scannerPhone');
+        if (savedPhone && savedPhone.length >= 10) {
+            // Auto execute if we already have it saved
+            executeAction(type, savedPhone);
         } else {
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            // Prompt user with modal
+            setShowPhoneModal(true);
         }
+    };
+
+    const executeAction = async (type, phoneToUse) => {
+        setActionLoading(true);
+        try {
+            if (type === 'call') {
+                const res = await api.post(`/public/tag/${id}/call`, { scannerPhone: phoneToUse });
+                if (res.data.success && res.data.exophone) {
+                    setCallReadyUrl(`tel:${res.data.exophone}`);
+                    if (!showPhoneModal) {
+                        setShowPhoneModal(true);
+                    }
+                }
+            } else if (type === 'whatsapp') {
+                const res = await api.post(`/public/tag/${id}/whatsapp-session`, { scannerPhone: phoneToUse });
+                
+                let targetPhone = res.data.companyWhatsapp || res.data.directPhone;
+                
+                if (targetPhone) {
+                    // Remove + if it exists
+                    targetPhone = targetPhone.replace('+', '');
+                    // For company whatsapp, we can prefill a message with the tag ID to ensure context
+                    let text = `Hi, I scanned ${id}. `;
+                    if (!res.data.masked) text = `Hi, I found your item (${id}). `;
+                    
+                    window.location.href = `https://wa.me/${targetPhone}?text=${encodeURIComponent(text)}`;
+                } else {
+                    toast.error("Could not initiate WhatsApp session.");
+                }
+                setShowPhoneModal(false);
+                
+            } else if (type === 'parking') {
+                const msgType = 'Parking Alert';
+                
+                let lat, lng;
+                if (navigator.geolocation) {
+                    try {
+                        const pos = await new Promise((resolve, reject) => {
+                            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 });
+                        });
+                        lat = pos.coords.latitude;
+                        lng = pos.coords.longitude;
+                    } catch (e) {
+                        console.warn("Location not available");
+                    }
+                }
+
+                await api.post(`/public/tag/${id}/alert`, { 
+                    scannerPhone: phoneToUse,
+                    lat,
+                    lng,
+                    city: msgType
+                });
+                toast.success("Alert sent successfully. The owner has been notified.");
+                setShowPhoneModal(false);
+            } else if (type === 'sos') {
+                await api.post(`/public/tag/${id}/emergency`, { scannerPhone: phoneToUse });
+                toast.success("Emergency SOS triggered! The emergency contacts have been notified.");
+                setShowPhoneModal(false);
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.error || "Action failed. Please try again.");
+            console.error(err);
+            setShowPhoneModal(false);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleModalSubmit = (e) => {
+        e.preventDefault();
+        if (!modalPhone || modalPhone.length < 10) {
+            toast.error("Valid 10-digit mobile number is required.");
+            return;
+        }
+        localStorage.setItem('scannerPhone', modalPhone);
+        executeAction(pendingAction, modalPhone);
     };
 
     if (loading) return null;
 
     return (
         <PageWrapper>
+            {showPhoneModal && (
+                <ModalOverlay>
+                    <ModalContent>
+                        <div style={{ textAlign: 'right', marginBottom: '-10px', position: 'relative', zIndex: 10 }}>
+                            <button onClick={() => setShowPhoneModal(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999' }}>&times;</button>
+                        </div>
+                        
+                        {!callReadyUrl ? (
+                            <form onSubmit={handleModalSubmit}>
+                                <ModalTitle>Security Check</ModalTitle>
+                                <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '15px' }}>
+                                    To connect securely via Call Masking, please verify your mobile number. (One-time only)
+                                </p>
+                                <ModalInput 
+                                    type="tel" 
+                                    placeholder="Enter 10-digit mobile number" 
+                                    value={modalPhone} 
+                                    onChange={e => setModalPhone(e.target.value)} 
+                                    maxLength={15} 
+                                />
+                                <ModalButton type="submit" disabled={actionLoading}>
+                                    {actionLoading ? 'Connecting securely...' : 'Proceed'}
+                                </ModalButton>
+                            </form>
+                        ) : (
+                            <div style={{ textAlign: 'center', padding: '10px 0' }}>
+                                <div style={{ background: 'rgba(16, 185, 129, 0.1)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
+                                    <Phone color="#10B981" size={30} />
+                                </div>
+                                <ModalTitle style={{ color: '#0B1A33' }}>Ready to Connect</ModalTitle>
+                                <p style={{ fontSize: '0.85rem', color: '#666', marginBottom: '20px' }}>
+                                    Your call is securely routed. The owner's personal number remains hidden.
+                                </p>
+                                <a href={callReadyUrl} style={{ textDecoration: 'none' }} onClick={() => setShowPhoneModal(false)}>
+                                    <ModalButton type="button" style={{ background: '#10B981' }}>
+                                        Tap to Call Owner
+                                    </ModalButton>
+                                </a>
+                            </div>
+                        )}
+                    </ModalContent>
+                </ModalOverlay>
+            )}
+
             <TopHeader>
                 <TopControls>
                     <ScanVerified>
-                        <Shield className="icon" size={16} />
-                        <div className="text">QR SCAN<br/><span>VERIFIED</span></div>
+                        <QrCode className="icon" size={16} />
+                        <div className="text">{t.scanVerified}<br/><span>{t.verified}</span></div>
                     </ScanVerified>
                     <LangToggle>
                         <button className={lang === 'hi' ? 'active' : ''} onClick={() => setLang('hi')}>HI</button>
@@ -585,143 +835,221 @@ export default function PublicProfile() {
                     <img src="/new_logo.png" alt="Logo" />
                     <h1>V-KAWACH</h1>
                     <h2>SECURITY</h2>
-                    <p className="subtitle">Smart Vehicle Security Identity</p>
+                    <p className="subtitle">{t.smartSecurity}</p>
                     <div className="features">
-                        <span>Parking</span> • <span>Emergency</span> • <span>Privacy</span> • <span>Protection</span>
+                        <span>{t.badges.split(" • ")[0]}</span> • <span>{t.badges.split(" • ")[1]}</span> • <span>{t.badges.split(" • ")[2]}</span> • <span>{t.badges.split(" • ")[3]}</span>
                     </div>
-                    <div className="asset-id">ASSET ID: {id?.toUpperCase() || 'VH-MUE3F1'}</div>
+                    <div className="asset-id">{t.assetId}: {id?.toUpperCase() || 'TS-9RQQB3'}</div>
                     <div className="protected">
-                        <CheckCircle size={14} /> Protected by Tarkshya Security Network
+                        <CheckCircle size={14} /> {t.protectedBy}
                     </div>
                 </BrandSection>
             </TopHeader>
 
             <MainCard>
-                <OwnerProfile>
-                    <div className="left">
-                        <div className="avatar">
-                            <User size={32} />
-                            <div className="check"><CheckCircle size={10} /></div>
-                        </div>
-                        <div className="info">
-                            <h3>{product?.ownerName || 'VIKAS KUMAR'}</h3>
-                            <div className="badges">
-                                <div><CheckCircle size={12} /> Verified Owner</div>
-                                <div><Shield size={12} /> Vehicle Protected</div>
+                {isDummy ? (
+                    <div style={{ padding: '10px 0' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                            <div style={{ background: 'rgba(201, 168, 76, 0.1)', width: '60px', height: '60px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 15px' }}>
+                                <Shield color="#C9A84C" size={32} />
                             </div>
+                            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0B1A33', marginBottom: '8px' }}>Activate Your V-Kawach Tag</h3>
+                            <p style={{ fontSize: '0.85rem', color: '#666', lineHeight: 1.5 }}>
+                                This safety tag is unassigned. Fill out your details below to activate and link this QR sticker to your vehicle/asset.
+                            </p>
                         </div>
+
+                        <form onSubmit={handleActivateSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <div>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0B1A33', display: 'block', marginBottom: '5px' }}>Owner Full Name *</label>
+                                <ModalInput 
+                                    type="text" 
+                                    placeholder="Enter your full name" 
+                                    value={activateData.ownerName} 
+                                    onChange={e => setActivateData({ ...activateData, ownerName: e.target.value })} 
+                                    required 
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0B1A33', display: 'block', marginBottom: '5px' }}>Mobile Number *</label>
+                                <ModalInput 
+                                    type="tel" 
+                                    placeholder="10-digit mobile number" 
+                                    value={activateData.ownerPhone} 
+                                    onChange={e => setActivateData({ ...activateData, ownerPhone: e.target.value })} 
+                                    required 
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0B1A33', display: 'block', marginBottom: '5px' }}>Emergency Contact Number (Optional)</label>
+                                <ModalInput 
+                                    type="tel" 
+                                    placeholder="Family / Friend contact" 
+                                    value={activateData.emergencyContact} 
+                                    onChange={e => setActivateData({ ...activateData, emergencyContact: e.target.value })} 
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0B1A33', display: 'block', marginBottom: '5px' }}>Vehicle / Registration Number (Optional)</label>
+                                <ModalInput 
+                                    type="text" 
+                                    placeholder="e.g. MH02AB1234" 
+                                    value={activateData.assetNumber} 
+                                    onChange={e => setActivateData({ ...activateData, assetNumber: e.target.value })} 
+                                />
+                            </div>
+
+                            <div>
+                                <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0B1A33', display: 'block', marginBottom: '5px' }}>Account Password *</label>
+                                <ModalInput 
+                                    type="password" 
+                                    placeholder="Create password for account" 
+                                    value={activateData.password} 
+                                    onChange={e => setActivateData({ ...activateData, password: e.target.value })} 
+                                    required 
+                                />
+                            </div>
+
+                            <ModalButton type="submit" disabled={activating} style={{ background: '#0B1A33', marginTop: '10px' }}>
+                                {activating ? 'Activating Tag...' : 'Activate & Lock Tag'}
+                            </ModalButton>
+                        </form>
                     </div>
-                    <div className="right-badge">
-                        <Shield size={20} />
-                        <span>VERIFIED<br/>OWNER</span>
-                    </div>
-                </OwnerProfile>
+                ) : (
+                    <>
+                        <OwnerProfile>
+                            <div className="left">
+                                <div className="avatar">
+                                    <User size={32} />
+                                    <div className="check"><CheckCircle size={10} /></div>
+                                </div>
+                                <div className="info">
+                                    <h3>{product?.ownerName || 'Vehicle Owner'}</h3>
+                                    <div className="badges">
+                                        <div><CheckCircle size={12} /> {t.verifiedOwner}</div>
+                                        <div><Shield size={12} /> {t.vehicleProtected}</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="right-badge">
+                                <Shield size={20} />
+                                <span>{t.verifiedOwner.split(" ")[0]}<br/>{t.verifiedOwner.split(" ").slice(1).join(" ")}</span>
+                            </div>
+                        </OwnerProfile>
 
                 <ActionButtons>
                     <PrimaryButton bg="#16a34a" shadow="rgba(22, 163, 74, 0.3)" onClick={() => handleAction('call')}>
-                        <div className="icon-bg"><Phone size={24} /></div>
+                        <div className="icon-bg" style={{background: 'white'}}><Phone color="#16a34a" fill="#16a34a" size={24} /></div>
                         <div className="content">
-                            <h4>CONTACT VEHICLE OWNER</h4>
-                            <p>Call securely (Number Masked)</p>
-                            <span className="sub">Primary option for Parking & General Contact</span>
+                            <h4>{t.contactOwnerTitle}</h4>
+                            <p>{t.contactOwnerSub}</p>
+                            <span className="sub">{t.primaryOption}</span>
                         </div>
                         <div style={{ paddingRight: '10px' }}>&gt;</div>
                     </PrimaryButton>
 
-                    <PrimaryButton bg="#059669" shadow="rgba(5, 150, 105, 0.3)" onClick={() => handleAction('whatsapp')}>
-                        <div className="icon-bg"><MessageCircle size={24} /></div>
+                    <PrimaryButton bg="#16a34a" shadow="rgba(22, 163, 74, 0.3)" onClick={() => handleAction('whatsapp')}>
+                        <div className="icon-bg" style={{background: 'white'}}><MessageCircle color="#16a34a" fill="#16a34a" size={24} /></div>
                         <div className="content">
-                            <h4>CHAT ON WHATSAPP</h4>
-                            <p>Chat securely (Number Masked)</p>
+                            <h4>{t.chatWhatsappTitle}</h4>
+                            <p>{t.chatWhatsappSub}</p>
                         </div>
-                        <div className="premium-badge"><Shield size={10} /> PREMIUM</div>
-                        <div>&gt;</div>
+                        <div className="premium-badge"><Crown size={12} /> {t.premium}</div>
+                        <div style={{ paddingRight: '10px' }}>&gt;</div>
                     </PrimaryButton>
 
                     <PrimaryButton bg="#f97316" shadow="rgba(249, 115, 22, 0.3)" onClick={() => handleAction('parking')}>
-                        <div className="icon-bg"><CircleParking size={24} /></div>
+                        <div className="icon-bg" style={{background: 'white'}}><CircleParking color="#f97316" fill="#f97316" size={24} /></div>
                         <div className="content">
-                            <h4>VEHICLE BLOCKING THE WAY?</h4>
-                            <p>Send Parking Alert to Owner</p>
+                            <h4>{t.parkingTitle}</h4>
+                            <p>{t.parkingSub}</p>
                         </div>
-                        <div>&gt;</div>
+                        <div style={{ paddingRight: '10px' }}>&gt;</div>
                     </PrimaryButton>
                 </ActionButtons>
 
                 <SectionHeader>
                     <div className="title">
                         <ShieldAlert size={18} />
-                        <h3>EMERGENCY OPTIONS</h3>
+                        <h3>{t.emergencyOptions}</h3>
                     </div>
-                    <div className="expand">Tap to expand ▼</div>
+                    <div className="expand">{t.tapToExpand}</div>
                 </SectionHeader>
 
                 <EmergencyGrid>
                     <EmergencyCard color="#ef4444" textColor="#ef4444" onClick={() => handleAction('sos')}>
-                        <div className="icon-wrapper"><Megaphone /></div>
-                        <h4>SOS EMERGENCY</h4>
-                        <p>Immediate Help</p>
-                        <div style={{ textAlign: 'right', color: '#ccc' }}>&gt;</div>
+                        <div className="icon-wrapper" style={{fontSize: '28px'}}>🚨</div>
+                        <h4>{t.sosEmergency}</h4>
+                        <p>{t.immediateHelp}</p>
+                        <div style={{ textAlign: 'right', color: '#ef4444', fontWeight: 'bold', position: 'absolute', right: '15px', bottom: '15px' }}>&gt;</div>
                     </EmergencyCard>
                     
                     <EmergencyCard color="#3b82f6" textColor="#1d4ed8" onClick={() => handleAction('sos')}>
-                        <div className="icon-wrapper"><MapPin /></div>
-                        <h4>SHARE ACCIDENT LOCATION</h4>
-                        <p>Share live location with family contacts</p>
-                        <span className="premium"><Shield size={8} style={{display:'inline', marginRight:'2px'}}/> PREMIUM</span>
+                        <div className="icon-wrapper" style={{background: 'rgba(59, 130, 246, 0.1)', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%'}}>
+                            <MapPin fill="#3b82f6" color="white" size={24} />
+                        </div>
+                        <h4>{t.shareLocation}</h4>
+                        <p>{t.shareLocationSub}</p>
+                        <span className="premium"><Crown size={10} style={{display:'inline', marginRight:'2px'}}/> {t.premium}</span>
+                        <div style={{ textAlign: 'right', color: '#1d4ed8', fontWeight: 'bold', position: 'absolute', right: '15px', bottom: '15px' }}>&gt;</div>
                     </EmergencyCard>
                     
                     <EmergencyCard color="#4f46e5" textColor="#0B1A33" onClick={() => window.location.href='tel:112'}>
-                        <div className="icon-wrapper"><ShieldAlert /></div>
-                        <h4>POLICE</h4>
-                        <p>Call Police<br/><strong>112</strong></p>
+                        <div className="icon-wrapper" style={{fontSize: '28px'}}>👮</div>
+                        <h4>{t.policeTitle}</h4>
+                        <p>{t.policeSub}<br/><strong>112</strong></p>
+                        <div style={{ textAlign: 'right', color: '#0B1A33', fontWeight: 'bold', position: 'absolute', right: '15px', bottom: '15px' }}>&gt;</div>
                     </EmergencyCard>
                     
                     <EmergencyCard color="#ef4444" textColor="#0B1A33" onClick={() => window.location.href='tel:108'}>
-                        <div className="icon-wrapper"><Activity /></div>
-                        <h4>AMBULANCE</h4>
-                        <p>Call Ambulance<br/><strong>108</strong></p>
+                        <div className="icon-wrapper" style={{fontSize: '28px'}}>🚑</div>
+                        <h4>{t.ambulanceTitle}</h4>
+                        <p>{t.ambulanceSub}<br/><strong>108</strong></p>
+                        <div style={{ textAlign: 'right', color: '#0B1A33', fontWeight: 'bold', position: 'absolute', right: '15px', bottom: '15px' }}>&gt;</div>
                     </EmergencyCard>
                 </EmergencyGrid>
 
                 <FamilyNotify>
                     <div className="left">
                         <Globe size={18} />
-                        <span>Family will be notified in case of emergency.</span>
+                        <span>{t.familyNotified}</span>
                     </div>
-                    <div className="premium"><Shield size={10} /> PREMIUM</div>
+                    <div className="premium"><Crown size={12} /> {t.premium}</div>
                 </FamilyNotify>
 
                 <SectionHeader>
                     <div className="title">
                         <Car size={18} color="#0B1A33" />
-                        <h3>VEHICLE DETAILS</h3>
+                        <h3>{t.vehicleDetails}</h3>
                     </div>
                 </SectionHeader>
 
                 <DetailsGrid>
                     <div className="item">
-                        <div className="label">Vehicle Type</div>
+                        <div className="label">{t.vehicleType}</div>
                         <div className="value">{product?.vehicleType || 'Car'}</div>
                     </div>
                     <div className="item">
-                        <div className="label">Registration No.</div>
+                        <div className="label">{t.registrationNo}</div>
                         <div className="value">{product?.registrationNo || 'VH-M****F1'}</div>
                     </div>
                     <div className="item">
-                        <div className="label">Color</div>
+                        <div className="label">{t.color}</div>
                         <div className="value">{product?.color || 'N/A'}</div>
                     </div>
                     <div className="item">
-                        <div className="label">Registration State</div>
+                        <div className="label">{t.registrationState}</div>
                         <div className="value">{product?.registrationState || 'N/A'}</div>
                     </div>
                     <div className="item">
-                        <div className="label">Model</div>
+                        <div className="label">{t.model}</div>
                         <div className="value">{product?.model || 'N/A'}</div>
                     </div>
                     <div className="item">
-                        <div className="label">Year</div>
+                        <div className="label">{t.year}</div>
                         <div className="value">{product?.year || 'N/A'}</div>
                     </div>
                 </DetailsGrid>
@@ -729,29 +1057,31 @@ export default function PublicProfile() {
                 <PrivacyBanner>
                     <Lock size={20} />
                     <div className="text">
-                        <p>Your personal details are protected.<br/>Owner will see only masked contact details.</p>
+                        <p>{t.privacyProtected}<br/>{t.ownerWillSee}</p>
                     </div>
-                    <div className="link">Learn more</div>
+                    <div className="link">{t.learnMore}</div>
                 </PrivacyBanner>
 
                 <FooterStats>
                     <div className="stat">
                         <Shield />
-                        <span>End-To-End<br/>Encrypted</span>
+                        <span>{t.endToEnd}<br/>{t.encrypted}</span>
                     </div>
                     <div className="stat">
                         <Lock />
-                        <span>Privacy<br/>Protected</span>
+                        <span>{t.privacy}<br/>{t.protected}</span>
                     </div>
                     <div className="stat">
                         <Globe />
-                        <span>Secure<br/>Network</span>
+                        <span>{t.secure}<br/>{t.network}</span>
                     </div>
                     <div className="stat">
                         <Activity />
-                        <span>Managed By<br/>Tarkshya Protocol</span>
+                        <span>{t.managedBy}<br/>{t.tarkshyaProtocol}</span>
                     </div>
                 </FooterStats>
+                    </>
+                )}
             </MainCard>
 
             <BottomFooter>

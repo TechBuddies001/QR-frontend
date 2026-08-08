@@ -16,6 +16,7 @@
   "author": "Tarkshya Solution",
   "license": "ISC",
   "dependencies": {
+    "@google/genai": "^2.8.0",
     "@prisma/client": "^5.0.0",
     "archiver": "^7.0.1",
     "axios": "^1.6.0",
@@ -34,6 +35,7 @@
     "multer": "^1.4.5-lts.1",
     "pdfkit": "^0.18.0",
     "qrcode": "^1.5.3",
+    "razorpay": "^2.9.6",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

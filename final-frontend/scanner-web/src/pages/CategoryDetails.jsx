@@ -498,6 +498,16 @@ const ImageWrapper = styled.div`
   }
 `;
 
+const getCategoryMockup = (categoryName) => {
+  const name = (categoryName || '').toLowerCase();
+  if (name.includes('vehicle') || name.includes('car') || name.includes('bike') || name.includes('parking')) return '/assets/car_qr_tag_mockup_1776107740073.png';
+  if (name.includes('pet') || name.includes('dog') || name.includes('cat') || name.includes('animal')) return '/assets/pet_qr_tag_mockup_1776107762376.png';
+  if (name.includes('luggage') || name.includes('bag')) return '/assets/luggage-sticker-green.jpg';
+  if (name.includes('kid') || name.includes('student') || name.includes('office') || name.includes('card')) return '/assets/student-id-1.jpg';
+  if (name.includes('door') || name.includes('home')) return '/assets/doorbell_qr_mockup_1776107787932.png';
+  return '/assets/v-kawach-packaging.jpg';
+};
+
 const getIcon = (name) => {
   const icons = {
     'ShieldAlert': <ShieldAlert size={50} />,
@@ -619,7 +629,7 @@ const CategoryDetails = () => {
               {data.preventionCards.map((card, i) => (
                 <CapabilityCard key={i}>
                   <div className="img-wrapper">
-                    <img src={card.image ? `${apiUrl}${card.image}` : "/assets/car_qr_tag_mockup_1776107740073.png"} alt={card.title} />
+                    <img src={card.image ? `${apiUrl}${card.image}` : getCategoryMockup(data.name)} alt={card.title} />
                   </div>
                   <div className="content">
                     <h4>{language === 'hi' ? (card.title_hi || card.title) : card.title}</h4>
@@ -646,7 +656,7 @@ const CategoryDetails = () => {
               {data.emergencyCards.map((card, i) => (
                 <CapabilityCard key={i}>
                   <div className="img-wrapper">
-                    <img src={card.image ? `${apiUrl}${card.image}` : "/assets/car_qr_tag_mockup_1776107740073.png"} alt={card.title} />
+                    <img src={card.image ? `${apiUrl}${card.image}` : getCategoryMockup(data.name)} alt={card.title} />
                   </div>
                   <div className="content">
                     <h4>{language === 'hi' ? (card.title_hi || card.title) : card.title}</h4>
@@ -665,7 +675,7 @@ const CategoryDetails = () => {
         <Section bg="#f8f9fa">
           <HowItWorksSection>
             <div className="video-box">
-              <img src="/assets/car_qr_tag_mockup_1776107740073.png" alt="How it works" />
+              <img src={getCategoryMockup(data.name)} alt="How it works" />
               <div className="play-btn">
                 <Play size={40} fill="white" />
               </div>
@@ -692,7 +702,7 @@ const CategoryDetails = () => {
               {data.trackingCards.map((card, i) => (
                 <CapabilityCard key={i}>
                   <div className="img-wrapper">
-                    <img src={card.image ? `${apiUrl}${card.image}` : "/assets/car_qr_tag_mockup_1776107740073.png"} alt={card.title} />
+                    <img src={card.image ? `${apiUrl}${card.image}` : getCategoryMockup(data.name)} alt={card.title} />
                   </div>
                   <div className="content">
                     <h4>{language === 'hi' ? (card.title_hi || card.title) : card.title}</h4>
@@ -731,7 +741,7 @@ const CategoryDetails = () => {
                   };
                   const photos = safeParse(product.photos, []);
                   const dynamicData = safeParse(product.dynamicData, []);
-                  const mainPhoto = photos[0] ? (photos[0].startsWith('http') ? photos[0] : `${apiUrl}${photos[0]}`) : "/assets/car_qr_tag_mockup_1776107740073.png";
+                  const mainPhoto = photos[0] ? (photos[0].startsWith('http') ? photos[0] : `${apiUrl}${photos[0]}`) : getCategoryMockup(data.name);
                   
                   return (
                     <ProductCard key={product.id}>
@@ -751,11 +761,15 @@ const CategoryDetails = () => {
                       </ProductInfo>
 
                       <PriceSection>
-                        <span className="current">₹{product.mrp}</span>
-                        <span className="old">₹{Math.round(product.mrp * 1.5)}</span>
+                        <span className="current">₹{product.sellingPrice || product.mrp || 0}</span>
+                        {product.mrp && product.sellingPrice && product.mrp > product.sellingPrice && (
+                            <span className="old">₹{product.mrp}</span>
+                        )}
                       </PriceSection>
 
-                      <DiscountText>40% OFF* (Pack of 3)</DiscountText>
+                      {product.mrp && product.sellingPrice && product.mrp > product.sellingPrice && (
+                          <DiscountText>{Math.round(((product.mrp - product.sellingPrice) / product.mrp) * 100)}% OFF</DiscountText>
+                      )}
 
                       <ActionButtons>
                         <Link to={`/product/${product.id}`} className="view-btn">View Details</Link>
@@ -810,7 +824,7 @@ const CategoryDetails = () => {
 
           <ImageWrapper>
             <div className="image-container">
-              <img src={data.heroImage ? `${apiUrl}${data.heroImage}` : '/assets/car_qr_tag_mockup_1776107740073.png'} alt={data.name} />
+              <img src={data.heroImage ? `${apiUrl}${data.heroImage}` : getCategoryMockup(data.name)} alt={data.name} />
               <div style={{ position: 'absolute', bottom: '30px', right: '-30px', background: 'white', padding: '20px 30px', borderRadius: '20px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '15px' }}>
                  <div style={{ color: '#27ae60', background: '#eafaf1', padding: '10px', borderRadius: '12px' }}><CheckCircle2 size={28} /></div>
                  <div>

@@ -1,15 +1,15 @@
 export const theme = {
   colors: {
-    primary: '#1E3A8A',      // V-KAWACH Navy Blue
-    primaryDark: '#1E293B',
-    accent: '#D97706',       // V-KAWACH Gold/Mustard
-    accentHover: '#B45309',
+    primary: '#0B1A33',      // V-KAWACH Navy Blue
+    primaryDark: '#081326',
+    accent: '#C9A84C',       // V-KAWACH Gold
+    accentHover: '#b59744',
     white: '#FFFFFF',
     text: '#333333',
     textLight: '#E0E0E0',
     background: '#F9FAFB',
     border: '#E5E7EB',
-    danger: '#DC2626',
+    danger: '#0B1A33',       // Replacing red with Navy Blue
     success: '#10B981',
     gray: '#888888',
     lightGray: '#F3F4F6',

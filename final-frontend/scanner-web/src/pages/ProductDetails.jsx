@@ -390,7 +390,13 @@ const ProductDetails = () => {
   );
 
   const getFallbackImage = () => {
-    return 'https://img.icons8.com/fluency/400/security-checked.png';
+    const name = (product?.name || '').toLowerCase();
+    if (name.includes('vehicle') || name.includes('car') || name.includes('bike') || name.includes('parking')) return '/assets/car_qr_tag_mockup_1776107740073.png';
+    if (name.includes('pet') || name.includes('dog') || name.includes('cat') || name.includes('animal')) return '/assets/pet_qr_tag_mockup_1776107762376.png';
+    if (name.includes('luggage') || name.includes('bag')) return '/assets/luggage-sticker-green.jpg';
+    if (name.includes('kid') || name.includes('student') || name.includes('office') || name.includes('card')) return '/assets/student-id-1.jpg';
+    if (name.includes('door') || name.includes('home')) return '/assets/doorbell_qr_mockup_1776107787932.png';
+    return '/assets/v-kawach-packaging.jpg';
   };
 
   const getSpecValue = (label) => {
@@ -455,9 +461,13 @@ const ProductDetails = () => {
 
               <div className="price-card">
                 <PriceRow>
-                  <span className="current">₹{product.mrp || 0}</span>
-                  <span className="old">₹{Math.round((product.mrp || 0) * 1.5)}</span>
-                  <span className="discount">{language === 'hi' ? 'विशेष ऑफर' : 'SPECIAL OFFER'}</span>
+                  <span className="current">₹{product.sellingPrice || product.mrp || 0}</span>
+                  {product.mrp && product.sellingPrice && product.mrp > product.sellingPrice && (
+                    <>
+                      <span className="old">₹{product.mrp}</span>
+                      <span className="discount">{Math.round(((product.mrp - product.sellingPrice) / product.mrp) * 100)}% {language === 'hi' ? 'छूट' : 'OFF'}</span>
+                    </>
+                  )}
                 </PriceRow>
 
                 <SpecGrid>

@@ -15,11 +15,16 @@ export default function Page() {
     email: "",
     password: "",
   });
+  const [consent, setConsent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email || !formData.password) {
       toast.error("Please fill in all fields");
+      return;
+    }
+    if (!consent) {
+      toast.error("You must agree to the Privacy Policy & Terms of Service");
       return;
     }
 
@@ -114,6 +119,21 @@ export default function Page() {
               >
                 Forgot Password?
               </Link>
+            </div>
+
+            <div className="flex items-start gap-2 pt-2 text-sm">
+              <label className="flex items-start gap-2 cursor-pointer group mt-0.5">
+                <input
+                  className="rounded border-slate-300 text-blue-600 focus:ring-blue-600 w-4 h-4 cursor-pointer mt-0.5"
+                  type="checkbox"
+                  checked={consent}
+                  onChange={(e) => setConsent(e.target.checked)}
+                  required
+                />
+                <span className="text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors leading-snug">
+                  I consent to the collection and processing of my data as per the <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link> and <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>.
+                </span>
+              </label>
             </div>
 
             <button

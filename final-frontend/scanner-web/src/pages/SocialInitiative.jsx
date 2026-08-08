@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../utils/translations';
 import styled from 'styled-components';
 import Section from '../components/Section';
 import Button from '../components/Button';
@@ -92,6 +94,8 @@ const TextArea = styled.textarea`
 `;
 
 const SocialInitiative = () => {
+  const { language } = useLanguage();
+  const t = translations[language];
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -121,9 +125,9 @@ const SocialInitiative = () => {
         <>
             <Hero>
                 <MissionContent>
-                    <h1 style={{ fontSize: '3rem', color: '#C9A84C' }}>Become a partner</h1>
+                    <h1 style={{ fontSize: '3rem', color: '#C9A84C' }}>{t.partnerNew?.title || 'Become a partner'}</h1>
                     <p style={{ fontSize: '1.2rem', marginTop: '20px', opacity: 0.9 }}>
-                        Our commitment to safer roads and connected communities.
+                        {t.partnerNew?.subtitle || 'Our commitment to safer roads...'}
                     </p>
                 </MissionContent>
             </Hero>

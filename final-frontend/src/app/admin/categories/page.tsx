@@ -42,6 +42,7 @@ interface Category {
   trackingHeading?: string;
   trackingText?: string;
   trackingCards?: string;
+  isActive?: boolean;
   _count?: {
     products: number;
   };
@@ -135,6 +136,19 @@ function CategoriesContent() {
     }
   };
 
+  const safeParseJSON = (data: any) => {
+    if (!data) return [];
+    try {
+      let parsed = JSON.parse(data);
+      if (typeof parsed === 'string') {
+        parsed = JSON.parse(parsed); // Handle double stringified data
+      }
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  };
+
   const openEditModal = (category: Category) => {
     setEditingCategory(category);
     setFormData({
@@ -143,21 +157,21 @@ function CategoriesContent() {
       icon: category.icon || "",
       color: category.color || "#C9A84C",
       isActive: category.isActive !== false,
-      features: category.features ? JSON.parse(category.features as any) : [],
+      features: safeParseJSON(category.features),
       benefits: category.benefits || "",
       heroImage: category.heroImage || "",
       preventionHeading: category.preventionHeading || "",
       preventionText: category.preventionText || "",
-      preventionCards: category.preventionCards ? JSON.parse(category.preventionCards as any) : [],
+      preventionCards: safeParseJSON(category.preventionCards),
       emergencyHeading: category.emergencyHeading || "",
       emergencyText: category.emergencyText || "",
-      emergencyCards: category.emergencyCards ? JSON.parse(category.emergencyCards as any) : [],
+      emergencyCards: safeParseJSON(category.emergencyCards),
       howItWorksHeading: category.howItWorksHeading || "",
       howItWorksText: category.howItWorksText || "",
       videoUrl: category.videoUrl || "",
       trackingHeading: category.trackingHeading || "",
       trackingText: category.trackingText || "",
-      trackingCards: category.trackingCards ? JSON.parse(category.trackingCards as any) : []
+      trackingCards: safeParseJSON(category.trackingCards)
     });
     setIsModalOpen(true);
     setActiveTab("basic");

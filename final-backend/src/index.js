@@ -31,6 +31,19 @@ const planRoutes = require('./routes/plans');
 const sponsorRoutes = require('./routes/sponsors');
 const subscriptionRoutes = require('./routes/subscriptions');
 const settingsRoutes = require('./routes/settings');
+const chatbotRoutes = require('./routes/chatbot');
+const categoryRoutes = require('./routes/categories');
+const productRoutes = require('./routes/products');
+const orderRoutes = require('./routes/orders');
+const salesRoutes = require('./routes/sales');
+const adminUsersRoutes = require('./routes/admin_users');
+const leadRoutes = require('./routes/leads');
+const scanRoutes = require('./routes/scans');
+const userDashboardRoutes = require('./routes/userDashboard');
+const paymentRoutes = require('./routes/payments');
+const partnerRoutes = require('./routes/partner');
+const inventoryRoutes = require('./routes/inventory');
+const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -103,6 +116,7 @@ app.get('/uploads/qrcodes/:filename', async (req, res, next) => {
 
 // Static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use('/api/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // Health check
 app.get('/health', (req, res) => {
@@ -114,7 +128,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API Routes
+const caseStudyRoutes = require('./routes/caseStudies');
+
 app.use('/api/auth', authRoutes);
 app.use('/api/tags', tagRoutes);
 app.use('/api/public', publicRoutes);
@@ -125,6 +140,21 @@ app.use('/api/plans', planRoutes);
 app.use('/api/sponsors', sponsorRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/sales', salesRoutes);
+app.use('/api/admin/sales', salesRoutes);
+app.use('/api/admin_users', adminUsersRoutes);
+app.use('/api/leads', leadRoutes);
+app.use('/api/scans', scanRoutes);
+app.use('/api/user', userDashboardRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/partners', partnerRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/case-studies', caseStudyRoutes);
 
 // 404
 app.use((req, res) => {

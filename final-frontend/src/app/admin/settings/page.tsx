@@ -27,6 +27,8 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [settings, setSettings] = useState<Record<string, string>>({});
   const [profile, setProfile] = useState({ name: "", email: "" });
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [changingPassword, setChangingPassword] = useState(false);
   const [employeeForm, setEmployeeForm] = useState({ name: "", email: "", password: "" });
   const [adminUser, setAdminUser] = useState<any>(null);
 
@@ -67,6 +69,31 @@ export default function SettingsPage() {
 
   const handleChange = (key: string, value: string) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+    setChangingPassword(true);
+    try {
+      await api.post("/auth/change-password", {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword
+      });
+      toast.success("Password updated successfully");
+      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || "Failed to update password");
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
   if (loading) {
@@ -178,6 +205,56 @@ export default function SettingsPage() {
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Update Profile
                 </button>
+
+                {/* Password Update Section */}
+                <div className="mt-12 pt-8 border-t border-slate-100 dark:border-slate-800">
+                  <h3 className="text-lg font-black text-slate-800 dark:text-white mb-6">Change Password</h3>
+                  <form onSubmit={handleChangePassword} className="space-y-6 max-w-xl">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Current Password</label>
+                      <input 
+                        type="password" 
+                        required
+                        value={passwordForm.currentPassword}
+                        onChange={e => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                        className="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-800 rounded-xl font-bold text-sm outline-none focus:border-blue-500 transition-all"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">New Password</label>
+                        <input 
+                          type="password" 
+                          required
+                          value={passwordForm.newPassword}
+                          onChange={e => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                          className="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-800 rounded-xl font-bold text-sm outline-none focus:border-blue-500 transition-all"
+                          placeholder="••••••••"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Confirm New Password</label>
+                        <input 
+                          type="password" 
+                          required
+                          value={passwordForm.confirmPassword}
+                          onChange={e => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                          className="w-full px-5 py-3.5 bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-800 rounded-xl font-bold text-sm outline-none focus:border-blue-500 transition-all"
+                          placeholder="••••••••"
+                        />
+                      </div>
+                    </div>
+                    <button 
+                      type="submit"
+                      disabled={changingPassword}
+                      className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm flex items-center gap-2 shadow-lg shadow-blue-600/20 active:scale-95 transition-all disabled:opacity-50"
+                    >
+                      {changingPassword ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+                      Update Password
+                    </button>
+                  </form>
+                </div>
               </div>
             )}
             
@@ -349,6 +426,60 @@ export default function SettingsPage() {
                     onChange={(v) => handleChange('exotelWhatsappTemplate', v)} 
                     placeholder="e.g. scan_alert_v1"
                   />
+                </div>
+
+                {/* CALL ESCALATION SETTINGS */}
+                <div className="flex items-center gap-4 p-5 bg-blue-500/5 rounded-2xl border border-blue-200 mt-6 mb-4">
+                   <Phone className="w-8 h-8 text-blue-600 shrink-0" />
+                   <div>
+                      <h4 className="font-black text-blue-600 text-sm uppercase">Call Escalation Settings</h4>
+                      <p className="text-xs font-medium text-slate-500">Ring timeouts and QR scan alert spam protection.</p>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-wide">Primary Ring Timeout (sec)</label>
+                    <input type="number" min={5} max={60}
+                      value={settings['exotel_ring_timeout_primary'] ?? '18'}
+                      onChange={e => handleChange('exotel_ring_timeout_primary', e.target.value)}
+                      className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                    <p className="text-[0.68rem] text-slate-400">Owner ko ring karne ka time before escalation (default: 18s)</p>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-wide">Secondary Ring Timeout (sec)</label>
+                    <input type="number" min={5} max={60}
+                      value={settings['exotel_ring_timeout_secondary'] ?? '20'}
+                      onChange={e => handleChange('exotel_ring_timeout_secondary', e.target.value)}
+                      className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                    <p className="text-[0.68rem] text-slate-400">Emergency contact ring time (default: 20s)</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6 mt-2">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-wide">Scan Alert Cooldown (min)</label>
+                    <input type="number" min={1} max={60}
+                      value={settings['scan_alert_cooldown_minutes'] ?? '10'}
+                      onChange={e => handleChange('scan_alert_cooldown_minutes', e.target.value)}
+                      className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                    <p className="text-[0.68rem] text-slate-400">Ek vehicle ke liye repeat scan alert ke beech minimum gap (default: 10 min)</p>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <label className="text-xs font-black text-slate-500 uppercase tracking-wide">Instant Scan WhatsApp Alert</label>
+                    <button type="button"
+                      onClick={() => handleChange('scan_alert_enabled', settings['scan_alert_enabled'] === 'false' ? 'true' : 'false')}
+                      className={`w-14 h-7 rounded-full transition-all relative mt-1 ${settings['scan_alert_enabled'] === 'false' ? 'bg-slate-300' : 'bg-emerald-500'}`}
+                    >
+                      <span className={`absolute top-1.5 w-4 h-4 rounded-full bg-white shadow transition-all ${settings['scan_alert_enabled'] === 'false' ? 'left-1.5' : 'left-8'}`} />
+                    </button>
+                    <p className="text-[0.68rem] text-slate-400">
+                      {settings['scan_alert_enabled'] === 'false' ? 'Disabled - no instant scan alerts' : 'Owner ko QR scan hote hi WhatsApp jayega'}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}

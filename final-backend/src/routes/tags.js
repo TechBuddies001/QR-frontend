@@ -60,14 +60,15 @@ router.get('/', authenticateToken, async (req, res) => {
   }
 });
 
-// GET /api/tags/export-excel – download tags as Excel
-router.get('/export-excel', authenticateToken, async (req, res) => {
+// GET & POST /api/tags/export-excel – download tags as Excel
+router.all('/export-excel', authenticateToken, async (req, res) => {
   try {
-    const { search, status, planType, assetType, ids } = req.query;
+    const { search, status, planType, assetType } = req.query;
+    const ids = req.body.ids || req.query.ids;
 
     const where = {};
     if (ids) {
-      where.id = { in: ids.split(',') };
+      where.id = { in: Array.isArray(ids) ? ids : ids.split(',') };
     } else {
       if (search) {
         where.OR = [
@@ -143,6 +144,86 @@ router.get('/export-excel', authenticateToken, async (req, res) => {
   }
 });
 
+// GET & POST /api/tags/export-qr-only-excel – Excel with tagCode (UniqueCode) + QR image URL (minimal, no frame) per row
+router.all('/export-qr-only-excel', authenticateToken, async (req, res) => {
+  try {
+    const { search, status, planType, assetType } = req.query;
+    const ids = req.body.ids || req.query.ids;
+
+    const where = {};
+    if (ids) {
+      where.id = { in: Array.isArray(ids) ? ids : ids.split(',') };
+    } else {
+      if (search) {
+        where.OR = [
+          { tagCode: { contains: search } },
+          { ownerName: { contains: search } },
+          { ownerPhone: { contains: search } },
+        ];
+      }
+      if (status === 'active') where.isActive = true;
+      if (status === 'inactive') where.isActive = false;
+      if (status === 'lost') where.isLost = true;
+      if (planType && planType !== 'all') where.planType = planType;
+      if (assetType && assetType !== 'all') where.assetType = assetType;
+    }
+
+    const tags = await prisma.tag.findMany({
+      where,
+      select: { id: true, tagCode: true, assetType: true, customAssetType: true, sponsorId: true }
+    });
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('QR Print URLs');
+
+    worksheet.columns = [
+      { header: 'UniqueCode', key: 'uniqueCode', width: 22 },
+      { header: 'QRUrl', key: 'qrUrl', width: 65 },
+    ];
+
+    const headerRow = worksheet.getRow(1);
+    headerRow.height = 25;
+    headerRow.font = { bold: true, size: 11, color: { argb: 'FF000000' } };
+    headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } }; // Yellow background
+    headerRow.alignment = { vertical: 'middle', horizontal: 'left' };
+
+    const host = req.get('host');
+    const imageBaseUrl = (host.includes('localhost') || host.includes('127.0.0.1'))
+      ? `http://${host}`
+      : 'https://tarkshyasolution.in';
+
+    for (let i = 0; i < tags.length; i++) {
+      const tag = tags[i];
+      const imgFileName = `qr_minimal_${tag.tagCode}.png`;
+      const imgPath = path.join(__dirname, '..', '..', 'uploads', 'qrcodes', imgFileName);
+
+      // Generate on the fly if it does not exist
+      if (!fs.existsSync(imgPath)) {
+        try {
+          const sponsorObj = tag.sponsorId ? await prisma.sponsor.findUnique({ where: { id: tag.sponsorId } }) : null;
+          await generateQRCode(tag.tagCode, 'minimal', sponsorObj, tag.assetType, tag.customAssetType);
+        } catch (e) {
+          console.error(`Failed to generate QR on the fly for ${tag.tagCode}:`, e.message);
+        }
+      }
+
+      const imageUrl = `${imageBaseUrl}/uploads/qrcodes/${imgFileName}`;
+
+      worksheet.addRow({
+        uniqueCode: tag.tagCode,
+        qrUrl: imageUrl,
+      });
+    }
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=QR_Link_Export_${new Date().getTime()}.xlsx`);
+    res.status(200).send(buffer);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // GET /api/tags/:id – single tag details (admin)
 router.get('/:id', authenticateToken, async (req, res) => {
   try {
@@ -152,6 +233,8 @@ router.get('/:id', authenticateToken, async (req, res) => {
         _count: { select: { scanLogs: true, callLogs: true, smsLogs: true } },
         sponsor: true,
         admin: { select: { name: true, email: true } },
+        scanLogs: { orderBy: { createdAt: 'desc' }, take: 50 },
+        callLogs: { orderBy: { createdAt: 'desc' }, take: 50 },
       },
     });
     if (!tag) return res.status(404).json({ error: 'Tag not found' });
@@ -172,8 +255,9 @@ router.post('/', authenticateToken, upload.single('photo'), [
 
   try {
     const {
-      ownerName, ownerPhone, emergencyContact, customMessage,
+      ownerName, ownerPhone, emergencyContact, whatsappNumber, customMessage,
       address, assetType, customAssetType, planType, tagCode: customCode, sponsorId, designType, designTypes: requestedDesigns,
+      module, categoryId, productType, batchNumber, printingStatus, warehouseLocation, distributorId, dealerId, lifecycleStage,
     } = req.body;
 
     // Generate unique tag code if not provided
@@ -216,16 +300,29 @@ router.post('/', authenticateToken, upload.single('photo'), [
         ownerName,
         ownerPhone,
         emergencyContact: emergencyContact || null,
+        whatsappNumber: whatsappNumber || null,
         customMessage: customMessage || null,
         address: address || null,
         assetType: assetType || 'vehicle',
         planType: planType || 'basic',
         designType: primaryDesignType,
+        isDummy: req.body.isDummy === 'true' || req.body.isDummy === true,
         ownerPhoto: req.file ? `/uploads/photos/${req.file.filename}` : null,
         adminId: req.admin.id,
         expiresAt,
         sponsorId: sponsorId || null,
         customAssetType: customAssetType || null,
+        categoryId: categoryId || null,
+
+        // Master Flow Fields
+        module: module || 'Consumer Safety',
+        productType: productType || assetType || 'General Tag',
+        batchNumber: batchNumber || `BATCH-CHANDAUSI-${new Date().getFullYear()}`,
+        printingStatus: printingStatus || 'PRINTED',
+        warehouseLocation: warehouseLocation || 'Chandausi Warehouse',
+        distributorId: distributorId || null,
+        dealerId: dealerId || null,
+        lifecycleStage: lifecycleStage || 'LIVE',
       },
     });
 
@@ -243,17 +340,18 @@ router.post('/', authenticateToken, upload.single('photo'), [
 });
 
 // PUT /api/tags/:id – update tag
-router.put('/:id', authenticateToken, upload.single('photo'), async (req, res) => {
+router.put('/:id', authenticateToken, upload.fields([{ name: 'photos', maxCount: 5 }, { name: 'photo', maxCount: 1 }, { name: 'videos', maxCount: 2 }]), async (req, res) => {
   try {
     const {
       ownerName, ownerPhone, emergencyContact, customMessage,
-      address, assetType, planType, isActive, isLost, sponsorId,
+      address, assetType, planType, isActive, isLost, sponsorId, whatsappNumber
     } = req.body;
 
     const updateData = {};
     if (ownerName !== undefined) updateData.ownerName = ownerName;
     if (ownerPhone !== undefined) updateData.ownerPhone = ownerPhone;
     if (emergencyContact !== undefined) updateData.emergencyContact = emergencyContact;
+    if (whatsappNumber !== undefined) updateData.whatsappNumber = whatsappNumber;
     if (customMessage !== undefined) updateData.customMessage = customMessage;
     if (address !== undefined) updateData.address = address;
     if (assetType !== undefined) updateData.assetType = assetType;
@@ -261,7 +359,19 @@ router.put('/:id', authenticateToken, upload.single('photo'), async (req, res) =
     if (isActive !== undefined) updateData.isActive = isActive === 'true' || isActive === true;
     if (isLost !== undefined) updateData.isLost = isLost === 'true' || isLost === true;
     if (sponsorId !== undefined) updateData.sponsorId = sponsorId || null;
-    if (req.file) updateData.ownerPhoto = `/uploads/photos/${req.file.filename}`;
+    
+    if (req.files) {
+      if (req.files['photo']) {
+        updateData.ownerPhoto = `/uploads/photos/${req.files['photo'][0].filename}`;
+      }
+      if (req.files['photos']) {
+        const photoPaths = req.files['photos'].map(f => `/uploads/photos/${f.filename}`);
+        updateData.photos = JSON.stringify(photoPaths);
+        if (photoPaths.length > 0) {
+          updateData.ownerPhoto = photoPaths[0]; // Set first as fallback for older clients
+        }
+      }
+    }
 
     const tag = await prisma.tag.update({ where: { id: req.params.id }, data: updateData });
 
@@ -433,6 +543,7 @@ router.post('/bulk', authenticateToken, uploadDoc.single('file'), async (req, re
                 assetType: assetType || 'vehicle',
                 planType: planType || 'basic',
                 designType: primaryDesignType,
+                isDummy: req.body.isDummy === 'true' || req.body.isDummy === true,
                 adminId: req.admin.id,
                 expiresAt,
                 sponsorId: bodySponsorId,

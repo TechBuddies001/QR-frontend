@@ -1,11 +1,14 @@
+import 'react-native-gesture-handler';
 import React, { useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 
 import { AuthProvider, AuthContext } from './src/context/AuthContext';
 import { theme } from './src/utils/theme';
+import CustomDrawerContent from './src/components/CustomDrawerContent';
 
 // Screens
 import LoginScreen from './src/screens/LoginScreen';
@@ -17,9 +20,26 @@ import ProfileScreen from './src/screens/ProfileScreen';
 import VisitorTagScreen from './src/screens/VisitorTagScreen';
 import TrackingScreen from './src/screens/TrackingScreen';
 import LogsScreen from './src/screens/LogsScreen';
+import ProductDetailsScreen from './src/screens/ProductDetailsScreen';
 
 const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 
+function DrawerNavigator() {
+  return (
+    <Drawer.Navigator
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        headerShown: false,
+        drawerStyle: {
+          width: 300,
+        },
+      }}
+    >
+      <Drawer.Screen name="DashboardMain" component={DashboardScreen} />
+    </Drawer.Navigator>
+  );
+}
 
 function AppNavigation() {
   const { user, isLoading } = useContext(AuthContext);
@@ -64,15 +84,15 @@ function AppNavigation() {
         <>
           <Stack.Screen 
             name="Dashboard" 
-            component={DashboardScreen} 
+            component={DrawerNavigator} 
             options={{ 
-              headerShown: false, // Custom header implemented in Dashboard
+              headerShown: false, 
             }} 
           />
           <Stack.Screen 
             name="ScanQR" 
             component={ScanQRScreen} 
-            options={{ headerShown: false }} // Custom scan layout
+            options={{ headerShown: false }} 
           />
           <Stack.Screen 
             name="TagSettings" 
@@ -94,24 +114,37 @@ function AppNavigation() {
             name="VisitorTag" 
             component={VisitorTagScreen} 
             options={{ 
-              title: 'V-KAWACH Scan Details',
+              title: 'Visitor Pass',
               headerBackTitleVisible: false,
             }} 
           />
           <Stack.Screen 
             name="Tracking" 
             component={TrackingScreen} 
-            options={{ headerShown: false }} 
+            options={{ 
+              title: 'Live Tracking',
+              headerBackTitleVisible: false,
+            }} 
           />
           <Stack.Screen 
             name="Logs" 
             component={LogsScreen} 
-            options={{ headerShown: false }} 
+            options={{ 
+              title: 'Activity Logs',
+              headerBackTitleVisible: false,
+            }} 
+          />
+          <Stack.Screen 
+            name="ProductDetails" 
+            component={ProductDetailsScreen} 
+            options={{ 
+              title: 'Product Details',
+              headerShown: false,
+            }} 
           />
         </>
       )}
     </Stack.Navigator>
-
   );
 }
 

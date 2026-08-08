@@ -1,4 +1,6 @@
 import React from 'react';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../utils/translations';
 import styled, { keyframes } from 'styled-components';
 import { 
     ArrowRight, Truck, Building2, Award, Shield, 
@@ -223,6 +225,8 @@ const CTASection = styled.section`
 `;
 
 const CaseStudies = () => {
+  const { language } = useLanguage();
+  const t = translations[language];
   const cases = [
     {
       id: 1,
@@ -274,8 +278,8 @@ const CaseStudies = () => {
     <PageWrapper>
       <HeroSection>
         <div className="content">
-          <h1>Enterprise <span>Case Studies</span></h1>
-          <p>Discover how leading organizations leverage Tarkshya's Smart QR ecosystem to secure their assets, personnel, and brand identity.</p>
+          <h1>{t.caseStudiesNew?.title || 'Enterprise'} <span>{t.caseStudiesNew?.titleHighlight || 'Case Studies'}</span></h1>
+          <p>{t.caseStudiesNew?.subtitle || 'Discover how leading organizations...'}</p>
         </div>
       </HeroSection>
 

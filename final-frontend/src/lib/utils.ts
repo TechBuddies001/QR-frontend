@@ -7,11 +7,14 @@ export function cn(...inputs: ClassValue[]) {
 
 export function resolveImageUrl(url: string | null | undefined): string {
   if (!url) return "";
-  if (url.startsWith("http")) return url;
+  if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:") || url.startsWith("blob:")) {
+    return url;
+  }
   
-  // Get API URL and strip /api if it exists to get the root domain
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || "https://api.tarkshyasolution.in";
-  const baseUrl = apiBase.endsWith("/api") ? apiBase.slice(0, -4) : apiBase;
+  // Get API URL and strip trailing slashes & trailing /api
+  const rawApiBase = process.env.NEXT_PUBLIC_API_URL || "https://api.tarkshyasolution.in";
+  const cleanApiBase = rawApiBase.replace(/\/+$/, "");
+  const baseUrl = cleanApiBase.replace(/\/api$/i, "");
   
   // Ensure the path starts with a slash
   const path = url.startsWith("/") ? url : `/${url}`;

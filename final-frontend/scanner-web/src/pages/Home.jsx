@@ -223,8 +223,7 @@ const ActionButton = styled(Link)`
   transition: all 0.3s ease;
   &:hover {
     transform: translateY(-3px);
-    background-color: ${props => props.variant === 'outline' ? '#C9A84C' : '#B08D35'};
-    border-color: ${props => props.variant === 'outline' ? '#C9A84C' : '#C9A84C'};
+    background-color: ${props => props.variant === 'outline' ? 'white' : '#B08D35'};
     color: #0b1a33;
   }
 
@@ -343,8 +342,8 @@ const ScrollButton = styled.button`
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 45px;
-  height: 45px;
+  width: 55px;
+  height: 55px;
   border-radius: 50%;
   background: white;
   border: 1px solid #eee;
@@ -437,8 +436,8 @@ const CategoryCard = styled(Link)`
   }
 
   .icon-box {
-    width: 45px;
-    height: 45px;
+    width: 55px;
+    height: 55px;
     margin-bottom: 12px;
     display: flex;
     align-items: center;
@@ -472,14 +471,10 @@ const CategoryCard = styled(Link)`
 
 const ProductGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 30px;
-  max-width: 1000px;
+  max-width: 1400px;
   margin: 0 auto;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
 `;
 
 const ModernProductCard = styled.div`
@@ -662,7 +657,7 @@ const ServiceCard = styled(Link)`
   @media (max-width: 768px) {
     min-height: 150px;
     padding: 15px 10px;
-    .icon-wrapper { width: 45px; height: 45px; svg { width: 22px; height: 22px; } }
+    .icon-wrapper { width: 55px; height: 55px; svg { width: 22px; height: 22px; } }
     span { font-size: 0.7rem; }
   }
 `;
@@ -782,8 +777,8 @@ const TestimonialsSection = styled.div`
 
     .nav-btn-mobile {
       display: none;
-      width: 45px;
-      height: 45px;
+      width: 55px;
+      height: 55px;
       border-radius: 50%;
       border: 2px solid #C9A84C;
       background: white;
@@ -1045,12 +1040,12 @@ const ComparisonContainer = styled.div`
 
 const ComparisonGrid = styled.div`
   display: grid;
-  grid-template-columns: 280px repeat(${props => props.columns || 3}, 1fr);
+  grid-template-columns: 280px 1fr 1fr 1fr;
   gap: 15px;
   position: relative;
 
   @media (max-width: 1024px) {
-    grid-template-columns: 180px repeat(${props => props.columns || 3}, 1fr);
+    grid-template-columns: 180px 1fr 1fr 1fr;
   }
   @media (max-width: 768px) {
     display: flex;
@@ -1570,8 +1565,8 @@ const Home = () => {
   const [securityFeatures, setSecurityFeatures] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activePlanTab, setActivePlanTab] = useState('bike');
-  const [activeProductTab, setActiveProductTab] = useState('ALL');
+  const [activePlanTab, setActivePlanTab] = useState('LITE');
+  const [activeProductTab, setActiveProductTab] = useState('VEHICLE');
   const [heroBanners, setHeroBanners] = useState([]);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
@@ -1593,15 +1588,6 @@ const Home = () => {
         return;
       }
 
-      // 0. Fetch Settings to get Razorpay Key ID
-      const settingsRes = await api.get('/public/settings');
-      const RAZORPAY_KEY_ID = settingsRes.data.settings?.RAZORPAY_KEY_ID;
-
-      if (!RAZORPAY_KEY_ID) {
-        toast.error('Razorpay is not configured on the server');
-        return;
-      }
-
       // 1. Create Razorpay Order in Backend
       const orderRes = await api.post('/payments/create-order', {
         amount: plan.price,
@@ -1616,7 +1602,7 @@ const Home = () => {
 
       // 2. Open Razorpay Checkout Modal
       const options = {
-        key: RAZORPAY_KEY_ID, // Dynamic Key ID from admin panel
+        key: 'rzp_test_Sld6vwxfI5Afv3', // Test Key ID
         amount: order.amount,
         currency: order.currency,
         name: 'V-KAWACH Safety Plans',
@@ -1735,7 +1721,7 @@ const Home = () => {
     }, [photos]);
 
     if (!photos || photos.length === 0) {
-      return <img src="https://img.icons8.com/fluency/400/security-checked.png" alt={productName} style={{opacity: 1}}/>;
+      return <img src="/assets/v-kawach-packaging.jpg" alt={productName} style={{opacity: 1}}/>;
     }
 
     return (
@@ -1874,7 +1860,18 @@ const Home = () => {
               </BannerDots>
             )}
           </div>
+          {/* We hide the small preview image as it's now the full background */}
+          {!currentBgImage && (
+            <HeroImage style={{ animation: 'slideInRight 0.8s ease-out' }}>
+              <img 
+                src="/assets/v-kawach-packaging.jpg" 
+                alt="Banner" 
+                style={{ borderRadius: '30px', boxShadow: '0 30px 60px rgba(0,0,0,0.3)' }} 
+              />
+            </HeroImage>
+          )}
         </HeroContainer>
+        
         <style>{`
           @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
@@ -1903,7 +1900,7 @@ const Home = () => {
                     {getCategoryIcon(cat.name)}
                   </div>
                   <h3>{cat.name}</h3>
-                  <CategoryActionButton className="action-btn">Explore</CategoryActionButton>
+                  <CategoryActionButton className="action-btn">{t.home?.explore || 'Explore'}</CategoryActionButton>
                 </CategoryCard>
               );
             })}
@@ -1914,7 +1911,7 @@ const Home = () => {
           <div className="md:hidden text-center mt-4">
              <p className="text-[10px] font-black uppercase text-amber-500 tracking-widest flex items-center justify-center gap-2">
                 <span className="h-[1px] w-8 bg-slate-100"></span>
-                Swipe to See More
+                {t.home?.swipeMore || 'Swipe to See More'}
                 <span className="h-[1px] w-8 bg-slate-100"></span>
              </p>
           </div>
@@ -1922,10 +1919,155 @@ const Home = () => {
         </ScrollWrapper>
       </Section>
 
+      {/* ── B2B & Cloud Monitoring Showcase ── */}
+      <section style={{
+        background: 'linear-gradient(135deg, #0b1a33 0%, #122040 50%, #0b1a33 100%)',
+        padding: '80px 20px',
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+          <span style={{
+            display: 'inline-block', background: 'rgba(201,168,76,0.15)',
+            border: '1px solid rgba(201,168,76,0.4)', color: '#C9A84C',
+            padding: '6px 20px', borderRadius: '50px', fontSize: '0.82rem',
+            fontWeight: 800, letterSpacing: '1.5px', textTransform: 'uppercase',
+            marginBottom: '18px'
+          }}>{t.home?.ourServices || 'Our Services'}</span>
+          <h2 style={{
+            fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 900,
+            color: '#fff', lineHeight: 1.2, marginBottom: '14px'
+          }}>
+            {t.home?.poweringBusiness || 'Powering Businesses &'} <span style={{ color: '#C9A84C' }}>{t.home?.securingPremises || 'Securing Premises'}</span>
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', maxWidth: '550px', margin: '0 auto' }}>
+            {t.home?.businessDesc || 'From smart QR solutions for enterprises to real-time cloud-based CCTV monitoring — all in one ecosystem.'}
+          </p>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: '28px', maxWidth: '1100px', margin: '0 auto'
+        }}>
+          {/* B2B Solutions Card */}
+          <div style={{
+            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.2)',
+            borderRadius: '24px', padding: '40px 36px', position: 'relative', overflow: 'hidden',
+            transition: 'transform 0.3s, box-shadow 0.3s',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-6px)'; e.currentTarget.style.boxShadow = '0 24px 60px rgba(0,0,0,0.35)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+          >
+            {/* Glow accent */}
+            <div style={{
+              position: 'absolute', top: '-40px', right: '-40px',
+              width: '180px', height: '180px', borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%)',
+              pointerEvents: 'none'
+            }} />
+            <div style={{
+              width: '60px', height: '60px', borderRadius: '16px',
+              background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: '24px'
+            }}>
+              <Scan size={28} color="#C9A84C" />
+            </div>
+            <div style={{
+              display: 'inline-block', background: 'rgba(201,168,76,0.1)',
+              color: '#C9A84C', fontSize: '0.75rem', fontWeight: 800,
+              padding: '4px 12px', borderRadius: '50px', marginBottom: '14px',
+              letterSpacing: '1px', textTransform: 'uppercase'
+            }}>{t.home?.b2bBadge || 'B2B Solutions'}</div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff', marginBottom: '14px', lineHeight: 1.3 }}>
+              {t.home?.b2bTitle || 'Smart QR Codes for'} <br/><span style={{ color: '#C9A84C' }}>{t.home?.b2bHighlight || 'Businesses & Enterprises'}</span>
+            </h3>
+            <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, fontSize: '0.95rem', marginBottom: '28px' }}>
+              {t.home?.b2bDesc || 'Generate customizable V-Kawach QR codes for fleet management, asset tracking, employee IDs, inventory, and marketing campaigns — all from one dashboard.'}
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {(t.home?.b2bFeatures || ['Fleet & Asset Management', 'Employee Identity Cards', 'Marketing Campaigns', 'Dynamic QR Updates']).map(item => (
+                <li key={item} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem' }}>
+                  <CheckCircle2 size={16} color="#C9A84C" style={{ flexShrink: 0 }} />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link to="/b2b-solutions" style={{
+              display: 'inline-flex', alignItems: 'center', gap: '10px',
+              background: '#C9A84C', color: '#0b1a33', padding: '13px 30px',
+              borderRadius: '50px', fontWeight: 800, fontSize: '0.95rem',
+              textDecoration: 'none', transition: 'all 0.3s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#b8943c'; e.currentTarget.style.transform = 'translateX(4px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#C9A84C'; e.currentTarget.style.transform = 'translateX(0)'; }}
+            >
+              {t.home?.knowMore || 'Know More'} <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          {/* Cloud Monitoring Card */}
+          <div style={{
+            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(201,168,76,0.2)',
+            borderRadius: '24px', padding: '40px 36px', position: 'relative', overflow: 'hidden',
+            transition: 'transform 0.3s, box-shadow 0.3s',
+          }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-6px)'; e.currentTarget.style.boxShadow = '0 24px 60px rgba(0,0,0,0.35)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+          >
+            {/* Glow accent */}
+            <div style={{
+              position: 'absolute', top: '-40px', right: '-40px',
+              width: '180px', height: '180px', borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%)',
+              pointerEvents: 'none'
+            }} />
+            <div style={{
+              width: '60px', height: '60px', borderRadius: '16px',
+              background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: '24px'
+            }}>
+              <Eye size={28} color="#C9A84C" />
+            </div>
+            <div style={{
+              display: 'inline-block', background: 'rgba(201,168,76,0.1)',
+              color: '#C9A84C', fontSize: '0.75rem', fontWeight: 800,
+              padding: '4px 12px', borderRadius: '50px', marginBottom: '14px',
+              letterSpacing: '1px', textTransform: 'uppercase'
+            }}>{t.home?.cloudBadge || 'Cloud Monitoring'}</div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff', marginBottom: '14px', lineHeight: 1.3 }}>
+              {t.home?.cloudTitle || 'AI-Powered'} <span style={{ color: '#C9A84C' }}>{t.home?.cloudHighlight || '24/7 CCTV'}</span><br/>{t.home?.cloudSubTitle || 'Cloud Surveillance'}
+            </h3>
+            <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, fontSize: '0.95rem', marginBottom: '28px' }}>
+              {t.home?.cloudDesc || 'Monitor your home, shop, or property from anywhere in the world with real-time AI motion detection, instant alerts, and professional remote vigilance.'}
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {(t.home?.cloudFeatures || ['24/7 Live Vigilance', 'Shop & Premises Monitoring', "NRI's Property Protection", 'AI Motion Detection Alerts']).map(item => (
+                <li key={item} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem' }}>
+                  <CheckCircle2 size={16} color="#C9A84C" style={{ flexShrink: 0 }} />
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link to="/cloud-monitoring" style={{
+              display: 'inline-flex', alignItems: 'center', gap: '10px',
+              background: '#C9A84C', color: '#0b1a33', padding: '13px 30px',
+              borderRadius: '50px', fontWeight: 800, fontSize: '0.95rem',
+              textDecoration: 'none', transition: 'all 0.3s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#b8943c'; e.currentTarget.style.transform = 'translateX(4px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#C9A84C'; e.currentTarget.style.transform = 'translateX(0)'; }}
+            >
+              {t.home?.knowMore || 'Know More'} <ArrowRight size={16} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <Section bg="white">
         <SectionTitle>
-          <h2>How It Works <span>3 Easy Steps</span></h2>
-          <p>Protecting what matters most is now simpler than ever</p>
+          <h2>{t.home?.howItWorks || 'How It Works'} <span>{t.home?.howItWorksHighlight || '3 Easy Steps'}</span></h2>
+          <p>{t.home?.howItWorksDesc || 'Protecting what matters most is now simpler than ever'}</p>
           <div className="line" />
         </SectionTitle>
         <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
@@ -1941,10 +2083,9 @@ const Home = () => {
         </SectionTitle>
         <TabContainer>
           {[
-            { id: 'ALL', label: 'All Products', icon: <Icons.Package size={18} /> },
-            { id: 'VEHICLE', label: 'Vehicle', icon: <Icons.Car size={18} /> },
-            { id: 'PERSONAL', label: 'Personal', icon: <Icons.User size={18} /> },
-            { id: 'PETS', label: 'Pets', icon: <Icons.Dog size={18} /> }
+            { id: 'VEHICLE', label: t.home?.vehicle || 'Vehicle', icon: <Icons.Car size={18} /> },
+            { id: 'PERSONAL', label: t.home?.personal || 'Personal', icon: <Icons.User size={18} /> },
+            { id: 'PETS', label: t.home?.pets || 'Pets', icon: <Icons.Dog size={18} /> }
           ].map((tab) => (
             <TabButton
               key={tab.id}
@@ -1960,18 +2101,18 @@ const Home = () => {
         <ProductGrid>
           {products
             .filter(prod => {
-              if (activeProductTab === 'ALL') return true;
               const name = (prod.name || '').toLowerCase();
               if (activeProductTab === 'VEHICLE') return /\b(vehicle|car|cars|bike|bikes|cycle|parking)\b/i.test(name);
               if (activeProductTab === 'PERSONAL') return /\b(kid|child|woman|laptop|bag|luggage|luggge|gadget|office|corporate|identity|card)\b/i.test(name) && !/\b(car|bike)\b/i.test(name);
               if (activeProductTab === 'PETS') return /\b(pet|dog|cat|animal)\b/i.test(name);
               return true;
             })
+            .slice(0, 6)
             .map((prod) => {
               const photos = typeof prod.photos === 'string' ? JSON.parse(prod.photos || "[]") : (prod.photos || []);
               const dynamicData = typeof prod.dynamicData === 'string' ? JSON.parse(prod.dynamicData || "[]") : (prod.dynamicData || []);
               const features = dynamicData.slice(0, 4);
-              let imgSrc = photos[0] ? (photos[0].startsWith('http') ? photos[0] : `${apiUrl}${photos[0]}`) : "https://img.icons8.com/fluency/400/security-checked.png";
+              let imgSrc = photos[0] ? (photos[0].startsWith('http') ? photos[0] : `${apiUrl}${photos[0]}`) : "/assets/v-kawach-packaging.jpg";
               if (imgSrc.includes('images.icons8.com')) {
                 imgSrc = imgSrc.replace('images.icons8.com', 'img.icons8.com').replace('/bubbles/', '/fluency/');
               }
@@ -1984,12 +2125,17 @@ const Home = () => {
                   <div className="content">
                     <h3>{prod.name}</h3>
                     <div className="price-row">
-                      <div className="price">₹{prod.mrp || 0} <span>₹{Math.round((prod.mrp || 0) * 1.5)}</span></div>
-                      <div className="discount">33% OFF</div>
+                      <div className="price">
+                        ₹{prod.sellingPrice || prod.mrp || 0} 
+                        {prod.mrp && prod.sellingPrice && prod.mrp > prod.sellingPrice && <span>₹{prod.mrp}</span>}
+                      </div>
+                      {prod.mrp && prod.sellingPrice && prod.mrp > prod.sellingPrice && (
+                        <div className="discount">{Math.round(((prod.mrp - prod.sellingPrice) / prod.mrp) * 100)}% OFF</div>
+                      )}
                     </div>
                   </div>
                   <div className="footer">
-                    <ActionButton to={`/product/${prod.id}`} style={{ padding: '10px 15px', fontSize: '0.8rem' }}>VIEW DETAILS</ActionButton>
+                    <ActionButton to={`/product/${prod.id}`} style={{ padding: '10px 15px', fontSize: '0.8rem' }}>{t.home?.viewDetails || 'VIEW DETAILS'}</ActionButton>
                     <Button variant="secondary" style={{ padding: '10px 15px' }} onClick={(e) => handleAddToCart(e, prod)}>
                       <ShoppingCart size={18} />
                     </Button>
@@ -1998,6 +2144,11 @@ const Home = () => {
               );
             })}
         </ProductGrid>
+        <div style={{ textAlign: 'center', marginTop: '40px' }}>
+          <ActionButton to="/smart-qr" variant="outline" style={{ padding: '12px 30px', fontSize: '0.9rem' }}>
+            {t.home?.viewAllProducts || 'VIEW ALL PRODUCTS'} <Icons.ArrowRight size={18} style={{ marginLeft: '8px' }} />
+          </ActionButton>
+        </div>
       </Section>
 
       <Section bg="light">
@@ -2011,33 +2162,33 @@ const Home = () => {
         <CircularServiceGrid ref={featuresRef}>
             <ServiceCard to="/service/instant-call-masking">
               <div className="icon-wrapper"><Icons.PhoneForwarded /></div>
-              <span>Call Masking</span>
-              <div className="btn">Explore</div>
+              <span>{t.home?.services?.callMasking || 'Call Masking'}</span>
+              <div className="btn">{t.home?.services?.exploreBtn || 'Explore'}</div>
             </ServiceCard>
             <ServiceCard to="/service/qr-security">
               <div className="icon-wrapper"><Icons.Scan /></div>
-              <span>QR Security</span>
-              <div className="btn">Explore</div>
+              <span>{t.home?.services?.qrSecurity || 'QR Security'}</span>
+              <div className="btn">{t.home?.services?.exploreBtn || 'Explore'}</div>
             </ServiceCard>
             <ServiceCard to="/service/emergency-helplines">
               <div className="icon-wrapper"><Icons.PhoneCall /></div>
-              <span>Helplines</span>
-              <div className="btn">Explore</div>
+              <span>{t.home?.services?.helplines || 'Helplines'}</span>
+              <div className="btn">{t.home?.services?.exploreBtn || 'Explore'}</div>
             </ServiceCard>
             <ServiceCard to="/service/data-privacy">
               <div className="icon-wrapper"><Icons.ShieldCheck /></div>
-              <span>Data Privacy</span>
-              <div className="btn">Explore</div>
+              <span>{t.home?.services?.dataPrivacy || 'Data Privacy'}</span>
+              <div className="btn">{t.home?.services?.exploreBtn || 'Explore'}</div>
             </ServiceCard>
             <ServiceCard to="/service/verified">
               <div className="icon-wrapper"><Icons.BadgeCheck /></div>
-              <span>Verified Identity</span>
-              <div className="btn">Explore</div>
+              <span>{t.home?.services?.verifiedIdentity || 'Verified Identity'}</span>
+              <div className="btn">{t.home?.services?.exploreBtn || 'Explore'}</div>
             </ServiceCard>
             <ServiceCard to="/service/instant-alerts">
               <div className="icon-wrapper"><Icons.Zap /></div>
-              <span>Instant Alerts</span>
-              <div className="btn">Explore</div>
+              <span>{t.home?.services?.instantAlerts || 'Instant Alerts'}</span>
+              <div className="btn">{t.home?.services?.exploreBtn || 'Explore'}</div>
             </ServiceCard>
           </CircularServiceGrid>
           <ScrollButton className="right" onClick={() => scroll(featuresRef, 'right')}><ChevronRight /></ScrollButton>
@@ -2052,98 +2203,111 @@ const Home = () => {
         </SectionTitle>
 
         <ComparisonContainer>
-          {(() => {
-            const availableCategories = [...new Set(plans.filter(p => p.name && p.name !== 'free_trial').map(p => p.name.split('_')[0]))];
-            const categoriesToShow = availableCategories.length > 0 ? availableCategories : ['bike', 'car'];
-            
-            const currentCat = categoriesToShow.includes(activePlanTab) ? activePlanTab : categoriesToShow[0];
-            
-            const categoryPlans = plans.filter(p => p.name && p.name.startsWith(`${currentCat}_`)).sort((a, b) => a.price - b.price);
-            
-            const allFeaturesSet = new Set();
-            categoryPlans.forEach(p => {
-              if(p.features) p.features.forEach(f => allFeaturesSet.add(f));
-            });
-            const allFeatures = Array.from(allFeaturesSet);
+          <TabContainer style={{ marginBottom: '60px' }}>
+            {['BIKE SECURITY', 'CAR SECURITY'].map((cat) => (
+              <TabButton
+                key={cat}
+                active={activePlanTab === (cat === 'BIKE SECURITY' ? 'LITE' : 'ELITE')}
+                onClick={() => setActivePlanTab(cat === 'BIKE SECURITY' ? 'LITE' : 'ELITE')}
+                className="comparison-tab"
+              >
+                {cat === 'BIKE SECURITY' ? (t.home?.bikeSecurity || 'BIKE SECURITY') : (t.home?.carSecurity || 'CAR SECURITY')}
+              </TabButton>
+            ))}
+          </TabContainer>
 
-            return (
-              <>
-                <TabContainer style={{ marginBottom: '60px' }}>
-                  {categoriesToShow.map((cat) => (
-                    <TabButton
-                      key={cat}
-                      active={currentCat === cat}
-                      onClick={() => setActivePlanTab(cat)}
-                      className="comparison-tab"
+          <ComparisonScrollWrapper>
+            <ComparisonArrow className="left" onClick={() => scroll(comparisonRef, 'left')}>
+              <Icons.ChevronLeft size={24} />
+            </ComparisonArrow>
+
+            <ComparisonGrid ref={comparisonRef}>
+            <ComparisonColumn className="feature-labels">
+              <h3>{t.home?.compareTiers || 'Compare Tiers'}</h3>
+              {(t.home?.planFeatures || [
+                'Basic QR Scan',
+                'Direct Call (No Masking)',
+                'WhatsApp Alert (No Masking)',
+                'Privacy Masking',
+                'Call Masking (Protected)',
+                'WhatsApp Masking (Protected)',
+                'Live Location Sharing'
+              ]).map((f, i) => (
+                <div key={i} className="feature-cell label">{f}</div>
+              ))}
+            </ComparisonColumn>
+
+            {['LITE', 'PRO', 'ELITE'].map((tierName) => {
+              const isBike = activePlanTab === 'LITE';
+              const prefix = isBike ? 'bike_' : 'car_';
+              const plan = plans.find(p => p.name === `${prefix}${tierName.toLowerCase()}`);
+              
+              if (!plan) return <ComparisonColumn key={tierName} />;
+              
+              const planFeatures = (plan.features || []).map(f => f.toLowerCase());
+              
+              const labels = t.home?.planFeatures || [
+                'Basic QR Scan',
+                'Direct Call (No Masking)',
+                'WhatsApp Alert (No Masking)',
+                'Privacy Masking',
+                'Call Masking (Protected)',
+                'WhatsApp Masking (Protected)',
+                'Live Location Sharing'
+              ];
+
+              const keys = [
+                'scan',
+                'direct',
+                'whatsapp alert',
+                'privacy',
+                'call masking',
+                'whatsapp masking',
+                'location'
+              ];
+              
+              return (
+                <ComparisonColumn key={tierName} className={tierName === 'PRO' ? 'featured' : ''}>
+                  {tierName === 'PRO' && <div className="popular-badge">{t.home?.popular || 'Popular'}</div>}
+                  <div className="plan-header">
+                    <div className="tier">{tierName}</div>
+                    <div className="price">₹{plan.price} <span>/yr</span></div>
+                  </div>
+                  
+                  {keys.map((featKey, i) => {
+                    const hasFeature = planFeatures.some(f => f.includes(featKey));
+                    return (
+                      <div key={i} className="feature-cell">
+                        <span className="mobile-label">{labels[i]}</span>
+                        {hasFeature ? <Icons.Check size={20} className="check" /> : <span className="dash">—</span>}
+                      </div>
+                    );
+                  })}
+
+                  <div className="cta-box">
+                    <Button 
+                      onClick={() => handlePlanCheckout(plan)}
+                      style={{ 
+                        background: tierName === 'PRO' ? '#C9A84C' : 'transparent',
+                        color: tierName === 'PRO' ? '#0b1a33' : '#C9A84C',
+                        border: '2px solid #C9A84C',
+                        padding: '18px',
+                        fontSize: '1rem',
+                        boxShadow: tierName === 'PRO' ? '0 10px 20px rgba(201, 168, 76, 0.2)' : 'none'
+                      }}
                     >
-                      {cat.toUpperCase()} SECURITY
-                    </TabButton>
-                  ))}
-                </TabContainer>
+                      {t.home?.get || 'Get'} {tierName.charAt(0) + tierName.slice(1).toLowerCase()}
+                    </Button>
+                  </div>
+                </ComparisonColumn>
+              );
+            })}
+            </ComparisonGrid>
 
-                <ComparisonScrollWrapper>
-                  <ComparisonArrow className="left" onClick={() => scroll(comparisonRef, 'left')}>
-                    <Icons.ChevronLeft size={24} />
-                  </ComparisonArrow>
-
-                  <ComparisonGrid ref={comparisonRef} columns={categoryPlans.length}>
-                    <ComparisonColumn className="feature-labels">
-                      <h3>Compare Tiers</h3>
-                      {allFeatures.map((f, i) => (
-                        <div key={i} className="feature-cell label" style={{ textTransform: 'capitalize' }}>{f}</div>
-                      ))}
-                      {allFeatures.length === 0 && <div className="feature-cell label">No features defined</div>}
-                    </ComparisonColumn>
-
-                    {categoryPlans.map((plan) => {
-                      const tierName = plan.name.split('_')[1]?.toUpperCase() || 'PLAN';
-                      const isPopular = tierName === 'PRO' || tierName === 'PREMIUM';
-                      
-                      return (
-                        <ComparisonColumn key={plan.id} className={isPopular ? 'featured' : ''}>
-                          {isPopular && <div className="popular-badge">Popular</div>}
-                          <div className="plan-header">
-                            <div className="tier">{tierName}</div>
-                            <div className="price">₹{plan.price} <span>/yr onwards</span></div>
-                          </div>
-                          
-                          {allFeatures.map((feat, i) => {
-                            const hasFeature = plan.features?.includes(feat);
-                            return (
-                              <div key={i} className="feature-cell">
-                                <span className="mobile-label" style={{ textTransform: 'capitalize' }}>{feat}</span>
-                                {hasFeature ? <Icons.Check size={20} className="check" /> : <span className="dash">—</span>}
-                              </div>
-                            );
-                          })}
-
-                          <div className="cta-box">
-                            <Button 
-                              onClick={() => handlePlanCheckout(plan)}
-                              style={{ 
-                                background: isPopular ? '#C9A84C' : 'transparent',
-                                color: isPopular ? '#0b1a33' : '#C9A84C',
-                                border: '2px solid #C9A84C',
-                                padding: '18px',
-                                fontSize: '1rem',
-                                boxShadow: isPopular ? '0 10px 20px rgba(201, 168, 76, 0.2)' : 'none'
-                              }}
-                            >
-                              Get {tierName}
-                            </Button>
-                          </div>
-                        </ComparisonColumn>
-                      );
-                    })}
-                  </ComparisonGrid>
-
-                  <ComparisonArrow className="right" onClick={() => scroll(comparisonRef, 'right')}>
-                    <Icons.ChevronRight size={24} />
-                  </ComparisonArrow>
-                </ComparisonScrollWrapper>
-              </>
-            );
-          })()}
+            <ComparisonArrow className="right" onClick={() => scroll(comparisonRef, 'right')}>
+              <Icons.ChevronRight size={24} />
+            </ComparisonArrow>
+          </ComparisonScrollWrapper>
         </ComparisonContainer>
       </Section>
 
@@ -2151,23 +2315,23 @@ const Home = () => {
         <TravelGrid>
           <div>
             <SectionTitle className="travel-section-title" style={{ textAlign: 'left', margin: 0 }}>
-              <h2 style={{ fontSize: '3rem' }}>Travel with <span>Absolute Peace</span></h2>
-              <p style={{ margin: '25px 0' }}>Never worry about lost luggage again. Our Smart QR tags ensure that your bags are always connected to you, anywhere in the world.</p>
+              <h2 style={{ fontSize: '3rem' }}>{t.home?.travelTitle || 'Travel with'} <span>{t.home?.travelHighlight || 'Absolute Peace'}</span></h2>
+              <p style={{ margin: '25px 0' }}>{t.home?.travelDesc || 'Never worry about lost luggage again. Our Smart QR tags ensure that your bags are always connected to you, anywhere in the world.'}</p>
               <div className="line" style={{ margin: '0 0 30px 0' }} />
             </SectionTitle>
             <TravelFeatures>
               <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
                 <Icons.Globe size={24} color="#C9A84C" />
-                <h4 style={{ margin: '10px 0 5px' }}>Global Reach</h4>
-                <p style={{ fontSize: '0.85rem', color: '#666' }}>Works worldwide with zero roaming charges for the finder.</p>
+                <h4 style={{ margin: '10px 0 5px' }}>{t.home?.globalReach || 'Global Reach'}</h4>
+                <p style={{ fontSize: '0.85rem', color: '#666' }}>{t.home?.globalReachDesc || 'Works worldwide with zero roaming charges for the finder.'}</p>
               </div>
               <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '16px' }}>
                 <Icons.ShieldCheck size={24} color="#C9A84C" />
-                <h4 style={{ margin: '10px 0 5px' }}>ID Privacy</h4>
-                <p style={{ fontSize: '0.85rem', color: '#666' }}>Your personal contact details are never exposed to the public.</p>
+                <h4 style={{ margin: '10px 0 5px' }}>{t.home?.idPrivacy || 'ID Privacy'}</h4>
+                <p style={{ fontSize: '0.85rem', color: '#666' }}>{t.home?.idPrivacyDesc || 'Your personal contact details are never exposed to the public.'}</p>
               </div>
             </TravelFeatures>
-            <Button as="a" href="/#products" variant="primary" style={{ padding: '15px 40px', textDecoration: 'none' }}>EXPLORE TAGS</Button>
+            <Button as={Link} to="/smart-qr" variant="primary" style={{ padding: '15px 40px' }}>{t.home?.exploreTags || 'EXPLORE TAGS'}</Button>
           </div>
           <div style={{ position: 'relative' }}>
             <img src="/assets/luggage-sticker-red.jpg" alt="Luggage Tags" style={{ width: '100%', borderRadius: '40px', boxShadow: '0 40px 80px rgba(0,0,0,0.1)' }} />
@@ -2182,7 +2346,7 @@ const Home = () => {
       <TestimonialsSection>
         <div className="section-header">
           <Icons.Quote size={42} className="quote-icon" />
-          <h2><span>What our</span>Customers Say</h2>
+          <h2><span>{t.home?.testimonialsTitle || 'What our'}</span>{t.home?.testimonialsHighlight || 'Customers Say'}</h2>
         </div>
         <div className="carousel-wrapper">
           <button className="nav-btn" onClick={() => setTestimonialSlide(s => (s - 1 + 8) % 8)}>
@@ -2245,7 +2409,7 @@ const Home = () => {
       <FAQSection>
         <div className="faq-inner">
           <div className="faq-header">
-            <h2>Frequently Asked Questions<span /></h2>
+            <h2>{t.home?.faqTitle || 'Frequently Asked Questions'}<span /></h2>
             <p>V-KAWACH के बारे में सामान्य प्रश्नों के उत्तर पाएं</p>
           </div>
           {[
@@ -2276,8 +2440,8 @@ const Home = () => {
 
       <Section bg="light">
         <AboutContent>
-          <div className="subtitle">OUR MISSION</div>
-          <h2>About <span>V-KAWACH</span></h2>
+          <div className="subtitle">{t.home?.ourMission || 'OUR MISSION'}</div>
+          <h2>{t.home?.aboutTitle || 'About'} <span>V-KAWACH</span></h2>
           <div className="content-text" dangerouslySetInnerHTML={{ __html: t.about.content }} />
 
           <div className="stats">
@@ -2285,19 +2449,19 @@ const Home = () => {
               <div className="icon-circle"><Icons.Clock size={40} /></div>
               <h3>24/7</h3>
               <span>{t.about.stats.monitoring}</span>
-              <p>Round-the-clock monitoring and instant emergency response connectivity whenever you need it.</p>
+              <p>{t.home?.monitoringDesc || 'Round-the-clock monitoring and instant emergency response connectivity whenever you need it.'}</p>
             </div>
             <div className="stat-item">
               <div className="icon-circle"><Icons.Eye size={40} /></div>
-              <h3>Vision</h3>
+              <h3>{t.home?.visionTitle || 'Vision'}</h3>
               <span>{t.about.stats.activeUsers}</span>
-              <p>Our core mission is to impact 10,000+ lives by making advanced safety accessible to everyone.</p>
+              <p>{t.home?.visionDesc || 'Our core mission is to impact 10,000+ lives by making advanced safety accessible to everyone.'}</p>
             </div>
             <div className="stat-item">
               <div className="icon-circle"><Icons.Users size={40} /></div>
-              <h3>Partners</h3>
+              <h3>{t.home?.partnersTitle || 'Partners'}</h3>
               <span>{t.social.stats.partnersDesc}</span>
-              <p>We are actively looking for dedicated partners to expand our safety network across the nation.</p>
+              <p>{t.home?.partnersDesc || 'We are actively looking for dedicated partners to expand our safety network across the nation.'}</p>
             </div>
           </div>
         </AboutContent>

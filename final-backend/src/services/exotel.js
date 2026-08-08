@@ -64,6 +64,7 @@ const sendExotelWhatsapp = async ({ to, templateName, components = [] }) => {
     whatsapp: {
       messages: [
         {
+          from: process.env.EXOTEL_WHATSAPP_NUMBER || process.env.EXOTEL_CALLER_ID,
           to: to,
           content: {
             type: "template",
@@ -88,4 +89,33 @@ const sendExotelWhatsapp = async ({ to, templateName, components = [] }) => {
   return response.data;
 };
 
-module.exports = { initiateExotelCall, sendExotelSms, sendExotelWhatsapp };
+const sendExotelWhatsappText = async ({ to, text }) => {
+  const { EXOTEL_SID, EXOTEL_API_KEY, EXOTEL_API_TOKEN, EXOTEL_SUBDOMAIN } = process.env;
+  
+  const url = `https://${EXOTEL_API_KEY}:${EXOTEL_API_TOKEN}@${EXOTEL_SUBDOMAIN}/v2/accounts/${EXOTEL_SID}/messages`;
+  
+  const payload = {
+    whatsapp: {
+      messages: [
+        {
+          from: process.env.EXOTEL_WHATSAPP_NUMBER || process.env.EXOTEL_CALLER_ID,
+          to: to,
+          content: {
+            type: "text",
+            text: {
+              body: text
+            }
+          }
+        }
+      ]
+    }
+  };
+
+  const response = await axios.post(url, payload, {
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  return response.data;
+};
+
+module.exports = { initiateExotelCall, sendExotelSms, sendExotelWhatsapp, sendExotelWhatsappText };

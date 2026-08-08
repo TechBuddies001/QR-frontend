@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
+import { translations } from '../utils/translations';
 import styled from 'styled-components';
 import axios from 'axios';
 import { Mail, Phone, MapPin } from 'lucide-react';
@@ -157,6 +159,8 @@ const ErrorMessage = styled.div`
 `;
 
 const ContactUs = () => {
+  const { language } = useLanguage();
+  const t = translations[language];
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -189,13 +193,13 @@ const ContactUs = () => {
       <Content>
         <Container>
           <ContactInfo>
-            <h2>Get In Touch</h2>
-            <p>Have questions about our Smart QR tags or enterprise security solutions? Fill out the form, and our team will get back to you shortly.</p>
+            <h2>{t.contactNew?.title || 'Get In Touch'}</h2>
+            <p>{t.contactNew?.subtitle || 'Have questions about our...'}</p>
             
             <InfoItem>
               <div className="icon"><Phone size={20} /></div>
               <div className="details">
-                <h4>Phone / WhatsApp</h4>
+                <h4>{t.contactNew?.phone || 'Phone / WhatsApp'}</h4>
                 <p><a href="tel:+919412300716">+91 94123 00716</a></p>
               </div>
             </InfoItem>
@@ -203,7 +207,7 @@ const ContactUs = () => {
             <InfoItem>
               <div className="icon"><Mail size={20} /></div>
               <div className="details">
-                <h4>Email</h4>
+                <h4>{t.contactNew?.email || 'Email'}</h4>
                 <p><a href="mailto:Info@tarkshyasolution.in">Info@tarkshyasolution.in</a></p>
               </div>
             </InfoItem>

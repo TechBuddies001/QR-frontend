@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useContext, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,8 @@ import {
   FlatList,
   Dimensions,
   Image,
+  ImageBackground,
+  Modal,
   TextInput,
   Alert,
   Linking
@@ -47,6 +49,7 @@ import api from '../utils/api';
 import { theme } from '../utils/theme';
 import { Accelerometer } from 'expo-sensors';
 import * as Location from 'expo-location';
+import { FindLocationModal, OfferModal, IvrCallModal, PermissionModal } from '../components/Popups';
 
 const { width } = Dimensions.get('window');
 
@@ -65,7 +68,7 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <View style={{ flex: 1, padding: 20, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FEE2E2' }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#991B1B', marginBottom: 10 }}>Render Error</Text>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#0B1A33', marginBottom: 10 }}>Render Error</Text>
           <Text style={{ fontSize: 14, color: '#B91C1C', textAlign: 'center', marginBottom: 20 }}>
             {this.state.error?.toString()}
           </Text>
@@ -84,6 +87,9 @@ function DashboardScreen({ navigation }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [heroBanners, setHeroBanners] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
 
 
   // Tabs state: 'HOME', 'PRODUCT', 'IVR_CALL', 'HELPLINE', 'SOS'
@@ -97,11 +103,17 @@ function DashboardScreen({ navigation }) {
 
   // Home banner slider state
   const [activeSlide, setActiveSlide] = useState(0);
+  const bannerScrollRef = useRef(null);
 
   // IVR call state
   const [ivrTagCode, setIvrTagCode] = useState('');
   const [ivrPhone, setIvrPhone] = useState('');
   const [ivrLoading, setIvrLoading] = useState(false);
+  const [showFindLocation, setShowFindLocation] = useState(false);
+  const [showOffer, setShowOffer] = useState(false);
+  const [showIvrModal, setShowIvrModal] = useState(false);
+  const [showPermission, setShowPermission] = useState(false);
+  const [serviceInfo, setServiceInfo] = useState(null); // { title, desc, icon }
 
   const banners = [
     {
@@ -122,7 +134,7 @@ function DashboardScreen({ navigation }) {
       title: 'ACCIDENT SUPPORT',
       desc: 'Fast, reliable accident support for peace of mind. Scan to notify emergency contacts.',
       color: '#FEF2F2',
-      textColor: '#991B1B',
+      textColor: '#0B1A33',
       borderColor: '#FECACA'
     },
     {
@@ -143,8 +155,29 @@ function DashboardScreen({ navigation }) {
 
   const fetchDashboardData = async () => {
     try {
-      const res = await api.get('/user/dashboard');
-      setData(res.data);
+      const [resDashboard, resSettings, resCats, resProds] = await Promise.all([
+        api.get('/user/dashboard').catch(() => ({ data: {} })),
+        api.get('/public/settings').catch(() => ({ data: {} })),
+        api.get('/categories').catch(() => ({ data: {} })),
+        api.get('/products?type=SAFETY').catch(() => ({ data: {} }))
+      ]);
+
+      if (resDashboard.data) setData(resDashboard.data);
+
+      if (resSettings.data?.settings?.heroBannersList) {
+        try {
+          setHeroBanners(JSON.parse(resSettings.data.settings.heroBannersList));
+        } catch (e) { console.error('Banner parse error', e); }
+      }
+
+      if (resCats.data?.categories) {
+        const filtered = resCats.data.categories.filter(c => c.name !== 'Smart Home' && c.isActive !== false);
+        setCategories(filtered);
+      }
+
+      if (resProds.data?.products) {
+        setProducts(resProds.data.products);
+      }
     } catch (err) {
       console.error('Error fetching dashboard', err);
     } finally {
@@ -160,12 +193,18 @@ function DashboardScreen({ navigation }) {
 
   // Auto-scroll slider
   useEffect(() => {
-    if (currentTab !== 'HOME') return;
+    if (currentTab !== 'HOME' || !heroBanners || heroBanners.length === 0) return;
     const interval = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % banners.length);
+      setActiveSlide((prev) => {
+        const nextSlide = (prev + 1) % heroBanners.length;
+        if (bannerScrollRef.current) {
+          bannerScrollRef.current.scrollTo({ x: nextSlide * (width - 30), animated: true });
+        }
+        return nextSlide;
+      });
     }, 4500);
     return () => clearInterval(interval);
-  }, [currentTab]);
+  }, [currentTab, heroBanners]);
 
   useEffect(() => {
     let subscription;
@@ -274,329 +313,311 @@ function DashboardScreen({ navigation }) {
       contentContainerStyle={styles.scrollContent}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      {/* Search/Welcome title & Partner */}
-      <View style={styles.welcomeBanner}>
-        <View style={styles.welcomeInfo}>
-          <Text style={styles.welcomeTitle}>Hello, Welcome To</Text>
-          <Image source={require('../../assets/icon.png')} style={{ width: 140, height: 40, resizeMode: 'contain', marginVertical: 4 }} />
-          <Text style={styles.welcomeSubtitle}>मुसीबत में काम आए ! दुर्घटना में जान बचाए !!</Text>
-        </View>
-        <TouchableOpacity style={styles.partnerBtn} onPress={() => Alert.alert('Partner Portal', 'Partner verification flow coming soon.')}>
-          <Plus size={16} color={theme.colors.primary} />
-          <Text style={styles.partnerBtnText}>PARTNER</Text>
+      {/* Top Actions Row */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+        <TouchableOpacity style={{ alignItems: 'center', width: '30%' }} onPress={() => setShowOffer(true)}>
+          <View style={{ backgroundColor: '#EFF6FF', padding: 18, borderRadius: 30, shadowColor: '#0B1A33', shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.15, shadowRadius: 8, elevation: 4, marginBottom: 8 }}>
+            <Shield size={26} color="#0B1A33" />
+          </View>
+          <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#0B1A33', textAlign: 'center' }}>PHONE THEFT</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{ alignItems: 'center', width: '30%' }} onPress={() => setShowFindLocation(true)}>
+          <View style={{ backgroundColor: '#EFF6FF', padding: 18, borderRadius: 30, shadowColor: '#0B1A33', shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.15, shadowRadius: 8, elevation: 4, marginBottom: 8 }}>
+            <MapPin size={26} color="#0B1A33" />
+          </View>
+          <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#0B1A33', textAlign: 'center' }}>FIND LOCATION</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{ alignItems: 'center', width: '30%' }} onPress={() => navigation.navigate('Tracking')}>
+          <View style={{ backgroundColor: '#EFF6FF', padding: 18, borderRadius: 30, shadowColor: '#0B1A33', shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.15, shadowRadius: 8, elevation: 4, marginBottom: 8 }}>
+            <Map size={26} color="#0B1A33" />
+          </View>
+          <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#0B1A33', textAlign: 'center' }}>ROUTE TRACKING</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Info Carousel Banners */}
-      <View style={styles.carouselContainer}>
-        <View
-          style={[
-            styles.carouselCard,
-            {
-              backgroundColor: banners[activeSlide].color,
-              borderColor: banners[activeSlide].borderColor
-            }
-          ]}
-        >
-          <View style={styles.carouselHeader}>
-            <Text style={[styles.carouselTitle, { color: banners[activeSlide].textColor }]}>
-              {banners[activeSlide].title}
-            </Text>
-            <Shield size={16} color={banners[activeSlide].textColor} />
-          </View>
-          <Text style={styles.carouselDesc}>{banners[activeSlide].desc}</Text>
-          <TouchableOpacity style={styles.carouselReadMore}>
-            <Text style={[styles.carouselReadMoreText, { color: banners[activeSlide].textColor }]}>Read More</Text>
-          </TouchableOpacity>
+      {/* Main Banner section */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#000' }}>हर मुश्किल में,</Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#0B1A33' }}>V-Kawach</Text>
+          <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#000' }}>Your Safety Partner</Text>
         </View>
-
-        {/* Indicators */}
-        <View style={styles.indicatorRow}>
-          {banners.map((_, idx) => (
-            <TouchableOpacity
-              key={idx}
-              style={[
-                styles.indicatorDot,
-                idx === activeSlide ? { backgroundColor: theme.colors.primary, width: 20 } : null
-              ]}
-              onPress={() => setActiveSlide(idx)}
-            />
-          ))}
-        </View>
+        <TouchableOpacity style={{ backgroundColor: '#C9A84C', borderRadius: 20, paddingHorizontal: 15, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', shadowColor: '#C9A84C', shadowOffset: {width: 0, height: 3}, shadowOpacity: 0.4, shadowRadius: 5, elevation: 3 }}>
+          <Users size={16} color="#0B1A33" style={{ marginRight: 5 }} />
+          <Text style={{ color: '#0B1A33', fontSize: 10, fontWeight: 'bold', textAlign: 'center' }}>BECOME A{'\n'}DISTRIBUTOR</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Grid Navigation Menu (12 items based on V-KAWACH system) */}
-      <View style={styles.gridMenu}>
-        {[
-          { label: 'FIND LOCATION', icon: <MapPin size={22} color={theme.colors.primary} />, route: 'Tracking' },
-          { label: 'ROUTE TRACKING', icon: <Map size={22} color={theme.colors.primary} />, route: 'Tracking' },
-          { label: 'CRASH DETECTION', icon: <Car size={22} color={theme.colors.primary} />, action: () => Alert.alert('Crash Detection', 'No crashes detected. Sensor active.') },
-          { label: 'OVERSPEED ALERT', icon: <Gauge size={22} color={theme.colors.primary} />, action: () => Alert.alert('Overspeed Alert', 'Speed limits are within normal parameters.') },
-          { label: 'RASHDRIVE ALERT', icon: <TriangleAlert size={22} color={theme.colors.primary} />, action: () => Alert.alert('Rash Drive', 'Driving behavior is normal.') },
-          { label: 'FAMILY CONTROL', icon: <Users size={22} color={theme.colors.primary} />, action: () => Alert.alert('Family Control', 'Manage emergency contacts here.') },
-          { label: 'AMBULANCE HELP', icon: <Ambulance size={22} color="#DC2626" />, action: () => Linking.openURL('tel:108') },
-          { label: 'HOSPITAL HELP', icon: <Hospital size={22} color="#DC2626" />, action: () => Alert.alert('Hospital Help', 'Locating nearest hospitals...') },
-          { label: 'POLICE HELP', icon: <ShieldAlert size={22} color="#1E3A8A" />, action: () => Linking.openURL('tel:112') },
-          { label: 'SOS', icon: <TriangleAlert size={22} color="#DC2626" />, action: triggerSOS },
-          { label: 'HELPLINES', icon: <PhoneCall size={22} color={theme.colors.primary} />, action: () => setCurrentTab('HELPLINE') },
-          { label: 'SCANNING', icon: <QrCode size={22} color={theme.colors.primary} />, route: 'ScanQR' },
-        ].map((item, idx) => (
-          <TouchableOpacity 
-            key={idx} 
-            style={styles.gridItem} 
-            onPress={() => item.route ? navigation.navigate(item.route) : item.action && item.action()}
+      {/* Slider Banner */}
+      {heroBanners && heroBanners.length > 0 ? (
+        <View style={{ marginBottom: 25 }}>
+          <ScrollView 
+            ref={bannerScrollRef}
+            horizontal 
+            pagingEnabled 
+            showsHorizontalScrollIndicator={false} 
+            style={{ borderRadius: 20, overflow: 'hidden' }}
+            onMomentumScrollEnd={(e) => {
+              const newIndex = Math.round(e.nativeEvent.contentOffset.x / (width - 30));
+              setActiveSlide(newIndex);
+            }}
           >
-            <View style={[styles.gridIconContainer, { backgroundColor: '#EFF6FF' }]}>
-              {item.icon}
+            {heroBanners.map((banner, idx) => {
+              const baseUrl = api.defaults.baseURL.replace('/api', '');
+              const imgPath = banner.imageUrl?.startsWith('/') ? banner.imageUrl : `/${banner.imageUrl}`;
+              const imageUri = banner.imageUrl?.startsWith('http') ? banner.imageUrl : `${baseUrl}${imgPath}`;
+              return (
+                <ImageBackground key={idx} source={{ uri: imageUri }} style={{ width: width - 30, height: 200, padding: 20, justifyContent: 'center' }} imageStyle={{ borderRadius: 20, opacity: 0.5, backgroundColor: '#0B1A33' }}>
+                  <View style={{ backgroundColor: 'rgba(11, 26, 51, 0.7)', ...StyleSheet.absoluteFillObject, borderRadius: 20 }} />
+                  <Text style={{ color: '#E2E8F0', fontSize: 14, fontWeight: 'bold' }}>{banner.taglineDim || 'SECURE EVERY MOMENT'}</Text>
+                  <Text style={{ color: '#C9A84C', fontSize: 24, fontWeight: '900', letterSpacing: 1, marginVertical: 5 }}>{banner.taglineHighlight || 'SMART ID TECHNOLOGY'}</Text>
+                  <Text style={{ color: '#E2E8F0', fontSize: 12, marginBottom: 15, lineHeight: 18, width: '90%' }}>{banner.subtext || 'Enhance safety with smart digital identity solutions, real-time access control, and instant emergency support.'}</Text>
+                  <View style={{ flexDirection: 'row' }}>
+                    {(banner.button1Text || 'GET STARTED') && (
+                      <TouchableOpacity style={{ backgroundColor: '#C9A84C', borderRadius: 25, paddingVertical: 8, paddingHorizontal: 15, marginRight: 10 }}>
+                        <Text style={{ color: '#0B1A33', fontWeight: 'bold', fontSize: 12 }}>{banner.button1Text || 'GET STARTED'}</Text>
+                      </TouchableOpacity>
+                    )}
+                    {(banner.button2Text || 'WATCH DEMO') && (
+                      <TouchableOpacity style={{ borderWidth: 1, borderColor: '#C9A84C', borderRadius: 25, paddingVertical: 8, paddingHorizontal: 15 }}>
+                        <Text style={{ color: '#C9A84C', fontWeight: 'bold', fontSize: 12 }}>{banner.button2Text || 'WATCH DEMO'}</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </ImageBackground>
+              );
+            })}
+          </ScrollView>
+          {/* Pagination Dots */}
+          {heroBanners.length > 1 && (
+            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 10 }}>
+              {heroBanners.map((_, idx) => (
+                <View 
+                  key={idx} 
+                  style={{ 
+                    width: activeSlide === idx ? 20 : 8, 
+                    height: 8, 
+                    borderRadius: 4, 
+                    backgroundColor: activeSlide === idx ? '#C9A84C' : '#CBD5E1', 
+                    marginHorizontal: 4 
+                  }} 
+                />
+              ))}
             </View>
-            <Text style={styles.gridLabel}>{item.label}</Text>
+          )}
+        </View>
+      ) : (
+        <View style={{ backgroundColor: '#0B1A33', borderRadius: 20, padding: 20, marginBottom: 25, shadowColor: '#0B1A33', shadowOffset: {width: 0, height: 6}, shadowOpacity: 0.3, shadowRadius: 10, elevation: 6, flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: '#C9A84C', fontSize: 20, fontWeight: '900', letterSpacing: 1 }}>CRASH DETECTION</Text>
+            <Text style={{ color: '#E2E8F0', fontSize: 12, marginTop: 8, marginBottom: 15, lineHeight: 18 }}>Instantly senses accidents on the road and alerts family with your live location.</Text>
+            <TouchableOpacity style={{ backgroundColor: '#C9A84C', borderRadius: 25, paddingVertical: 6, paddingHorizontal: 20, alignSelf: 'flex-start' }}>
+              <Text style={{ color: '#0B1A33', fontWeight: 'bold', fontSize: 12 }}>Read More</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ width: 90, height: 90, backgroundColor: 'rgba(201, 168, 76, 0.15)', borderRadius: 45, justifyContent: 'center', alignItems: 'center', marginLeft: 15 }}>
+            <Car size={45} color="#C9A84C" />
+          </View>
+        </View>
+      )}
+
+      {/* PRODUCT KIT */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderLeftWidth: 4, borderLeftColor: '#0B1A33', paddingLeft: 10, marginBottom: 15 }}>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#000' }}>PRODUCT KIT</Text>
+        <TouchableOpacity style={{ borderWidth: 1, borderColor: '#0B1A33', borderRadius: 5, paddingHorizontal: 15, paddingVertical: 5 }} onPress={() => setCurrentTab('PRODUCT')}>
+          <Text style={{ color: '#000', fontSize: 12, fontWeight: 'bold' }}>VIEW ALL</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 25, paddingLeft: 2, paddingBottom: 10 }}>
+        {products.length > 0 ? products.map((prod, idx) => {
+          const baseUrl = api.defaults.baseURL.replace('/api', '');
+          const imgUri = prod.imageUrl?.startsWith('http') ? prod.imageUrl : `${baseUrl}${prod.imageUrl?.startsWith('/') ? prod.imageUrl : '/' + prod.imageUrl}`;
+          return (
+            <TouchableOpacity key={prod._id || idx} style={{ alignItems: 'center', marginRight: 15, width: 100 }} onPress={() => navigation.navigate('ProductDetails', { product: prod.name, productId: prod._id })}>
+              <View style={{ width: 100, height: 100, backgroundColor: '#fff', borderRadius: 20, shadowColor: '#000', shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5, justifyContent: 'center', alignItems: 'center', marginBottom: 8, overflow: 'hidden' }}>
+                {prod.imageUrl ? (
+                  <Image source={{ uri: imgUri }} style={{ width: 90, height: 90, borderRadius: 16 }} resizeMode="cover" />
+                ) : (
+                  <QrCode size={45} color="#0B1A33" />
+                )}
+              </View>
+              <Text style={{ fontSize: 11, fontWeight: '700', color: '#333', textAlign: 'center' }}>{prod.name}</Text>
+            </TouchableOpacity>
+          );
+        }) : ['Car Safety QR', 'Car Premium QR', 'Bike Safety QR', 'Bike Premium QR'].map((prod, idx) => (
+          <TouchableOpacity key={idx} style={{ alignItems: 'center', marginRight: 15, width: 100 }} onPress={() => navigation.navigate('ProductDetails', { product: prod })}>
+            <View style={{ width: 100, height: 100, backgroundColor: '#fff', borderRadius: 20, shadowColor: '#000', shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.1, shadowRadius: 8, elevation: 5, justifyContent: 'center', alignItems: 'center', marginBottom: 8 }}>
+              <QrCode size={45} color="#0B1A33" />
+            </View>
+            <Text style={{ fontSize: 11, fontWeight: '700', color: '#333', textAlign: 'center' }}>{prod}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* CATEGORIES */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderLeftWidth: 4, borderLeftColor: '#0B1A33', paddingLeft: 10, marginBottom: 15 }}>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#000' }}>CATEGORIES</Text>
+      </View>
+
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 25 }}>
+        {(categories.length > 0 ? categories : [
+          { _id: '1', name: 'Accident Safety' },
+          { _id: '2', name: 'Wrong Parking' },
+          { _id: '3', name: 'Family Safety' },
+          { _id: '4', name: 'Lost and Found' },
+          { _id: '5', name: 'Safety Products' },
+          { _id: '6', name: 'Emergency Services' }
+        ]).map((cat, idx) => {
+          const lower = (cat.name || '').toLowerCase();
+          let icon, bg, border;
+          if (lower.includes('accident') || lower.includes('crash')) { icon = <TriangleAlert size={30} color="#C9A84C" />; bg = '#FEE2E2'; border = '#C9A84C'; }
+          else if (lower.includes('parking') || lower.includes('vehicle') || lower.includes('bike')) { icon = <Car size={30} color="#C9A84C" />; bg = '#FEF2F2'; border = '#C9A84C'; }
+          else if (lower.includes('family') || lower.includes('child') || lower.includes('kid')) { icon = <Users size={30} color="#1E3A8A" />; bg = '#EFF6FF'; border = '#1E40AF'; }
+          else if (lower.includes('lost') || lower.includes('found') || lower.includes('location')) { icon = <MapPin size={30} color="#0284C7" />; bg = '#E0F2FE'; border = '#0284C7'; }
+          else if (lower.includes('safety') || lower.includes('product') || lower.includes('shield')) { icon = <ShieldCheck size={30} color="#0B1A33" />; bg = '#E0E7FF'; border = '#C9A84C'; }
+          else if (lower.includes('emergency') || lower.includes('medical') || lower.includes('ambulance')) { icon = <Ambulance size={30} color="#C9A84C" />; bg = '#FEF2F2'; border = '#C9A84C'; }
+          else { icon = <ShieldCheck size={30} color="#0B1A33" />; bg = '#F1F5F9'; border = '#94A3B8'; }
+          return (
+            <TouchableOpacity key={cat._id || idx} style={{ width: '48%', backgroundColor: '#fff', borderRadius: 12, overflow: 'hidden', marginBottom: 15, shadowColor: border, shadowOffset: {width: 0, height: 3}, shadowOpacity: 0.15, shadowRadius: 5, elevation: 3 }}
+              onPress={() => navigation.navigate('ProductDetails', { category: cat.name, categoryId: cat._id })}>
+              <View style={{ height: 60, justifyContent: 'center', alignItems: 'center', backgroundColor: bg }}>
+                {icon}
+              </View>
+              <View style={{ paddingVertical: 10, backgroundColor: '#fff' }}>
+                <Text style={{ fontSize: 11, fontWeight: '800', color: border, textAlign: 'center', letterSpacing: 0.5 }}>{cat.name.toUpperCase()}</Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {/* KEY SERVICES */}
+      <View style={{ borderLeftWidth: 4, borderLeftColor: '#0B1A33', paddingLeft: 10, marginBottom: 15 }}>
+        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#000' }}>KEY SERVICES</Text>
+        <Text style={{ fontSize: 10, color: '#666' }}>( CLICK TO VIEW MORE )</Text>
+      </View>
+
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', backgroundColor: '#F8FAFC', padding: 15, borderRadius: 20 }}>
+        {[
+          { label: 'Find\nLocation', icon: <MapPin size={22} color="#C9A84C" />, desc: 'Track the real-time location of your registered tags. Know exactly where your vehicle, family member, or asset is at any moment.' },
+          { label: 'Route\nTracking', icon: <Map size={22} color="#C9A84C" />, desc: 'View complete travel route history of your tag. See where it has been throughout the day with timestamps and path visualization.' },
+          { label: 'Crash\nDetection', icon: <Car size={22} color="#C9A84C" />, desc: 'Automatically detects sudden impact or accidents using sensors. Instantly alerts emergency contacts with live GPS location.' },
+          { label: 'Overspeed\nAlert', icon: <Gauge size={22} color="#0B1A33" />, desc: 'Get notified when your vehicle exceeds a set speed limit. Helps promote safe driving habits and monitor your fleet.' },
+          { label: 'RashDrive\nAlert', icon: <TriangleAlert size={22} color="#000" />, desc: 'Detects sudden braking, sharp turns, and aggressive driving patterns. Sends alerts to keep drivers safe on the road.' },
+          { label: 'Family\nControl', icon: <Users size={22} color="#1E3A8A" />, desc: 'Monitor and manage the safety of all family members under your account. Set safety zones and get alerts when they go out of range.' },
+          { label: 'Ambulance\nHelp', icon: <Ambulance size={22} color="#C9A84C" />, desc: 'One-tap emergency call to request an ambulance. Your location and medical info is automatically shared for faster response.' },
+          { label: 'Hospital\nHelp', icon: <Hospital size={22} color="#1E3A8A" />, desc: 'Find the nearest hospitals and medical centers around you. Get directions and contact details instantly during an emergency.' },
+          { label: 'Police\nHelp', icon: <ShieldAlert size={22} color="#000" />, desc: 'Instantly contact the nearest police station. Your location is shared automatically to help law enforcement respond quickly.' }
+        ].map((svc, idx) => (
+          <TouchableOpacity key={idx} style={{ width: '31%', backgroundColor: '#fff', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 5, alignItems: 'center', marginBottom: 12, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 }}
+            onPress={() => setServiceInfo(svc)}>
+            <View style={{ marginBottom: 6 }}>{svc.icon}</View>
+            <Text style={{ fontSize: 9, fontWeight: '700', color: '#475569', textAlign: 'center' }}>{svc.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* PRODUCTS Section */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>PRODUCTS</Text>
-        <TouchableOpacity onPress={() => setCurrentTab('PRODUCT')}>
-          <Text style={styles.sectionLink}>View All</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.productsGrid}>
-        <TouchableOpacity style={styles.productCard} onPress={() => setCurrentTab('PRODUCT')}>
-          <View style={styles.productIconBg}>
-            <Car size={26} color={theme.colors.primary} />
-          </View>
-          <Text style={styles.productCardTitle}>CAR SAFETY QR</Text>
-          <Text style={styles.productCardPrice}>₹499</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.productCard} onPress={() => setCurrentTab('PRODUCT')}>
-          <View style={styles.productIconBg}>
-            <Play size={26} color={theme.colors.primary} />
-          </View>
-          <Text style={styles.productCardTitle}>BIKE SAFETY QR</Text>
-          <Text style={styles.productCardPrice}>₹299</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.productCard} onPress={() => setCurrentTab('PRODUCT')}>
-          <View style={styles.productIconBg}>
-            <User size={26} color={theme.colors.primary} />
-          </View>
-          <Text style={styles.productCardTitle}>CHILD SAFETY QR</Text>
-          <Text style={styles.productCardPrice}>₹199</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.productCard} onPress={() => setCurrentTab('PRODUCT')}>
-          <View style={styles.productIconBg}>
-            <Shield size={26} color={theme.colors.primary} />
-          </View>
-          <Text style={styles.productCardTitle}>PET SAFETY QR</Text>
-          <Text style={styles.productCardPrice}>₹199</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Prevention of Accident Section */}
-      <View style={[styles.sectionHeader, { marginTop: 24 }]}>
-        <Text style={styles.sectionTitle}>PREVENTION OF ACCIDENT</Text>
-      </View>
-
-      <View style={styles.accidentPreventionCard}>
-        <View style={styles.preventionBadge}>
-          <ShieldCheck size={16} color={isDriveMode ? theme.colors.success : '#9CA3AF'} />
-          <Text style={[styles.preventionBadgeText, { color: isDriveMode ? theme.colors.success : '#9CA3AF' }]}>
-            {isDriveMode ? 'DRIVE MODE ACTIVE' : 'DRIVE MODE INACTIVE'}
-          </Text>
-        </View>
-        <Text style={styles.preventionTitle}>Crash Detection & Safety</Text>
-        <Text style={styles.preventionDesc}>
-          V-KAWACH monitors for severe impacts via device sensors and automatically alerts emergency contacts with your live location.
-        </Text>
-        <TouchableOpacity 
-          style={{ backgroundColor: isDriveMode ? '#DC2626' : theme.colors.primary, paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginTop: 12 }}
-          onPress={() => setIsDriveMode(!isDriveMode)}
-        >
-          <Text style={{ color: '#FFF', fontWeight: '800', fontSize: 13 }}>
-            {isDriveMode ? 'STOP DRIVE MODE' : 'START DRIVE MODE'}
-          </Text>
-        </TouchableOpacity>
-
-        {crashDetected && (
-          <View style={{ backgroundColor: '#FEF2F2', padding: 16, borderRadius: 12, marginTop: 16, alignItems: 'center', borderWidth: 1, borderColor: '#FECACA' }}>
-            <TriangleAlert size={32} color="#DC2626" />
-            <Text style={{ fontSize: 16, fontWeight: '900', color: '#DC2626', marginTop: 8 }}>IMPACT DETECTED!</Text>
-            <Text style={{ fontSize: 12, fontWeight: '700', color: '#4B5563', marginVertical: 8 }}>Triggering SOS in {crashCountdown} seconds...</Text>
-            <TouchableOpacity 
-              style={{ backgroundColor: '#DC2626', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, marginTop: 4 }}
-              onPress={() => setCrashDetected(false)}
-            >
-              <Text style={{ color: '#FFF', fontWeight: '800', fontSize: 12 }}>CANCEL SOS</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-
-      {/* Digital Smart Tags section (user tags) */}
-      <View style={[styles.sectionHeader, { marginTop: 24 }]}>
-        <Text style={styles.sectionTitle}>My Registered Tags</Text>
-        <TouchableOpacity style={styles.addTagRowBtn} onPress={() => navigation.navigate('ScanQR')}>
-          <Plus size={16} color={theme.colors.primary} />
-          <Text style={styles.addTagRowText}>Link Tag</Text>
-        </TouchableOpacity>
-      </View>
-
-      {tags.length === 0 ? (
-        <View style={styles.emptyCard}>
-          <QrCode size={40} color={theme.colors.border} />
-          <Text style={styles.emptyText}>No registered tags found.</Text>
-          <TouchableOpacity style={styles.emptyBtn} onPress={() => navigation.navigate('ScanQR')}>
-            <Text style={styles.emptyBtnText}>Scan QR Code to Link</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        tags.map((tag) => (
-          <TouchableOpacity
-            key={tag.id}
-            style={styles.tagCard}
-            onPress={() => navigation.navigate('TagSettings', { tag })}
-          >
-            <View style={styles.tagIconContainer}>
-              <QrCode size={24} color={theme.colors.primary} />
-            </View>
-            <View style={styles.tagDetails}>
-              <Text style={styles.tagAssetType}>
-                {tag.customAssetType || tag.assetType || 'Vehicle Tag'}
-              </Text>
-              <Text style={styles.tagCode}>Code: {tag.tagCode}</Text>
-              {tag.assetNumber && <Text style={styles.tagAssetNum}>Reg: {tag.assetNumber}</Text>}
-            </View>
-            <View style={styles.tagAction}>
-              <Text style={styles.tagActionText}>Edit</Text>
-              <ArrowRight size={14} color={theme.colors.primary} />
-            </View>
-          </TouchableOpacity>
-        ))
-      )}
-
-      {/* Orders list */}
-      <View style={[styles.sectionHeader, { marginTop: 24 }]}>
-        <Text style={styles.sectionTitle}>Recent Orders</Text>
-      </View>
-
-      {orders.length === 0 ? (
-        <View style={styles.emptyCard}>
-          <ShoppingBag size={32} color={theme.colors.border} />
-          <Text style={styles.emptyText}>No orders placed yet.</Text>
-        </View>
-      ) : (
-        orders.map((order) => (
-          <View key={order.id} style={styles.orderCard}>
-            <View style={styles.orderRow}>
-              <Text style={styles.orderNumber}>{order.orderNumber}</Text>
-              <View
-                style={[
-                  styles.badge,
-                  {
-                    backgroundColor:
-                      order.paymentStatus === 'PAID' ? '#E6F4EA' : '#FCE8E6',
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.badgeText,
-                    { color: order.paymentStatus === 'PAID' ? '#137333' : '#C5221F' },
-                  ]}
-                >
-                  {order.paymentStatus}
-                </Text>
-              </View>
-            </View>
-            <Text style={styles.orderDate}>
-              {new Date(order.createdAt).toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              })}
-            </Text>
-            <Text style={styles.orderItems}>
-              {order.items?.map((i) => i.productName).join(', ')}
-            </Text>
-            <Text style={styles.orderAmount}>₹{order.totalAmount}</Text>
-          </View>
-        ))
-      )}
-
-      {/* Logout button at bottom */}
-      <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-        <LogOut size={18} color="#C5221F" />
-        <Text style={styles.logoutBtnText}>Logout Account</Text>
-      </TouchableOpacity>
-
-      <View style={{ height: 60 }} />
+      <View style={{ height: 120 }} />
     </ScrollView>
   );
 
   // Renderer for product tab
   const renderProductTab = () => (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
-      <Text style={styles.tabTitle}>V-KAWACH Security Catalog</Text>
-      <Text style={styles.tabSubtitle}>Buy or activate premium identity protection shields</Text>
+    <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 100 }}>
+      {/* Header */}
+      <View style={{ backgroundColor: '#0B1A33', borderRadius: 20, padding: 20, marginBottom: 24, alignItems: 'center' }}>
+        <Text style={{ color: '#C9A84C', fontSize: 11, fontWeight: '800', letterSpacing: 2, marginBottom: 4 }}>V-KAWACH</Text>
+        <Text style={{ color: '#fff', fontSize: 20, fontWeight: '900', textAlign: 'center', letterSpacing: 0.5 }}>Security Catalog</Text>
+        <Text style={{ color: '#94A3B8', fontSize: 12, marginTop: 6, textAlign: 'center' }}>Premium identity protection shields</Text>
+      </View>
 
-      {[
-        { 
-          id: '1', title: 'V-KAWACH CAR SAFETY QR', desc: 'Secure vehicle window stick protection.', price: '₹599', originalPrice: '₹998',
-          features: ['ROUTE TRACKING', 'CRASH DETECTION', 'AMBULANCE HELP', 'HOSPITAL HELP', 'OVERSPEED ALERT', 'FAMILY CONTROL', 'SOS', 'HELPLINES', 'RASHDRIVE ALERT', 'SET FLASH', '3 SAFETY QR', 'FIND LOCATION']
-        },
-        { 
-          id: '2', title: 'V-KAWACH BIKE SAFETY QR', desc: 'Waterproof motorcycle alert tag.', price: '₹299', originalPrice: '₹499',
-          features: ['ROUTE TRACKING', 'CRASH DETECTION', 'AMBULANCE HELP', 'HOSPITAL HELP', 'OVERSPEED ALERT', 'FAMILY CONTROL', 'SOS', 'HELPLINES', 'RASHDRIVE ALERT', 'SET FLASH', '1 SAFETY QR', 'FIND LOCATION']
-        },
-        { 
-          id: '3', title: 'V-KAWACH CHILD SAFETY QR', desc: 'Identity protection keychain for kids.', price: '₹199', originalPrice: '₹399',
-          features: ['ROUTE TRACKING', 'AMBULANCE HELP', 'HOSPITAL HELP', 'FAMILY CONTROL', 'SOS', 'HELPLINES', 'FIND LOCATION']
-        },
-        { 
-          id: '4', title: 'V-KAWACH PET SAFETY QR', desc: 'Lightweight dog/cat collar tag.', price: '₹199', originalPrice: '₹299',
-          features: ['ROUTE TRACKING', 'AMBULANCE HELP', 'HOSPITAL HELP', 'FAMILY CONTROL', 'SOS', 'FIND LOCATION']
-        }
+      {products.length > 0 ? products.map((prod, idx) => {
+        const baseUrl = api.defaults.baseURL.replace('/api', '');
+        const imgUri = prod.imageUrl?.startsWith('http') ? prod.imageUrl : `${baseUrl}${prod.imageUrl?.startsWith('/') ? prod.imageUrl : '/' + prod.imageUrl}`;
+        return (
+          <View key={prod._id || idx} style={{ backgroundColor: '#fff', borderRadius: 20, marginBottom: 16, overflow: 'hidden', shadowColor: '#0B1A33', shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.12, shadowRadius: 10, elevation: 5 }}>
+            {/* Card top banner */}
+            <View style={{ backgroundColor: '#0B1A33', padding: 16, flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: '#C9A84C', fontSize: 13, fontWeight: '900', letterSpacing: 0.5 }}>{prod.name}</Text>
+                <Text style={{ color: '#94A3B8', fontSize: 11, marginTop: 3 }}>{prod.description || 'Premium V-KAWACH Protection'}</Text>
+              </View>
+              {prod.imageUrl ? (
+                <Image source={{ uri: imgUri }} style={{ width: 60, height: 60, borderRadius: 12, borderWidth: 2, borderColor: '#C9A84C' }} resizeMode="cover" />
+              ) : (
+                <View style={{ width: 60, height: 60, borderRadius: 12, backgroundColor: 'rgba(201,168,76,0.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#C9A84C' }}>
+                  <QrCode size={30} color="#C9A84C" />
+                </View>
+              )}
+            </View>
+
+            {/* Price row */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 14, paddingBottom: 10 }}>
+              <View>
+                <Text style={{ color: '#94A3B8', fontSize: 10, fontWeight: '600' }}>PRICE</Text>
+                <Text style={{ color: '#0B1A33', fontSize: 22, fontWeight: '900' }}>{prod.price ? `₹${prod.price}` : 'Contact Us'}</Text>
+              </View>
+              <TouchableOpacity
+                style={{ backgroundColor: '#C9A84C', borderRadius: 25, paddingVertical: 10, paddingHorizontal: 22 }}
+                onPress={() => navigation.navigate('ProductDetails', { product: prod.name, productId: prod._id })}>
+                <Text style={{ color: '#0B1A33', fontWeight: '900', fontSize: 12 }}>VIEW DETAILS</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Features */}
+            {prod.features && prod.features.length > 0 && (
+              <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+                <Text style={{ color: '#475569', fontSize: 10, fontWeight: '800', marginBottom: 8, letterSpacing: 0.5 }}>INCLUDES:</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+                  {prod.features.map((feat, fidx) => (
+                    <View key={fidx} style={{ backgroundColor: '#EFF6FF', paddingVertical: 4, paddingHorizontal: 10, borderRadius: 20, borderWidth: 1, borderColor: '#BFDBFE' }}>
+                      <Text style={{ fontSize: 9, fontWeight: '700', color: '#1E3A8A' }}>{feat}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+          </View>
+        );
+      }) : [
+        { id: '1', name: 'V-KAWACH CAR SAFETY QR', description: 'Secure vehicle window stick protection.', price: '599', features: ['ROUTE TRACKING', 'CRASH DETECTION', 'AMBULANCE HELP', 'OVERSPEED ALERT', 'FAMILY CONTROL', 'SOS', 'FIND LOCATION'] },
+        { id: '2', name: 'V-KAWACH BIKE SAFETY QR', description: 'Waterproof motorcycle alert tag.', price: '299', features: ['ROUTE TRACKING', 'CRASH DETECTION', 'AMBULANCE HELP', 'FAMILY CONTROL', 'SOS', 'FIND LOCATION'] },
+        { id: '3', name: 'V-KAWACH CHILD SAFETY QR', description: 'Identity protection keychain for kids.', price: '199', features: ['ROUTE TRACKING', 'AMBULANCE HELP', 'FAMILY CONTROL', 'SOS', 'FIND LOCATION'] },
+        { id: '4', name: 'V-KAWACH PET SAFETY QR', description: 'Lightweight dog/cat collar tag.', price: '199', features: ['ROUTE TRACKING', 'AMBULANCE HELP', 'FAMILY CONTROL', 'SOS', 'FIND LOCATION'] }
       ].map((prod) => (
-        <View key={prod.id} style={styles.productStoreCard}>
-          <Text style={styles.productStoreTitle}>{prod.title}</Text>
-          <Text style={styles.productStoreDesc}>{prod.desc}</Text>
-          
-          <View style={styles.productFeaturesGrid}>
-            <Text style={styles.productFeaturesHeading}>This Price Includes:-</Text>
-            <View style={styles.productFeaturesList}>
-              {prod.features.map((feat, idx) => (
-                <View key={idx} style={styles.productFeatureBadge}>
-                  <Text style={styles.productFeatureText}>{feat}</Text>
+        <View key={prod.id} style={{ backgroundColor: '#fff', borderRadius: 20, marginBottom: 16, overflow: 'hidden', shadowColor: '#0B1A33', shadowOffset: {width: 0, height: 4}, shadowOpacity: 0.12, shadowRadius: 10, elevation: 5 }}>
+          <View style={{ backgroundColor: '#0B1A33', padding: 16, flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: '#C9A84C', fontSize: 13, fontWeight: '900', letterSpacing: 0.5 }}>{prod.name}</Text>
+              <Text style={{ color: '#94A3B8', fontSize: 11, marginTop: 3 }}>{prod.description}</Text>
+            </View>
+            <View style={{ width: 60, height: 60, borderRadius: 12, backgroundColor: 'rgba(201,168,76,0.15)', justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#C9A84C' }}>
+              <QrCode size={30} color="#C9A84C" />
+            </View>
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingTop: 14, paddingBottom: 10 }}>
+            <View>
+              <Text style={{ color: '#94A3B8', fontSize: 10, fontWeight: '600' }}>PRICE</Text>
+              <Text style={{ color: '#0B1A33', fontSize: 22, fontWeight: '900' }}>₹{prod.price}</Text>
+            </View>
+            <TouchableOpacity style={{ backgroundColor: '#C9A84C', borderRadius: 25, paddingVertical: 10, paddingHorizontal: 22 }}
+              onPress={() => Alert.alert('Order', `Place order for ${prod.name}?`, [{text: 'Cancel'}, {text: 'Confirm', onPress: () => Alert.alert('Success', 'Order placed!')}])}>
+              <Text style={{ color: '#0B1A33', fontWeight: '900', fontSize: 12 }}>BUY NOW</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+            <Text style={{ color: '#475569', fontSize: 10, fontWeight: '800', marginBottom: 8, letterSpacing: 0.5 }}>INCLUDES:</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+              {prod.features.map((feat, fidx) => (
+                <View key={fidx} style={{ backgroundColor: '#EFF6FF', paddingVertical: 4, paddingHorizontal: 10, borderRadius: 20, borderWidth: 1, borderColor: '#BFDBFE' }}>
+                  <Text style={{ fontSize: 9, fontWeight: '700', color: '#1E3A8A' }}>{feat}</Text>
                 </View>
               ))}
             </View>
           </View>
-
-          <View style={styles.productStoreFooter}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Text style={styles.productStorePrice}>{prod.price}</Text>
-              <Text style={styles.productStoreOriginalPrice}>{prod.originalPrice}</Text>
-            </View>
-            <TouchableOpacity
-              style={styles.productBuyBtn}
-              onPress={() => {
-                Alert.alert('Secure Order', `Placing order for ${prod.title}. Please confirm order?`, [
-                  { text: 'Cancel' },
-                  { text: 'Confirm Order', onPress: () => Alert.alert('Success', 'Order created successfully. Details sent to register email.') }
-                ]);
-              }}
-            >
-              <Text style={styles.productBuyBtnText}>BUY NOW</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       ))}
-
-      <View style={{ height: 60 }} />
     </ScrollView>
   );
 
@@ -698,20 +719,44 @@ function DashboardScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Custom Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => Alert.alert('Menu', 'Account and tag manager dashboard.')}>
-          <Menu size={24} color={theme.colors.text} />
+      {/* Modals */}
+      <FindLocationModal visible={showFindLocation} onClose={() => setShowFindLocation(false)} />
+      <OfferModal visible={showOffer} onClose={() => setShowOffer(false)} />
+      <IvrCallModal visible={showIvrModal} onClose={() => setShowIvrModal(false)} onConfirm={() => { setShowIvrModal(false); alert('Calling owner...'); }} />
+      <PermissionModal visible={showPermission} onClose={() => setShowPermission(false)} />
+
+      {/* Service Info Modal */}
+      {serviceInfo && (
+        <Modal transparent animationType="fade" visible={!!serviceInfo} onRequestClose={() => setServiceInfo(null)}>
+          <TouchableOpacity style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'center', alignItems: 'center', padding: 24 }} activeOpacity={1} onPress={() => setServiceInfo(null)}>
+            <TouchableOpacity activeOpacity={1} style={{ backgroundColor: '#fff', borderRadius: 24, padding: 28, width: '100%', alignItems: 'center', shadowColor: '#0B1A33', shadowOffset: {width: 0, height: 10}, shadowOpacity: 0.2, shadowRadius: 20, elevation: 12 }}>
+              <View style={{ width: 72, height: 72, backgroundColor: '#F0F4FF', borderRadius: 36, justifyContent: 'center', alignItems: 'center', marginBottom: 16 }}>
+                {serviceInfo.icon}
+              </View>
+              <Text style={{ fontSize: 18, fontWeight: '900', color: '#0B1A33', textAlign: 'center', marginBottom: 12, letterSpacing: 0.5 }}>{serviceInfo.label.replace('\n', ' ').toUpperCase()}</Text>
+              <View style={{ width: 40, height: 3, backgroundColor: '#C9A84C', borderRadius: 2, marginBottom: 16 }} />
+              <Text style={{ fontSize: 14, color: '#475569', textAlign: 'center', lineHeight: 22 }}>{serviceInfo.desc}</Text>
+              <TouchableOpacity style={{ marginTop: 24, backgroundColor: '#0B1A33', borderRadius: 25, paddingVertical: 12, paddingHorizontal: 40 }} onPress={() => setServiceInfo(null)}>
+                <Text style={{ color: '#C9A84C', fontWeight: 'bold', fontSize: 14 }}>Got it!</Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </Modal>
+      )}
+
+      {/* Header */}
+      <View style={[styles.header, { paddingHorizontal: 15, paddingBottom: 10 }]}>
+        <TouchableOpacity onPress={() => navigation.openDrawer()}>
+          <Menu size={28} color="#0B1A33" />
         </TouchableOpacity>
         
-        <Image source={require('../../assets/icon.png')} style={{ width: 140, height: 40, resizeMode: 'contain' }} />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Image source={require('../../assets/logo.png')} style={{ height: 35, width: 140, resizeMode: 'contain' }} />
+        </View>
         
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerIcon} onPress={() => setCurrentTab('PRODUCT')}>
-            <ShoppingCart size={22} color={theme.colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerIcon} onPress={() => Alert.alert('Notifications', 'No new security alerts.')}>
-            <Bell size={22} color={theme.colors.text} />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity style={{ backgroundColor: '#C9A84C', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 5 }} onPress={triggerSOS}>
+            <Text style={{ color: '#0B1A33', fontWeight: 'bold', fontSize: 12 }}>EMERGENCY</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -723,56 +768,32 @@ function DashboardScreen({ navigation }) {
       {currentTab === 'HELPLINE' && renderHelplineTab()}
       {currentTab === 'SOS' && renderSosTab()}
 
-      {/* Custom Bottom Tab Bar */}
-      <View style={styles.tabBar}>
-        <TouchableOpacity
-          style={[styles.tabItem, currentTab === 'PRODUCT' ? styles.activeTabItem : null]}
-          onPress={() => setCurrentTab('PRODUCT')}
-        >
-          <ShoppingBag size={20} color={currentTab === 'PRODUCT' ? theme.colors.primary : '#9CA3AF'} />
-          <Text style={[styles.tabText, currentTab === 'PRODUCT' ? styles.activeTabText : null]}>PRODUCT</Text>
+      {/* New Bottom Dock */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', backgroundColor: '#fff', paddingVertical: 10, paddingBottom: 25, borderTopWidth: 1, borderTopColor: '#eee', position: 'absolute', bottom: 0, width: '100%' }}>
+        <TouchableOpacity style={{ alignItems: 'center' }} onPress={() => navigation.navigate('Logs')}>
+          <ClipboardList size={24} color="#0B1A33" />
+          <Text style={{ fontSize: 10, color: '#0B1A33', marginTop: 4 }}>Logs</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tabItem, currentTab === 'IVR_CALL' ? styles.activeTabItem : null]}
-          onPress={() => setCurrentTab('IVR_CALL')}
-        >
-          <PhoneCall size={20} color={currentTab === 'IVR_CALL' ? theme.colors.primary : '#9CA3AF'} />
-          <Text style={[styles.tabText, currentTab === 'IVR_CALL' ? styles.activeTabText : null]}>IVR CALL</Text>
+        <TouchableOpacity style={{ alignItems: 'center' }} onPress={() => setShowIvrModal(true)}>
+          <PhoneCall size={24} color="#0B1A33" />
+          <Text style={{ fontSize: 10, color: '#0B1A33', marginTop: 4 }}>IVR Call</Text>
         </TouchableOpacity>
-
-        {/* Central Scan Button */}
-        <View style={styles.scanBtnContainer}>
-          <TouchableOpacity style={styles.scanBtn} onPress={() => navigation.navigate('ScanQR')}>
-            <QrCode size={28} color={theme.colors.primary} />
-            <Text style={styles.scanBtnText}>SCAN</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          style={[styles.tabItem, currentTab === 'HELPLINE' ? styles.activeTabItem : null]}
-          onPress={() => setCurrentTab('HELPLINE')}
-        >
-          <CircleQuestionMark size={20} color={currentTab === 'HELPLINE' ? theme.colors.primary : '#9CA3AF'} />
-          <Text style={[styles.tabText, currentTab === 'HELPLINE' ? styles.activeTabText : null]}>HELPLINE</Text>
+        
+        {/* Center Scan to Call */}
+        <TouchableOpacity style={{ alignItems: 'center', justifyContent: 'center', width: 60, height: 60, borderRadius: 30, backgroundColor: '#0B1A33', marginTop: -30, shadowColor: '#000', shadowOffset: {width: 0, height: 2}, shadowOpacity: 0.3, shadowRadius: 3, elevation: 5 }} onPress={() => navigation.navigate('ScanQR')}>
+          <QrCode size={28} color="#C9A84C" />
+          <Text style={{ fontSize: 8, color: '#C9A84C', marginTop: 2, textAlign: 'center', fontWeight: 'bold' }}>SCAN TO CALL</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tabItem, currentTab === 'SOS' ? styles.activeTabItem : null]}
-          onPress={() => setCurrentTab('SOS')}
-        >
-          <TriangleAlert size={20} color={currentTab === 'SOS' ? '#DC2626' : '#9CA3AF'} />
-          <Text style={[styles.tabText, currentTab === 'SOS' ? styles.activeSosText : null]}>SOS</Text>
+        
+        <TouchableOpacity style={{ alignItems: 'center' }} onPress={() => setShowPermission(true)}>
+          <Zap size={24} color="#0B1A33" />
+          <Text style={{ fontSize: 10, color: '#0B1A33', marginTop: 4 }}>Set Flash</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{ alignItems: 'center' }} onPress={triggerSOS}>
+          <TriangleAlert size={24} color="#C9A84C" />
+          <Text style={{ fontSize: 10, color: '#C9A84C', marginTop: 4 }}>SOS</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Floating Home indicator/button when not in home tab */}
-      {currentTab !== 'HOME' && (
-        <TouchableOpacity style={styles.floatingHome} onPress={() => setCurrentTab('HOME')}>
-          <Shield size={20} color={theme.colors.white} />
-          <Text style={styles.floatingHomeText}>HOME</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 }
@@ -1189,7 +1210,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF2F2',
   },
   logoutBtnText: {
-    color: '#DC2626',
+    color: '#C9A84C',
     fontWeight: '800',
     fontSize: 13,
   },
@@ -1396,7 +1417,7 @@ const styles = StyleSheet.create({
     width: 170,
     height: 170,
     borderRadius: 85,
-    backgroundColor: '#DC2626',
+    backgroundColor: '#C9A84C',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 4,

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { 
   LayoutDashboard, 
   QrCode, 
@@ -21,14 +22,22 @@ import {
   Image,
   FolderOpen,
   UserCheck,
+  Printer,
+  Truck,
+  Boxes,
+  FileText,
+  Bell,
   MessageCircle,
-  Boxes
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import api from "@/lib/api";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Generate QR", href: "/admin/qr/generate", icon: QrCode },
+  { label: "Batch Printing", href: "/admin/printing", icon: Printer },
+  { label: "Logistics & Supply", href: "/admin/logistics", icon: Truck },
   { label: "QR Templates", href: "/admin/qr-templates", icon: PenTool },
   { label: "Safety QR Products", href: "/admin/safety-id", icon: ShieldCheck },
   { label: "FMCG Inventory", href: "/admin/products", icon: Boxes },
@@ -36,6 +45,11 @@ const NAV_ITEMS = [
   { label: "Tags", href: "/admin/tags", icon: Tag },
   { label: "Users", href: "/admin/users", icon: UserCheck },
   { label: "Sales & Orders", href: "/admin/sales", icon: ShoppingCart },
+  { label: "Partners", href: "/admin/partners", icon: Users },
+  { label: "Inventory Module", href: "/admin/inventory", icon: Boxes },
+  { label: "Global Ledger", href: "/admin/ledger", icon: FileText },
+  { label: "Activation Feed", href: "/admin/activation-feed", icon: Bell, badge: true },
+  { label: "Case Studies", href: "/admin/case-studies", icon: Sparkles },
   { label: "Plans & Packs", href: "/admin/plans", icon: Package },
   { label: "Subscriptions", href: "/admin/subscriptions", icon: CreditCard },
   { label: "Sponsors", href: "/admin/sponsors", icon: Users },
@@ -54,6 +68,22 @@ const BOTTOM_ITEMS = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Poll unread notifications every 30s
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const res = await api.get('/notifications/unread-count');
+        setUnreadCount(res.data.count || 0);
+      } catch {
+        // Silently fail – don't break sidebar if API is down
+      }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <aside className="fixed inset-y-0 left-0 w-64 bg-primary dark:bg-slate-900 text-white flex flex-col z-20 shadow-2xl">
@@ -73,8 +103,9 @@ export default function Sidebar() {
       {/* Navigation Links */}
       <nav className="flex-1 px-4 space-y-1.5 mt-6 overflow-y-auto custom-scrollbar">
         {NAV_ITEMS.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
           const Icon = item.icon;
+          const showBadge = 'badge' in item && item.badge && unreadCount > 0;
           
           return (
             <Link
@@ -87,8 +118,15 @@ export default function Sidebar() {
                   : "text-white/80 hover:bg-white/15 hover:text-white hover:translate-x-1"
               )}
             >
-              <Icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-white/60 group-hover:text-white")} />
-              <span className="font-semibold text-sm tracking-wide">{item.label}</span>
+              <div className="relative">
+                <Icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-white/60 group-hover:text-white")} />
+                {showBadge && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border border-white/30 animate-pulse">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </div>
+              <span className="font-semibold text-sm tracking-wide flex-1">{item.label}</span>
               {isActive && (
                 <div className="absolute left-0 w-1.5 h-6 bg-primary rounded-r-full" />
               )}

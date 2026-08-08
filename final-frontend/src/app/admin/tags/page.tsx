@@ -317,11 +317,11 @@ function TagsContent() {
                 <p className="text-sm font-bold text-slate-400">Loading tags history...</p>
              </div>
           ) : (
-            <div className="w-full overflow-x-auto">
-              <table className="w-full text-left border-collapse table-fixed">
+            <div className="w-full">
+              <table className="w-full text-left border-collapse table-fixed whitespace-nowrap">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800">
-                    <th className="w-[60px] px-8 py-5">
+                    <th className="w-16 px-6 py-5">
                       <input 
                         type="checkbox" 
                         className="size-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
@@ -329,17 +329,18 @@ function TagsContent() {
                         onChange={toggleSelectAll}
                       />
                     </th>
-                    <th className="w-[180px] px-4 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-nowrap">Tag ID</th>
-                    <th className="min-w-[250px] px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-nowrap">Primary Owner</th>
-                    <th className="w-[130px] px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center text-nowrap">Stats</th>
-                    <th className="w-[200px] px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-nowrap">Plan details</th>
-                    <th className="w-[220px] px-8 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right text-nowrap">Settings</th>
+                    <th className="w-48 px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Tag ID</th>
+                    <th className="w-64 px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Primary Owner</th>
+                    <th className="w-48 px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Stats</th>
+                    <th className="w-48 px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400">Plan details</th>
+                    <th className="w-40 px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Settings</th>
+                    <th className=""></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
                   {tags.map((tag) => (
                     <tr key={tag.id} className={`hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all group ${selectedIds.includes(tag.id) ? 'bg-primary/5 dark:bg-primary/5' : ''}`}>
-                      <td className="px-8 py-5">
+                      <td className="px-6 py-5">
                         <input 
                           type="checkbox" 
                           className="size-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
@@ -347,7 +348,7 @@ function TagsContent() {
                           onChange={() => toggleSelect(tag.id)}
                         />
                       </td>
-                      <td className="px-4 py-5">
+                      <td className="px-6 py-5">
                          <div className="flex flex-col gap-1 truncate">
                             <span className="font-mono text-xs font-black text-primary bg-primary/5 px-2 py-0.5 rounded-lg w-fit truncate">
                               {tag.tagCode}
@@ -359,13 +360,13 @@ function TagsContent() {
                             </span>
                          </div>
                       </td>
-                      <td className="px-8 py-5">
+                      <td className="px-6 py-5">
                         <div className="flex flex-col truncate">
                           <span className="text-sm font-black text-slate-700 dark:text-slate-200 truncate">{tag.ownerName || 'Unknown Owner'}</span>
                           <span className="text-[10px] font-bold text-slate-400 group-hover:text-primary transition-colors tracking-tight">{tag.ownerPhone}</span>
                         </div>
                       </td>
-                      <td className="px-8 py-5">
+                      <td className="px-6 py-5">
                         <div className="flex items-center justify-center gap-4">
                            <div className="flex flex-col items-center">
                               <span className="text-xs font-black text-slate-700 dark:text-slate-200">{tag._count?.scanLogs || 0}</span>
@@ -378,7 +379,7 @@ function TagsContent() {
                            </div>
                         </div>
                       </td>
-                      <td className="px-8 py-5">
+                      <td className="px-6 py-5">
                         <div className="flex flex-col gap-2">
                           <span className={`inline-flex items-center px-4 py-1 rounded-xl text-[10px] font-black uppercase border w-fit ${
                             tag.planType === 'premium' ? 'bg-amber-50 text-amber-600 border-amber-100' :
@@ -392,7 +393,7 @@ function TagsContent() {
                           </span>
                         </div>
                       </td>
-                      <td className="px-8 py-5 text-right">
+                      <td className="px-6 py-5 text-right">
                         <div className="flex items-center justify-end gap-3">
                           <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tight flex items-center gap-2 border ${
                             tag.isActive ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-red-50 text-red-600 border-red-100'

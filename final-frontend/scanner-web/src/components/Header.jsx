@@ -118,14 +118,17 @@ const Nav = styled.nav`
   @media (min-width: 1024px) {
     display: flex;
     align-items: center;
-    gap: 30px;
+    gap: 12px;
+  }
+  @media (min-width: 1280px) {
+    gap: 18px;
   }
 `;
 
 const NavLink = styled(Link)`
   color: #333333;
   font-family: ${({ theme }) => theme.fonts.body};
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 700;
   position: relative;
   text-decoration: none;
@@ -205,7 +208,10 @@ const RightActions = styled.div`
   @media (min-width: 1024px) {
     display: flex;
     align-items: center;
-    gap: 25px;
+    gap: 12px;
+  }
+  @media (min-width: 1280px) {
+    gap: 15px;
   }
 `;
 
@@ -217,7 +223,7 @@ const ActionIcon = styled(Link)`
   gap: 8px;
   text-decoration: none;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.9rem;
   transition: all 0.2s;
   
   &:hover {
@@ -364,32 +370,22 @@ const Header = () => {
   const { cartCount } = useCart();
   const { language, setLanguage } = useLanguage();
 
+  const handleLangSwitch = () => {
+    const nextLang = language === 'en' ? 'hi' : 'en';
+    setLanguage(nextLang);
+    
+    // Trigger Google Translate dropdown
+    const combo = document.querySelector('.goog-te-combo');
+    if (combo) {
+      combo.value = nextLang;
+      combo.dispatchEvent(new Event('change'));
+    }
+  };
+
+  const t = translations[language];
+
   return (
     <HeaderWrapper>
-      {/* Top Bar matching screenshot */}
-      <TopBar>
-        <TopBarContainer>
-          <TopLeft>
-            <div className="item">
-              <Mail />
-              Info@tarkshyasolution.in
-            </div>
-            <div className="item">
-              <Phone />
-              +91 94123 00716
-            </div>
-          </TopLeft>
-          <TopRight>
-            <TopButton to="/">
-              <MapPin /> Find Phone
-            </TopButton>
-            <TopButton to="/">
-              <Download /> Get the App
-            </TopButton>
-          </TopRight>
-        </TopBarContainer>
-      </TopBar>
-
       <MainHeaderContainer>
         <Logo to="/">
           <img 
@@ -405,7 +401,7 @@ const Header = () => {
         {/* Main Navigation matching screenshot */}
         <Nav>
           <NavLink to="/" className={location.pathname === '/' ? 'active' : ''}>
-            Home
+            {t.nav?.home || 'Home'}
           </NavLink>
           <NavLink 
             to="/#products" 
@@ -417,42 +413,43 @@ const Header = () => {
               }
             }}
           >
-            Products
+            {t.nav?.products || 'Products'}
           </NavLink>
           
-          {/* Services Dropdown */}
-          <DropdownContainer>
-            <NavLink to="/" className={['/services', '/cloud-monitoring'].includes(location.pathname) ? 'active' : ''}>
-              Services <ChevronDown size={16} />
-            </NavLink>
-            <DropdownMenu className="dropdown-menu">
-              <DropdownItem to="/">Find Location</DropdownItem>
-              <DropdownItem to="/">Route Tracking</DropdownItem>
-              <DropdownItem to="/">Phone Theft</DropdownItem>
-              <DropdownItem to="/">Set Flash</DropdownItem>
-              <DropdownItem to="/">SOS</DropdownItem>
-            </DropdownMenu>
-          </DropdownContainer>
+          <NavLink to="/b2b-solutions" className={location.pathname === '/b2b-solutions' ? 'active' : ''}>
+            {t.nav?.b2b || 'B2B Solutions'}
+          </NavLink>
+          <span
+            style={{ position: 'relative', cursor: 'not-allowed', opacity: 0.65, display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 0', fontSize: '14px', fontWeight: '600', color: 'inherit' }}
+            title="Coming Soon"
+          >
+            {t.nav?.cloudMonitoring || 'Cloud Monitoring'}
+            <span style={{ background: 'linear-gradient(90deg, #f59e0b, #ef4444)', color: '#fff', fontSize: '9px', fontWeight: '800', padding: '2px 6px', borderRadius: '10px', letterSpacing: '0.5px', textTransform: 'uppercase', lineHeight: 1 }}>Soon</span>
+          </span>
 
           <NavLink to="/" className={location.pathname === '/about' ? 'active' : ''}>
-            About
+            {t.nav?.about || 'About'}
           </NavLink>
           <NavLink to="/case-studies" className={location.pathname === '/case-studies' ? 'active' : ''}>
-            Case Studies
+            {t.nav?.caseStudies || 'Case Studies'}
           </NavLink>
           <NavLink to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>
-            Contact
+            {t.nav?.contact || 'Contact'}
           </NavLink>
           <NavLink to="/social-initiative" className={location.pathname === '/social-initiative' ? 'active' : ''}>
-            Partner
+            {t.nav?.partner || 'Partner'}
           </NavLink>
           <NavLink to="/emergency" className={location.pathname === '/emergency' ? 'active' : ''}>
-            Emergency
+            {t.nav?.emergency || 'Emergency'}
           </NavLink>
         </Nav>
 
         {/* Right Actions matching screenshot */}
         <RightActions>
+          <LangButton onClick={handleLangSwitch} style={{ padding: '6px', background: 'transparent', border: '1px solid #ddd' }}>
+            <Globe size={18} color="#C9A84C" />
+            <span style={{ fontSize: '0.85rem' }}>{language === 'en' ? 'HI' : 'EN'}</span>
+          </LangButton>
           <ActionIcon to="/cart">
             <ShoppingCart />
             {cartCount > 0 && <span className="badge">{cartCount}</span>}
@@ -494,14 +491,18 @@ const Header = () => {
           >
             Products
           </MobileNavLink>
-          <MobileNavLink to="/" onClick={() => setIsMobileOpen(false)}>Services</MobileNavLink>
+          <MobileNavLink to="/b2b-solutions" onClick={() => setIsMobileOpen(false)}>B2B Solutions</MobileNavLink>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '12px 0', fontSize: '14px', fontWeight: '600', opacity: 0.6, cursor: 'not-allowed' }}>
+            Cloud Monitoring
+            <span style={{ background: 'linear-gradient(90deg, #f59e0b, #ef4444)', color: '#fff', fontSize: '9px', fontWeight: '800', padding: '2px 6px', borderRadius: '10px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Soon</span>
+          </span>
           <MobileNavLink to="/" onClick={() => setIsMobileOpen(false)}>About</MobileNavLink>
           <MobileNavLink to="/case-studies" onClick={() => setIsMobileOpen(false)}>Case Studies</MobileNavLink>
           <MobileNavLink to="/contact" onClick={() => setIsMobileOpen(false)}>Contact</MobileNavLink>
           <MobileNavLink to="/social-initiative" onClick={() => setIsMobileOpen(false)}>Partner</MobileNavLink>
           <MobileNavLink to="/emergency" onClick={() => setIsMobileOpen(false)}>Emergency</MobileNavLink>
           
-          <LangButton onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')} style={{ width: 'fit-content', marginTop: '15px' }}>
+          <LangButton onClick={handleLangSwitch} style={{ width: 'fit-content', marginTop: '15px' }}>
             <Globe size={18} />
             {language === 'en' ? 'Hindi (हिन्दी)' : 'English'}
           </LangButton>

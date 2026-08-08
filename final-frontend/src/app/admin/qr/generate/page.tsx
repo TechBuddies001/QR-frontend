@@ -60,12 +60,27 @@ export default function Page() {
   const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
   const [selectedVideos, setSelectedVideos] = useState<File[]>([]);
   
+  interface Category {
+    id: string;
+    name: string;
+    icon?: string;
+  }
+
+  interface Partner {
+    id: string;
+    name: string;
+    type: string;
+  }
+
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
+
   const [formData, setFormData] = useState({
     ownerName: "",
     ownerPhone: "",
     emergencyContact: "",
     tagCode: "",
-    assetType: "employee",
+    assetType: "vehicle",
     planType: "basic",
     sponsorId: "",
     templateId: "",
@@ -73,39 +88,61 @@ export default function Page() {
     quantities: { standard: 1, circle: 1, landscape: 1 } as Record<string, number>,
     customMessage: "",
     address: "",
-    customAssetType: ""
+    customAssetType: "",
+    isDummy: false,
+
+    // Master Flow Fields
+    module: "Consumer Safety", // Consumer Safety | Business QR
+    categoryId: "",
+    productType: "Vehicle Safety QR",
+    batchNumber: `BATCH-CHANDAUSI-${new Date().getFullYear()}-001`,
+    printingStatus: "PRINTED", // PENDING | IN_PRINTING | PRINTED
+    warehouseLocation: "Chandausi Warehouse", // Default Chandausi Warehouse (Modifiable)
+    distributorId: "",
+    dealerId: "",
+    lifecycleStage: "LIVE",
   });
 
-  // Fetch plans, sponsors & templates on load
+  // Fetch plans, sponsors, templates, categories & partners on load
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [plansRes, sponsorsRes, templatesRes] = await Promise.all([
-          api.get("/plans"),
-          api.get("/sponsors"),
-          api.get("/qr-templates")
+        const [plansRes, sponsorsRes, templatesRes, categoriesRes, partnersRes] = await Promise.all([
+          api.get("/plans").catch(() => ({ data: { plans: [] } })),
+          api.get("/sponsors").catch(() => ({ data: { sponsors: [] } })),
+          api.get("/qr-templates").catch(() => ({ data: { templates: [] } })),
+          api.get("/categories").catch(() => ({ data: { categories: [] } })),
+          api.get("/partners").catch(() => ({ data: { partners: [] } })),
         ]);
         
-        setPlans(plansRes.data.plans);
-        if (plansRes.data.plans.length > 0) {
+        setPlans(plansRes.data.plans || []);
+        if (plansRes.data.plans?.length > 0) {
           setFormData(prev => ({ ...prev, planType: plansRes.data.plans[0].name }));
         }
 
-        const activeSponsors = sponsorsRes.data.sponsors.filter((s: Sponsor) => s.isActive);
+        const activeSponsors = (sponsorsRes.data.sponsors || []).filter((s: Sponsor) => s.isActive);
         setSponsors(activeSponsors);
 
         const tmpls: QrTemplate[] = templatesRes.data.templates || [];
         setTemplates(tmpls);
         const def = tmpls.find(t => t.isDefault);
         if (def) setFormData(prev => ({ ...prev, templateId: def.id }));
+
+        setCategories(categoriesRes.data.categories || []);
+        setPartners(partnersRes.data.partners || []);
       } catch (error) {
-        console.error("Failed to fetch dependencies");
+        console.error("Failed to fetch dependencies", error);
       }
     };
     fetchData();
   }, []);
 
   const validateForm = () => {
+    if (formData.isDummy) {
+      if (!formData.ownerName) formData.ownerName = "Dummy / Stock Tag";
+      if (!formData.ownerPhone) formData.ownerPhone = "9999999999";
+      return true;
+    }
     const newErrors: Record<string, string> = {};
     if (!formData.ownerName.trim()) newErrors.ownerName = "Owner name is required";
     if (!/^[6-9]\d{9}$/.test(formData.ownerPhone)) newErrors.ownerPhone = "Enter a valid 10-digit mobile number";
@@ -162,6 +199,7 @@ export default function Page() {
     formDataUpload.append('file', file);
     formDataUpload.append('designTypes', JSON.stringify(formData.designTypes));
     formDataUpload.append('sponsorId', formData.sponsorId);
+    formDataUpload.append('isDummy', String(formData.isDummy));
 
     setBulkLoading(true);
     const toastId = toast.loading("Processing bulk tags...");
@@ -203,11 +241,24 @@ export default function Page() {
       assetType: "vehicle",
       planType: plans[0]?.name || "basic",
       sponsorId: "",
+      templateId: "",
       designTypes: ["standard"],
       quantities: { standard: 1, circle: 1, landscape: 1 },
       customMessage: "",
       address: "",
-      customAssetType: ""
+      customAssetType: "",
+      isDummy: false,
+
+      // Master Flow Fields
+      module: "Consumer Safety",
+      categoryId: "",
+      productType: "Vehicle Safety QR",
+      batchNumber: `BATCH-CHANDAUSI-${new Date().getFullYear()}-001`,
+      printingStatus: "PRINTED",
+      warehouseLocation: "Chandausi Warehouse",
+      distributorId: "",
+      dealerId: "",
+      lifecycleStage: "LIVE",
     });
     setSelectedPhotos([]);
     setSelectedVideos([]);
@@ -420,10 +471,149 @@ export default function Page() {
             
             {activeMode === 'single' ? (
             <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800">
+              {/* 🌟 Master Lifecycle Flow Tracker Header */}
+              <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 rounded-2xl mb-8 shadow-lg">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-lg">
+                      ⚡
+                    </div>
+                    <div>
+                      <h3 className="font-black text-lg text-white">Master Product Creation &amp; Lifecycle Flow</h3>
+                      <p className="text-xs text-slate-300">Complete 18-stage lifecycle configuration for Tarkshya Solution</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono font-bold bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 px-3 py-1 rounded-full">
+                    Master Flow v2.0
+                  </span>
+                </div>
+
+                {/* Master Flow Step Pills */}
+                <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-slate-300 border-t border-white/10 pt-4">
+                  <span className="px-2.5 py-1 bg-indigo-600 text-white rounded-lg font-bold">1. Create Product</span>
+                  <span>→</span>
+                  <span className={`px-2.5 py-1 rounded-lg ${formData.module === 'Consumer Safety' ? 'bg-emerald-600 text-white' : 'bg-purple-600 text-white'}`}>
+                    2. {formData.module}
+                  </span>
+                  <span>→</span>
+                  <span className="px-2.5 py-1 bg-white/10 rounded-lg">3. Category</span>
+                  <span>→</span>
+                  <span className="px-2.5 py-1 bg-white/10 rounded-lg">4. Product Type</span>
+                  <span>→</span>
+                  <span className="px-2.5 py-1 bg-amber-500 text-slate-950 rounded-lg font-bold">5. Plan: {formData.planType.toUpperCase()}</span>
+                  <span>→</span>
+                  <span className="px-2.5 py-1 bg-white/10 rounded-lg">6. Generate QR</span>
+                  <span>→</span>
+                  <span className="px-2.5 py-1 bg-white/10 rounded-lg">7. Batch</span>
+                  <span>→</span>
+                  <span className="px-2.5 py-1 bg-white/10 rounded-lg">8. Printing</span>
+                  <span>→</span>
+                  <span className="px-2.5 py-1 bg-sky-600 text-white rounded-lg">9. {formData.warehouseLocation}</span>
+                  <span>→</span>
+                  <span className="px-2.5 py-1 bg-white/10 rounded-lg">10. Distributor/Dealer</span>
+                </div>
+              </div>
+
+              {/* Master Flow Selection Inputs */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 bg-slate-50 dark:bg-slate-800/40 p-5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                {/* Module Selection */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Select Module *</label>
+                  <select
+                    className="w-full rounded-xl border-2 border-indigo-200 dark:border-indigo-900 bg-white dark:bg-slate-800 px-3.5 py-2.5 outline-none font-bold text-sm text-indigo-700 dark:text-indigo-300"
+                    value={formData.module}
+                    onChange={(e) => setFormData({ ...formData, module: e.target.value })}
+                  >
+                    <option value="Consumer Safety">🛡️ Consumer Safety</option>
+                    <option value="Business QR">🏢 Business QR</option>
+                  </select>
+                </div>
+
+                {/* Category Selection */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Select Category</label>
+                  <select
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 outline-none font-medium text-sm text-slate-800 dark:text-slate-200"
+                    value={formData.categoryId}
+                    onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                  >
+                    <option value="">Default Category</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Product Type Selection */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Select Product Type</label>
+                  <input
+                    type="text"
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 outline-none font-medium text-sm text-slate-800 dark:text-slate-200"
+                    placeholder="e.g. Vehicle Safety QR, Pet Collar, FMCG Label"
+                    value={formData.productType}
+                    onChange={(e) => setFormData({ ...formData, productType: e.target.value })}
+                  />
+                </div>
+
+                {/* Warehouse Location (Prefix Chandausi / Modifiable) */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Warehouse Location</label>
+                  <input
+                    type="text"
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 outline-none font-medium text-sm text-slate-800 dark:text-slate-200"
+                    placeholder="Chandausi Warehouse"
+                    value={formData.warehouseLocation}
+                    onChange={(e) => setFormData({ ...formData, warehouseLocation: e.target.value })}
+                  />
+                </div>
+
+                {/* Batch Number */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Batch Code</label>
+                  <input
+                    type="text"
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 outline-none font-mono text-sm text-slate-800 dark:text-slate-200"
+                    placeholder="e.g. BATCH-CHANDAUSI-2026-001"
+                    value={formData.batchNumber}
+                    onChange={(e) => setFormData({ ...formData, batchNumber: e.target.value })}
+                  />
+                </div>
+
+                {/* Printing Status */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Printing Status</label>
+                  <select
+                    className="w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 outline-none font-medium text-sm text-slate-800 dark:text-slate-200"
+                    value={formData.printingStatus}
+                    onChange={(e) => setFormData({ ...formData, printingStatus: e.target.value })}
+                  >
+                    <option value="PRINTED">🖨️ Printed</option>
+                    <option value="IN_PRINTING">⏳ In Printing</option>
+                    <option value="PENDING">⏸️ Pending</option>
+                  </select>
+                </div>
+              </div>
+
               <form onSubmit={handleSubmit} className="flex flex-col gap-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Left Column: Owner */}
                   <div className="space-y-5">
+                    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-xl mb-4">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input 
+                          type="checkbox"
+                          className="w-5 h-5 text-amber-600 rounded border-amber-300 focus:ring-amber-500"
+                          checked={formData.isDummy}
+                          onChange={(e) => setFormData({...formData, isDummy: e.target.checked})}
+                        />
+                        <div>
+                          <p className="font-bold text-amber-900 dark:text-amber-500 text-sm">Generate as Dummy / Blank Stock</p>
+                          <p className="text-xs text-amber-700 dark:text-amber-600 mt-0.5">Allows customer to self-activate this QR by scanning it later.</p>
+                        </div>
+                      </label>
+                    </div>
+
                     <h4 className="text-xs font-black uppercase tracking-widest text-primary flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
                       <span className="bg-primary/10 text-primary size-5 rounded-md flex items-center justify-center">1</span>
                       Owner Identity
@@ -863,6 +1053,21 @@ export default function Page() {
                         )}
                    </div>
                    <h4 className="font-bold text-lg mb-2">Import CSV Sheet</h4>
+                   
+                   <div className="max-w-xs mx-auto mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-3 rounded-xl text-left">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input 
+                          type="checkbox"
+                          className="w-5 h-5 text-amber-600 rounded border-amber-300 focus:ring-amber-500"
+                          checked={formData.isDummy}
+                          onChange={(e) => setFormData({...formData, isDummy: e.target.checked})}
+                        />
+                        <div>
+                          <p className="font-bold text-amber-900 dark:text-amber-500 text-sm">Generate as Dummy / Blank Stock</p>
+                        </div>
+                      </label>
+                    </div>
+
                    <p className="text-slate-500 text-sm mb-8 max-w-sm mx-auto leading-relaxed">
                       Wanna generate tags in bulk? Upload your data sheet and we'll handle the rest.
                    </p>
